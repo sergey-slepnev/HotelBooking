@@ -1,6 +1,8 @@
 package com.sspdev.hotelbooking.database.entity;
 
+import com.sspdev.hotelbooking.converter.CostConverter;
 import com.sspdev.hotelbooking.database.entity.enums.RoomType;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -10,8 +12,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedAttributeNode;
-import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -52,6 +52,7 @@ public class Room implements BaseEntity<Integer> {
 
     private Integer childrenBedCount;
 
+    @Convert(converter = CostConverter.class)
     private BigDecimal cost;
 
     private boolean available;

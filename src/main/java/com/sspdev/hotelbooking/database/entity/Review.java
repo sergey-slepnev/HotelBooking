@@ -1,6 +1,8 @@
 package com.sspdev.hotelbooking.database.entity;
 
+import com.sspdev.hotelbooking.converter.RatingConverter;
 import com.sspdev.hotelbooking.database.entity.enums.Rating;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -8,8 +10,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedAttributeNode;
-import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,6 +47,7 @@ public class Review implements BaseEntity<Long> {
 
     private LocalDateTime createdAt;
 
+    @Convert(converter = RatingConverter.class)
     private Rating rating;
 
     private String description;
