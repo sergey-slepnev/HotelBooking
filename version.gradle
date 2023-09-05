@@ -1,0 +1,7 @@
+//file (plugin) to store versions that are not in spring-dependency-plugin
+ext {
+    versions = [
+            'querydsl': '5.0.0',
+            'testcontainers' : '1.19.0'
+    ]
+}

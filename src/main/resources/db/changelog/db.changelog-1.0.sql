@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS review
     hotel_id    INT REFERENCES hotel (id) ON DELETE CASCADE NOT NULL,
     user_id     INT REFERENCES users (id)                   NOT NULL,
     created_at  TIMESTAMP                                   NOT NULL,
-    rating      SMALLINT                                    NOT NULL,
+    rating      INT                                         NOT NULL,
     description TEXT
 );
 --rollback DROP TABLE review;
