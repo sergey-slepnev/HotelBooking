@@ -8,8 +8,7 @@ VALUES (1, 'ADMIN', 'AdminEmail@gmail.com', 'AdminPassword', 'Sergey', 'Sidorov'
        (4, 'OWNER', 'FirstOwner@gmail.com', 'FirstOwnerPassword', 'Andrey', 'Petrov', '2000-03-15', '+3-958-98-89-555',
         'UserAvatar.jpg', 'NEW', '2022-11-18 10:00'),
        (5, 'OWNER', 'SecondOwner@gmail.com', 'SecondOwnerPassword', 'Jack', 'Ivanov', '2000-03-15', '+3-958-98-89-666',
-        'UserAvatar.jpg',
-        'NEW', '2022-11-15 11:00');
+        'UserAvatar.jpg', 'NEW', '2022-11-15 11:00');
 SELECT SETVAL('users_id_seq', (SELECT MAX(id) FROM users));
 
 INSERT
