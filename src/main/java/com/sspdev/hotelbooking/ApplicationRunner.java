@@ -9,4 +9,6 @@ public class ApplicationRunner {
     public static void main(String[] args) {
         SpringApplication.run(ApplicationRunner.class, args);
     }
+
+    // TODO: 9/6/2023 Write test for HotelRepository
 }

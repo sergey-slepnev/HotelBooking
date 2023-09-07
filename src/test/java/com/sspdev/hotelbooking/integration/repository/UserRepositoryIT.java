@@ -29,6 +29,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @RequiredArgsConstructor
 public class UserRepositoryIT extends IntegrationTestBase {
 
+    private static final Integer NO_PREDICATE_FILTER_PAGE_SIZE = 5;
+    private static final Integer ROLE_STATUS_FILTER_PAGE_SIZE = 2;
+
     private final UserRepository userRepository;
 
     @ParameterizedTest
@@ -94,7 +97,7 @@ public class UserRepositoryIT extends IntegrationTestBase {
         return Stream.of(
 //                no predicate filter
                 Arguments.of(UserFilter.builder().build(),
-                        5,
+                        NO_PREDICATE_FILTER_PAGE_SIZE,
                         Map.of(
                                 "FirstOwner@gmail.com", "2022-11-18",
                                 "SecondOwner@gmail.com", "2022-11-15",
@@ -106,7 +109,7 @@ public class UserRepositoryIT extends IntegrationTestBase {
                                 .role(Role.OWNER)
                                 .status(Status.NEW)
                                 .build(),
-                        2,
+                        ROLE_STATUS_FILTER_PAGE_SIZE,
                         Map.of(
                                 "FirstOwner@gmail.com", "2022-11-18",
                                 "SecondOwner@gmail.com", "2022-11-15"
