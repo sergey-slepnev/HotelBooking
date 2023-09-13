@@ -1,5 +1,6 @@
 package com.sspdev.hotelbooking.service;
 
+import com.sspdev.hotelbooking.database.entity.enums.Status;
 import com.sspdev.hotelbooking.database.repository.UserRepository;
 import com.sspdev.hotelbooking.dto.UserCreateEditDto;
 import com.sspdev.hotelbooking.dto.UserReadDto;
@@ -47,5 +48,22 @@ public class UserService {
                 .map(entity -> userCreateEditMapper.map(createEditDto, entity))
                 .map(userRepository::saveAndFlush)
                 .map(userReadMapper::map);
+    }
+
+    @Transactional
+    public boolean delete(Integer id) {
+        return userRepository.findById(id)
+                .map(user -> {
+                    userRepository.delete(user);
+                    userRepository.flush();
+                    return true;
+                })
+                .orElse(false);
+    }
+
+    @Transactional
+    public void changeStatus(Status status, Integer userId) {
+        userRepository.changeStatusByUserId(status, userId);
+        userRepository.flush();
     }
 }

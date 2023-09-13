@@ -21,7 +21,9 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -126,5 +128,18 @@ public class UserServiceTest extends UnitTestBase {
 
         var actualUser = userService.update(user.getId(), updatedDto);
         assertThat(actualUser).isPresent();
+    }
+
+    @Test
+    void checkDelete() {
+        var user = TestDataUtil.getUser();
+
+        doReturn(Optional.of(user)).when(userRepository).findById(user.getId());
+        doNothing().when(userRepository).delete(user);
+        doNothing().when(userRepository).flush();
+
+        var actualResul = userService.delete(user.getId());
+
+        assertTrue(actualResul);
     }
 }

@@ -5,17 +5,26 @@ import com.sspdev.hotelbooking.integration.IntegrationTestBase;
 import com.sspdev.hotelbooking.service.UserService;
 import com.sspdev.hotelbooking.unit.util.TestDataUtil;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @RequiredArgsConstructor
 public class UserServiceIT extends IntegrationTestBase {
 
     private static final Integer ALL_USERS_COLLECTION_SIZE = 5;
     private static final Integer EXISTENT_USER_ID = 1;
+    private static final Integer NON_EXISTENT_USER_ID = 999;
 
     private final UserService userService;
 
@@ -32,6 +41,14 @@ public class UserServiceIT extends IntegrationTestBase {
 
         assertThat(maybeUser).isPresent();
         maybeUser.ifPresent(user -> assertEquals(user.getId(), EXISTENT_USER_ID));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {Integer.MIN_VALUE, -10, 0, 999, Integer.MAX_VALUE})
+    void shouldReturnEmptyWhenFindByFakeId(Integer fakeId) {
+        var nonExistentUser = userService.findById(fakeId);
+
+        assertThat(nonExistentUser).isEmpty();
     }
 
     @Test
@@ -66,6 +83,36 @@ public class UserServiceIT extends IntegrationTestBase {
             assertEquals(userCreateEditDto.getUsername(), user.getUsername());
             assertEquals(userCreateEditDto.getFirstName(), user.getFirstName());
             assertEquals(userCreateEditDto.getLastName(), user.getLastName());
+        });
+    }
+
+    @ParameterizedTest
+    @MethodSource("getDataForDeleteExistentUserTest")
+    void checkDelete(Integer userId, boolean expectedResult) {
+        var actualResult = userService.delete(userId);
+
+        assertEquals(expectedResult, actualResult);
+    }
+
+    static @NotNull Stream<Arguments> getDataForDeleteExistentUserTest() {
+        return Stream.of(
+                Arguments.of(EXISTENT_USER_ID, true),
+                Arguments.of(NON_EXISTENT_USER_ID, false)
+        );
+    }
+
+    @Test
+    void checkChangeStatusByUserId() {
+        var expectedStatus = Status.BLOCKED;
+        var maybeUser = userService.findById(EXISTENT_USER_ID);
+
+        assertThat(maybeUser).isPresent();
+
+        maybeUser.ifPresent(user -> {
+            assertNotEquals(expectedStatus, user.getStatus());
+            userService.changeStatus(expectedStatus, user.getId());
+            var actualUser = userService.findById(user.getId());
+            assertEquals(expectedStatus, actualUser.get().getStatus());
         });
     }
 }
