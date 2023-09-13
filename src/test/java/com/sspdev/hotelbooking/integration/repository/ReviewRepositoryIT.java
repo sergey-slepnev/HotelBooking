@@ -22,7 +22,7 @@ public class ReviewRepositoryIT extends IntegrationTestBase {
 
     @ParameterizedTest
     @MethodSource("getDataForFindByFilterMethod")
-    void checkFindByFilterMethod(ReviewFilter filter, Integer expectedCollectionSize, Integer... expectedRatings) {
+    void checkFindByFilter(ReviewFilter filter, Integer expectedCollectionSize, Integer... expectedRatings) {
         var actualReviews = reviewRepository.findAllByFilter(filter);
 
         var actualRatings = actualReviews.stream().map(review -> review.getRating().rating).toList();

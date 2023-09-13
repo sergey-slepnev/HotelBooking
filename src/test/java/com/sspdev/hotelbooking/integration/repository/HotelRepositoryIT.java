@@ -35,7 +35,7 @@ public class HotelRepositoryIT extends IntegrationTestBase {
 
     @ParameterizedTest
     @MethodSource("getDataForFindHotelByOwnerId")
-    void findHotelsByOwnerId(Integer ownerId, Integer hotelsCount, String... expectedHotelNames) {
+    void checkFindHotelsByOwnerId(Integer ownerId, Integer hotelsCount, String... expectedHotelNames) {
         var hotelsByOwnerId = hotelRepository.findAllByOwnerId(ownerId);
 
         assertEquals(hotelsByOwnerId.size(), hotelsCount);

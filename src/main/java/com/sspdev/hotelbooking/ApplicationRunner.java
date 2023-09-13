@@ -10,5 +10,5 @@ public class ApplicationRunner {
         SpringApplication.run(ApplicationRunner.class, args);
     }
 
-    // TODO: 9/7/2023 finish with repositoryTests and repository
+    // TODO: 9/9/2023 finish UserServiceTest and UserServiceIT
 }
