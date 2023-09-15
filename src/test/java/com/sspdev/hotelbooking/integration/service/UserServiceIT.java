@@ -1,6 +1,9 @@
 package com.sspdev.hotelbooking.integration.service;
 
+import com.sspdev.hotelbooking.database.entity.enums.Role;
 import com.sspdev.hotelbooking.database.entity.enums.Status;
+import com.sspdev.hotelbooking.dto.UserReadDto;
+import com.sspdev.hotelbooking.dto.filter.UserFilter;
 import com.sspdev.hotelbooking.integration.IntegrationTestBase;
 import com.sspdev.hotelbooking.service.UserService;
 import com.sspdev.hotelbooking.unit.util.TestDataUtil;
@@ -23,6 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 public class UserServiceIT extends IntegrationTestBase {
 
     private static final Integer ALL_USERS_COLLECTION_SIZE = 5;
+    private static final Integer STATUS_ROLE_FILTER_COLLECTION_SIZE = 2;
+    private static final Integer FIRST_NAME_FILTER_COLLECTION_SIZE = 1;
     private static final Integer EXISTENT_USER_ID = 1;
     private static final Integer NON_EXISTENT_USER_ID = 999;
 
@@ -33,6 +38,31 @@ public class UserServiceIT extends IntegrationTestBase {
         var allUsers = userService.findAll();
 
         assertEquals(allUsers.size(), ALL_USERS_COLLECTION_SIZE);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getArgumentsForFindAllByFilter")
+    void checkFindAllByFilter(UserFilter filter, Integer expectedNumberOfUsers, String... expectedUsernames) {
+        var actualUsers = userService.findAllByFilter(filter);
+
+        var actualUsernames = actualUsers.stream().map(UserReadDto::getUsername).toList();
+
+        assertEquals(expectedNumberOfUsers, actualUsers.size());
+        assertThat(actualUsernames).contains(expectedUsernames);
+    }
+
+    static Stream<Arguments> getArgumentsForFindAllByFilter() {
+        return Stream.of(
+//                status-role filter
+                Arguments.of(
+                        UserFilter.builder().status(Status.NEW).role(Role.USER).build(),
+                        STATUS_ROLE_FILTER_COLLECTION_SIZE,
+                        new String[]{"FirstUser@gmail.com", "SecondUser@gmail.com"}),
+//                with "jack" (lowercase) in username filter
+                Arguments.of(UserFilter.builder().firstName("jack").build(),
+                        FIRST_NAME_FILTER_COLLECTION_SIZE,
+                        new String[]{"SecondOwner@gmail.com"}
+                ));
     }
 
     @Test

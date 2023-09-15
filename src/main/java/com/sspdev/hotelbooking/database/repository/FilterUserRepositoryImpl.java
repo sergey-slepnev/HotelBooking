@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 import static com.sspdev.hotelbooking.database.entity.QUser.user;
+import static com.sspdev.hotelrepository.database.querydsl.QPredicates.builder;
 
 @RequiredArgsConstructor
 public class FilterUserRepositoryImpl implements FilterUserRepository {
@@ -17,7 +18,7 @@ public class FilterUserRepositoryImpl implements FilterUserRepository {
 
     @Override
     public List<User> findAllByFilter(UserFilter filter) {
-        var predicate = com.sspdev.hotelrepository.database.querydsl.QPredicates.builder()
+        var predicate = builder()
                 .add(filter.role(), user.role::eq)
                 .add(filter.firstName(), user.personalInfo.firstname::containsIgnoreCase)
                 .add(filter.lastName(), user.personalInfo.lastname::containsIgnoreCase)

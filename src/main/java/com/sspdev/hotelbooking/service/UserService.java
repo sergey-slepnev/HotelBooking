@@ -4,6 +4,7 @@ import com.sspdev.hotelbooking.database.entity.enums.Status;
 import com.sspdev.hotelbooking.database.repository.UserRepository;
 import com.sspdev.hotelbooking.dto.UserCreateEditDto;
 import com.sspdev.hotelbooking.dto.UserReadDto;
+import com.sspdev.hotelbooking.dto.filter.UserFilter;
 import com.sspdev.hotelbooking.mapper.UserCreateEditMapper;
 import com.sspdev.hotelbooking.mapper.UserReadMapper;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,12 @@ public class UserService {
 
     public List<UserReadDto> findAll() {
         return userRepository.findAll().stream()
+                .map(userReadMapper::map)
+                .toList();
+    }
+
+    public List<UserReadDto> findAllByFilter(UserFilter userFilter) {
+        return userRepository.findAllByFilter(userFilter).stream()
                 .map(userReadMapper::map)
                 .toList();
     }
