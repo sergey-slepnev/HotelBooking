@@ -107,12 +107,12 @@ public class UserServiceIT extends IntegrationTestBase {
         assertThat(maybeExistentUser).isPresent();
         assertThat(maybeActualUser).isPresent();
 
-        maybeActualUser.ifPresent(user -> {
-            assertEquals(EXISTENT_USER_ID, user.getId());
-            assertEquals(userCreateEditDto.getRole(), user.getRole());
-            assertEquals(userCreateEditDto.getUsername(), user.getUsername());
-            assertEquals(userCreateEditDto.getFirstName(), user.getFirstName());
-            assertEquals(userCreateEditDto.getLastName(), user.getLastName());
+        maybeActualUser.ifPresent(updatedUser -> {
+            assertEquals(EXISTENT_USER_ID, updatedUser.getId());
+            assertEquals(userCreateEditDto.getRole(), updatedUser.getRole());
+            assertEquals(userCreateEditDto.getUsername(), updatedUser.getUsername());
+            assertEquals(userCreateEditDto.getFirstName(), updatedUser.getFirstName());
+            assertEquals(userCreateEditDto.getLastName(), updatedUser.getLastName());
         });
     }
 

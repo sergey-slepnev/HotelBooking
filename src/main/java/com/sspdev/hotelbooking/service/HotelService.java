@@ -22,4 +22,11 @@ public class HotelService {
                 .map(hotelReadMapper::map)
                 .toList();
     }
+
+    public List<HotelReadDto> findAll() {
+        return hotelRepository.findAll().stream()
+                .map(hotelReadMapper::map)
+                .toList();
+    }
+
 }

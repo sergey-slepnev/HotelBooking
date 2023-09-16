@@ -6,6 +6,7 @@ import com.sspdev.hotelbooking.mapper.HotelReadMapper;
 import com.sspdev.hotelbooking.service.HotelService;
 import com.sspdev.hotelbooking.unit.UnitTestBase;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -15,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -44,7 +46,7 @@ public class HotelServiceTest extends UnitTestBase {
         var actualHotels = hotelService.findAllByOwnerId(ownerId);
 
         assertEquals(actualHotels.size(), expectedHotels.size());
-        verify(hotelReadMapper, times(expectedHotels.size())).map(any());
+        verify(hotelReadMapper, times(expectedHotels.size())).map(any(Hotel.class));
     }
 
     public static Stream<Arguments> getArgumentsForFindAllByOwnerId() {
@@ -54,5 +56,16 @@ public class HotelServiceTest extends UnitTestBase {
                 Arguments.of(SECOND_OWNER_ID,
                         List.of(new Hotel(), new Hotel()))
         );
+    }
+
+    @Test
+    void shouldFindAllHotels() {
+        var allHotels = List.of(new Hotel(), new Hotel(), new Hotel(), new Hotel(), new Hotel());
+        doReturn(allHotels).when(hotelRepository).findAll();
+
+        var actualHotels = hotelService.findAll();
+
+        assertThat(actualHotels).hasSize(5);
+        verify(hotelReadMapper, times(actualHotels.size())).map(any(Hotel.class));
     }
 }

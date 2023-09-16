@@ -129,6 +129,7 @@ public class UserServiceTest extends UnitTestBase {
         var actualUserReadDto = userService.create(createDto);
 
         assertThat(actualUserReadDto.getId()).isNotNull();
+        verify(userRepository, times(1)).save(user);
     }
 
     @Test

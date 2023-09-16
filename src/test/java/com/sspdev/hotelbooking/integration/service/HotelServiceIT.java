@@ -4,6 +4,7 @@ import com.sspdev.hotelbooking.dto.HotelReadDto;
 import com.sspdev.hotelbooking.integration.IntegrationTestBase;
 import com.sspdev.hotelbooking.service.HotelService;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -41,5 +42,12 @@ public class HotelServiceIT extends IntegrationTestBase {
                         NUMBER_OF_SECOND_OWNER_HOTELS,
                         new String[]{"PiterPlaza", "MinskPlaza"})
         );
+    }
+
+    @Test
+    void shouldReturnAllHotels() {
+        var allHotels = hotelService.findAll();
+
+        assertThat(allHotels).hasSize(5);
     }
 }
