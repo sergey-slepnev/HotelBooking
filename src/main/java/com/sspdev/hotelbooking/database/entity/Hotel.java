@@ -53,7 +53,6 @@ public class Hotel implements BaseEntity<Integer> {
     @JoinColumn(name = "owner_id")
     private User owner;
 
-
     private String name;
 
     private boolean available;
