@@ -1,9 +1,9 @@
 package com.sspdev.hotelbooking.dto;
 
 import com.sspdev.hotelbooking.database.entity.enums.Star;
-import lombok.Data;
+import lombok.Value;
 
-@Data
+@Value
 public class HotelDetailsCreateEditDto {
 
     Integer hotelId;

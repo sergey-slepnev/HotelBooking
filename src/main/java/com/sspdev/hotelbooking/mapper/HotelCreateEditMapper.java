@@ -27,6 +27,16 @@ public class HotelCreateEditMapper implements Mapper<HotelCreateEditDto, Hotel> 
         return hotel;
     }
 
+    @Override
+    public Hotel map(HotelCreateEditDto fromObject, Hotel toObject) {
+        toObject.setOwner(getUser(fromObject.getOwnerId()));
+        toObject.setName(fromObject.getName());
+        toObject.setAvailable(fromObject.getAvailable());
+        toObject.setStatus(fromObject.getStatus());
+
+        return toObject;
+    }
+
     private User getUser(Integer id) {
         return Optional.ofNullable(id)
                 .flatMap(userRepository::findById)

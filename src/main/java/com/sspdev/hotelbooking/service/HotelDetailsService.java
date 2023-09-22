@@ -27,5 +27,4 @@ public class HotelDetailsService {
                 .map(hotelDetailsRepository::saveAndFlush)
                 .map(hotelDetailsReadMapper::map);
     }
-
 }

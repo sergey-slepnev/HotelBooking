@@ -19,7 +19,6 @@ public class HotelDetailsCreateEditMapper implements Mapper<HotelDetailsCreateEd
     public HotelDetails map(HotelDetailsCreateEditDto object) {
         var hotelDetails = new HotelDetails();
         copy(object, hotelDetails);
-
         return hotelDetails;
     }
 

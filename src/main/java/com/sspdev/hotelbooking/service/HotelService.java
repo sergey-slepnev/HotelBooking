@@ -1,7 +1,6 @@
 package com.sspdev.hotelbooking.service;
 
 import com.sspdev.hotelbooking.database.repository.HotelRepository;
-import com.sspdev.hotelbooking.dto.HotelContentCreateDto;
 import com.sspdev.hotelbooking.dto.HotelCreateEditDto;
 import com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto;
 import com.sspdev.hotelbooking.dto.HotelReadDto;
@@ -43,8 +42,7 @@ public class HotelService {
 
     @Transactional
     public Optional<HotelReadDto> update(Integer id, HotelCreateEditDto hotelDto,
-                                         HotelDetailsCreateEditDto hotelDetailsDto,
-                                         HotelContentCreateDto hotelContentDto) {
+                                         HotelDetailsCreateEditDto hotelDetailsDto) {
         return hotelRepository.findById(id)
                 .map(entity -> hotelCreateEditMapper.map(hotelDto, entity))
                 .map(hotelRepository::saveAndFlush)

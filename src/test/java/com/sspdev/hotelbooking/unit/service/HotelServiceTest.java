@@ -3,10 +3,16 @@ package com.sspdev.hotelbooking.unit.service;
 import com.sspdev.hotelbooking.database.entity.Hotel;
 import com.sspdev.hotelbooking.database.entity.User;
 import com.sspdev.hotelbooking.database.entity.enums.Role;
+import com.sspdev.hotelbooking.database.entity.enums.Star;
 import com.sspdev.hotelbooking.database.entity.enums.Status;
 import com.sspdev.hotelbooking.database.repository.HotelRepository;
+import com.sspdev.hotelbooking.dto.HotelCreateEditDto;
+import com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto;
+import com.sspdev.hotelbooking.dto.HotelDetailsReadDto;
 import com.sspdev.hotelbooking.dto.HotelReadDto;
+import com.sspdev.hotelbooking.mapper.HotelCreateEditMapper;
 import com.sspdev.hotelbooking.mapper.HotelReadMapper;
+import com.sspdev.hotelbooking.service.HotelDetailsService;
 import com.sspdev.hotelbooking.service.HotelService;
 import com.sspdev.hotelbooking.unit.UnitTestBase;
 import lombok.RequiredArgsConstructor;
@@ -37,12 +43,19 @@ public class HotelServiceTest extends UnitTestBase {
     private static final Integer SECOND_OWNER_ID = 5;
     private static final Integer EXISTENT_HOTEL_ID = 1;
     private static final Integer NON_EXISTENT_HOTEL_ID = 99;
+    private static final Integer EXISTENT_HOTEL_DETAILS_ID = 1;
 
     @MockBean
     private final HotelRepository hotelRepository;
 
     @MockBean
     private final HotelReadMapper hotelReadMapper;
+
+    @MockBean
+    private final HotelCreateEditMapper hotelCreateEditMapper;
+
+    @MockBean
+    private final HotelDetailsService hotelDetailsService;
 
     @InjectMocks
     private final HotelService hotelService;
@@ -97,6 +110,22 @@ public class HotelServiceTest extends UnitTestBase {
         verifyNoInteractions(hotelReadMapper);
     }
 
+    @Test
+    void shouldUpdateExistentHotel() {
+        var hotel = getHotel();
+        var hotelCreateEditDto = getHotelCreateEditDto();
+        var hotelDetailsCreatedEditDto = getHotelDetailsCreatedEditDto();
+        when(hotelRepository.findById(EXISTENT_HOTEL_ID)).thenReturn(Optional.of(hotel));
+        when(hotelCreateEditMapper.map(hotelCreateEditDto, hotel)).thenReturn(hotel);
+        when(hotelRepository.saveAndFlush(hotel)).thenReturn(hotel);
+        when(hotelReadMapper.map(hotel)).thenReturn(getHotelReadDto());
+
+        var actualHotel = hotelService.update(EXISTENT_HOTEL_DETAILS_ID, hotelCreateEditDto, hotelDetailsCreatedEditDto);
+
+        assertThat(actualHotel).isPresent();
+        verify(hotelDetailsService).update(hotel.getId(), hotelDetailsCreatedEditDto);
+    }
+
     private static Hotel getHotel() {
         return Hotel.builder()
                 .id(EXISTENT_HOTEL_ID)
@@ -121,5 +150,43 @@ public class HotelServiceTest extends UnitTestBase {
                 "MoscowPlaza",
                 true,
                 Status.APPROVED);
+    }
+
+    private HotelCreateEditDto getHotelCreateEditDto() {
+        return new HotelCreateEditDto(
+                FIRST_OWNER_ID,
+                "MoscowPlaza",
+                true,
+                Status.APPROVED
+        );
+    }
+
+    private HotelDetailsCreateEditDto getHotelDetailsCreatedEditDto() {
+        return new HotelDetailsCreateEditDto(
+                EXISTENT_HOTEL_ID,
+                "+7-965-78-78-999",
+                "Russia",
+                "Moscow",
+                "West",
+                "First",
+                3,
+                Star.FIVE,
+                "good hotel"
+        );
+    }
+
+    private HotelDetailsReadDto getHotelDetailsReadDto() {
+        return new HotelDetailsReadDto(
+                EXISTENT_HOTEL_DETAILS_ID,
+                EXISTENT_HOTEL_ID,
+                "+7-965-78-78-999",
+                "Russia",
+                "Moscow",
+                "West",
+                "First",
+                3,
+                Star.FIVE,
+                "good hotel"
+        );
     }
 }
