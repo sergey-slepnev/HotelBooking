@@ -41,6 +41,20 @@ public class HotelService {
     }
 
     @Transactional
+    public HotelReadDto create(HotelCreateEditDto hotelDto,
+                               HotelDetailsCreateEditDto hotelDetailsDto) {
+        return Optional.of(hotelDto)
+                .map(hotelCreateEditMapper::map)
+                .map(hotelRepository::save)
+                .map(hotelReadMapper::map)
+                .map(hotel -> {
+                    hotelDetailsDto.setHotelId(hotel.getId());
+                    hotelDetailsService.create(hotelDetailsDto);
+                    return hotel;
+                }).orElseThrow();
+    }
+
+    @Transactional
     public Optional<HotelReadDto> update(Integer id, HotelCreateEditDto hotelDto,
                                          HotelDetailsCreateEditDto hotelDetailsDto) {
         return hotelRepository.findById(id)

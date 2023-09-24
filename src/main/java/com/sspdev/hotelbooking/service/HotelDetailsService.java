@@ -20,10 +20,24 @@ public class HotelDetailsService {
     private final HotelDetailsCreateEditMapper hotelDetailsCreateEditMapper;
     private final HotelDetailsReadMapper hotelDetailsReadMapper;
 
+    public Optional<HotelDetailsReadDto> findByHotelId(Integer hotelId) {
+        return hotelDetailsRepository.findByHotelId(hotelId)
+                .map(hotelDetailsReadMapper::map);
+    }
+
     @Transactional
-    public Optional<HotelDetailsReadDto> update(Integer id, HotelDetailsCreateEditDto userDto) {
+    public HotelDetailsReadDto create(HotelDetailsCreateEditDto createDTO) {
+        return Optional.of(createDTO)
+                .map(hotelDetailsCreateEditMapper::map)
+                .map(hotelDetailsRepository::save)
+                .map(hotelDetailsReadMapper::map)
+                .orElseThrow();
+    }
+
+    @Transactional
+    public Optional<HotelDetailsReadDto> update(Integer id, HotelDetailsCreateEditDto hotelDetails) {
         return hotelDetailsRepository.findByHotelId(id)
-                .map(entity -> hotelDetailsCreateEditMapper.map(userDto, entity))
+                .map(entity -> hotelDetailsCreateEditMapper.map(hotelDetails, entity))
                 .map(hotelDetailsRepository::saveAndFlush)
                 .map(hotelDetailsReadMapper::map);
     }

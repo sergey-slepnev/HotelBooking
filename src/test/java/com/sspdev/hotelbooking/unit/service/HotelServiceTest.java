@@ -111,18 +111,35 @@ public class HotelServiceTest extends UnitTestBase {
     }
 
     @Test
+    void shouldCreateNewHotel() {
+        var hotel = getHotel();
+        var hotelCreateEditDto = getHotelCreateEditDto();
+        var hotelDetailsCreatedEditDto = getHotelDetailsCreatedEditDto();
+        var hotelReadDto = getHotelReadDto();
+        when(hotelCreateEditMapper.map(hotelCreateEditDto)).thenReturn(hotel);
+        when(hotelRepository.save(hotel)).thenReturn(hotel);
+        when(hotelReadMapper.map(hotel)).thenReturn(hotelReadDto);
+
+        var actualResult = hotelService.create(hotelCreateEditDto, hotelDetailsCreatedEditDto);
+
+        assertThat(actualResult.getId()).isPositive();
+        verify(hotelDetailsService).create(hotelDetailsCreatedEditDto);
+    }
+
+    @Test
     void shouldUpdateExistentHotel() {
         var hotel = getHotel();
         var hotelCreateEditDto = getHotelCreateEditDto();
         var hotelDetailsCreatedEditDto = getHotelDetailsCreatedEditDto();
+        var hotelReadDto = getHotelReadDto();
         when(hotelRepository.findById(EXISTENT_HOTEL_ID)).thenReturn(Optional.of(hotel));
         when(hotelCreateEditMapper.map(hotelCreateEditDto, hotel)).thenReturn(hotel);
         when(hotelRepository.saveAndFlush(hotel)).thenReturn(hotel);
-        when(hotelReadMapper.map(hotel)).thenReturn(getHotelReadDto());
+        when(hotelReadMapper.map(hotel)).thenReturn(hotelReadDto);
 
-        var actualHotel = hotelService.update(EXISTENT_HOTEL_DETAILS_ID, hotelCreateEditDto, hotelDetailsCreatedEditDto);
+        var update = hotelService.update(EXISTENT_HOTEL_DETAILS_ID, hotelCreateEditDto, hotelDetailsCreatedEditDto);
 
-        assertThat(actualHotel).isPresent();
+        assertThat(update).isPresent();
         verify(hotelDetailsService).update(hotel.getId(), hotelDetailsCreatedEditDto);
     }
 

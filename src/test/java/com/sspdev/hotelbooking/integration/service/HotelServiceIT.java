@@ -84,6 +84,16 @@ public class HotelServiceIT extends IntegrationTestBase {
     }
 
     @Test
+    void shouldCreateNewHotel() {
+        var hotelCreateEditDto = getHotelCreateEditDto();
+        var hotelDetailsCreatedEditDto = getHotelDetailsCreatedEditDto();
+        var actualResult = hotelService.create(hotelCreateEditDto, hotelDetailsCreatedEditDto);
+
+        assertThat(actualResult).isNotNull();
+        assertThat(actualResult.getId()).isPositive();
+    }
+
+    @Test
     void shouldUpdateExistentHotel() {
         var nonUpdatedHotel = hotelService.findById(EXISTENT_HOTEL_ID);
         nonUpdatedHotel.ifPresent(hotel -> {
