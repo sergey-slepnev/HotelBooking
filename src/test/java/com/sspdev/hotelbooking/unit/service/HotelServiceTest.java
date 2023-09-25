@@ -10,6 +10,7 @@ import com.sspdev.hotelbooking.dto.HotelCreateEditDto;
 import com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto;
 import com.sspdev.hotelbooking.dto.HotelDetailsReadDto;
 import com.sspdev.hotelbooking.dto.HotelReadDto;
+import com.sspdev.hotelbooking.dto.filter.HotelFilter;
 import com.sspdev.hotelbooking.mapper.HotelCreateEditMapper;
 import com.sspdev.hotelbooking.mapper.HotelReadMapper;
 import com.sspdev.hotelbooking.service.HotelDetailsService;
@@ -61,6 +62,31 @@ public class HotelServiceTest extends UnitTestBase {
     private final HotelService hotelService;
 
     @ParameterizedTest
+    @MethodSource("getArgumentsForFindAllByFilter")
+    void checkFindAllByFilter(HotelFilter filter, List<Hotel> expectedHotels) {
+        when(hotelRepository.findAllByFilter(filter)).thenReturn(expectedHotels);
+
+        var actualHotels = hotelService.findAllByFilter(filter);
+
+        assertEquals(expectedHotels.size(), actualHotels.size());
+        verify(hotelReadMapper, times(expectedHotels.size())).map(any(Hotel.class));
+    }
+
+    static Stream<Arguments> getArgumentsForFindAllByFilter() {
+        return Stream.of(
+//                country = Russia filter -> 3 hotels
+                Arguments.of(HotelFilter.builder()
+                                .country("Russia")
+                                .build(),
+                        List.of(new Hotel(), new Hotel(), new Hotel())),
+//                with "plaza" in hotel name filter -> 4 hotels
+                Arguments.of(HotelFilter.builder()
+                                .name("plaza")
+                                .build(),
+                        List.of(new Hotel(), new Hotel(), new Hotel()), new Hotel()));
+    }
+
+    @ParameterizedTest
     @MethodSource("getArgumentsForFindAllByOwnerId")
     void checkFindAllByOwnerId(Integer ownerId, List<Hotel> expectedHotels) {
         doReturn(expectedHotels).when(hotelRepository).findAllByOwnerId(ownerId);
@@ -71,7 +97,7 @@ public class HotelServiceTest extends UnitTestBase {
         verify(hotelReadMapper, times(expectedHotels.size())).map(any(Hotel.class));
     }
 
-    public static Stream<Arguments> getArgumentsForFindAllByOwnerId() {
+    static Stream<Arguments> getArgumentsForFindAllByOwnerId() {
         return Stream.of(
                 Arguments.of(FIRST_OWNER_ID,
                         List.of(new Hotel(), new Hotel(), new Hotel())),
@@ -126,7 +152,7 @@ public class HotelServiceTest extends UnitTestBase {
         verify(hotelDetailsService).create(hotelDetailsCreatedEditDto);
     }
 
-    @Test
+    @Test()
     void shouldUpdateExistentHotel() {
         var hotel = getHotel();
         var hotelCreateEditDto = getHotelCreateEditDto();

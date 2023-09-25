@@ -2,7 +2,6 @@ package com.sspdev.hotelbooking.database.repository;
 
 import com.querydsl.jpa.impl.JPAQuery;
 import com.sspdev.hotelbooking.database.entity.Hotel;
-import com.sspdev.hotelbooking.database.entity.QHotel;
 import com.sspdev.hotelbooking.dto.HotelInfo;
 import com.sspdev.hotelbooking.dto.filter.HotelFilter;
 import jakarta.persistence.EntityManager;
@@ -13,7 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.util.List;
 
 import static com.sspdev.hotelbooking.database.entity.QHotel.hotel;
-import static com.sspdev.hotelrepository.database.querydsl.QPredicates.*;
+import static com.sspdev.hotelrepository.database.querydsl.QPredicates.builder;
 
 @RequiredArgsConstructor
 public class FilterHotelRepositoryImpl implements FilterHotelRepository {
@@ -55,7 +54,7 @@ public class FilterHotelRepositoryImpl implements FilterHotelRepository {
     @Override
     public List<Hotel> findAllByFilter(HotelFilter filter) {
         var predicate = builder()
-                .add(filter.name(), hotel.name::eq)
+                .add(filter.name(), hotel.name::containsIgnoreCase)
                 .add(filter.status(), hotel.status::eq)
                 .add(filter.available(), hotel.available::eq)
                 .add(filter.country(), hotel.hotelDetails.country::eq)

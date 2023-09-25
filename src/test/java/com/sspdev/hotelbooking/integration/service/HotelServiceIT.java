@@ -5,8 +5,8 @@ import com.sspdev.hotelbooking.database.entity.enums.Status;
 import com.sspdev.hotelbooking.dto.HotelCreateEditDto;
 import com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto;
 import com.sspdev.hotelbooking.dto.HotelReadDto;
+import com.sspdev.hotelbooking.dto.filter.HotelFilter;
 import com.sspdev.hotelbooking.integration.IntegrationTestBase;
-import com.sspdev.hotelbooking.service.HotelDetailsService;
 import com.sspdev.hotelbooking.service.HotelService;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
@@ -24,6 +24,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @RequiredArgsConstructor
 public class HotelServiceIT extends IntegrationTestBase {
 
+    private static final Integer NUMBER_HOTELS_IN_RUSSIA = 3;
+    private static final Integer NUMBER_PLAZA_HOTELS = 4;
+    private static final Integer NUMBER_NO_FILTER_HOTELS = 5;
     private static final Integer FIRST_OWNER_ID = 4;
     private static final Integer SECOND_OWNER_ID = 5;
     private static final Integer NUMBER_OF_FIRST_OWNER_HOTELS = 3;
@@ -32,7 +35,33 @@ public class HotelServiceIT extends IntegrationTestBase {
     private static final Integer NON_EXISTENT_HOTEL_ID = 99;
 
     private final HotelService hotelService;
-    private final HotelDetailsService hotelDetailsService;
+
+    @ParameterizedTest
+    @MethodSource("getArgumentsForFindAllByFilter")
+    void checkFindByFilter(HotelFilter filter, Integer expectedNumberOfHotels) {
+        var actualHotels = hotelService.findAllByFilter(filter);
+
+        assertEquals(actualHotels.size(), expectedNumberOfHotels);
+    }
+
+    static Stream<Arguments> getArgumentsForFindAllByFilter() {
+        return Stream.of(
+//                country = Russia filter - > 3 hotels
+                Arguments.of(HotelFilter.builder()
+                                .country("Russia")
+                                .build(),
+                        NUMBER_HOTELS_IN_RUSSIA),
+//                with "plaza" in hotel name filter -> 4 hotels
+                Arguments.of(HotelFilter.builder()
+                                .name("plaza")
+                                .build(),
+                        NUMBER_PLAZA_HOTELS),
+//                empty filter -> 5 hotels
+                Arguments.of(HotelFilter.builder()
+                                .build(),
+                        NUMBER_NO_FILTER_HOTELS)
+        );
+    }
 
     @ParameterizedTest
     @MethodSource("getArgumentsForFindAllByOwnerId")

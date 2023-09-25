@@ -74,7 +74,7 @@ public class UserServiceTest extends UnitTestBase {
         var actualUsers = userService.findAllByFilter(filter);
 
         assertEquals(expectedNumberOfUsers, actualUsers.size());
-        verify(userReadMapper, times(expectedNumberOfUsers)).map(any());
+        verify(userReadMapper, times(expectedNumberOfUsers)).map(any(User.class));
     }
 
     static Stream<Arguments> provideArgumentsForFindAllByFilter() {
