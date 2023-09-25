@@ -24,15 +24,15 @@ public class HotelDetailsServiceIT extends IntegrationTestBase {
         var actualHotelDetails = hotelDetailsService.findByHotelId(EXISTENT_HOTEL_ID);
 
         assertThat(actualHotelDetails).isPresent();
-        actualHotelDetails.ifPresent(hotelDetails -> {
-            assertAll(() ->
-                    assertEquals(hotelDetails.getHotelId(), EXISTENT_HOTEL_ID));
-            assertEquals(hotelDetails.getPhoneNumber(), "1111-111-111");
-            assertEquals(hotelDetails.getCountry(), "Russia");
-            assertEquals(hotelDetails.getLocality(), "Moscow");
-            assertEquals(hotelDetails.getFloorCount(), 15);
-            assertEquals(hotelDetails.getStar(), Star.FOUR);
-        });
+        actualHotelDetails.ifPresent(hotelDetails ->
+                assertAll(() -> {
+                    assertEquals(hotelDetails.getHotelId(), EXISTENT_HOTEL_ID);
+                    assertEquals(hotelDetails.getPhoneNumber(), "1111-111-111");
+                    assertEquals(hotelDetails.getCountry(), "Russia");
+                    assertEquals(hotelDetails.getLocality(), "Moscow");
+                    assertEquals(hotelDetails.getFloorCount(), 15);
+                    assertEquals(hotelDetails.getStar(), Star.FOUR);
+                }));
     }
 
     @Test
@@ -49,29 +49,29 @@ public class HotelDetailsServiceIT extends IntegrationTestBase {
         var hotelDetailsToUpdate = getHotelDetailsCreatedEditDto();
         var hotelDetailsBeforeUpdate = hotelDetailsService.findByHotelId(EXISTENT_HOTEL_ID);
 
-        hotelDetailsBeforeUpdate.ifPresent(hotelDetails -> {
-            assertAll(() ->
-                    assertEquals(hotelDetails.getHotelId(), EXISTENT_HOTEL_ID));
-            assertEquals(hotelDetails.getPhoneNumber(), "1111-111-111");
-            assertEquals(hotelDetails.getCountry(), "Russia");
-            assertEquals(hotelDetails.getLocality(), "Moscow");
-            assertEquals(hotelDetails.getFloorCount(), 15);
-            assertEquals(hotelDetails.getStar(), Star.FOUR);
-        });
+        hotelDetailsBeforeUpdate.ifPresent(hotelDetails ->
+                assertAll(() -> {
+                    assertEquals(hotelDetails.getHotelId(), EXISTENT_HOTEL_ID);
+                    assertEquals(hotelDetails.getPhoneNumber(), "1111-111-111");
+                    assertEquals(hotelDetails.getCountry(), "Russia");
+                    assertEquals(hotelDetails.getLocality(), "Moscow");
+                    assertEquals(hotelDetails.getFloorCount(), 15);
+                    assertEquals(hotelDetails.getStar(), Star.FOUR);
+                }));
 
         var hotelDetailsAfterUpdate = hotelDetailsService.update(EXISTENT_HOTEL_DETAILS_ID, hotelDetailsToUpdate);
 
         assertThat(hotelDetailsAfterUpdate).isPresent();
-        hotelDetailsAfterUpdate.ifPresent(hotelDetails -> {
-            assertAll(() ->
-                    assertEquals(hotelDetails.getHotelId(), EXISTENT_HOTEL_ID));
-            assertEquals(hotelDetails.getPhoneNumber(), "+7-965-78-78-888");
-            assertEquals(hotelDetails.getCountry(), "Россия");
-            assertEquals(hotelDetails.getLocality(), "Москва");
-            assertEquals(hotelDetails.getArea(), "Центральный");
-            assertEquals(hotelDetails.getStreet(), "Новокузнецкая");
-            assertEquals(hotelDetails.getStar(), Star.FIVE);
-        });
+        hotelDetailsAfterUpdate.ifPresent(hotelDetails ->
+                assertAll(() -> {
+                    assertEquals(hotelDetails.getHotelId(), EXISTENT_HOTEL_ID);
+                    assertEquals(hotelDetails.getPhoneNumber(), "+7-965-78-78-888");
+                    assertEquals(hotelDetails.getCountry(), "Россия");
+                    assertEquals(hotelDetails.getLocality(), "Москва");
+                    assertEquals(hotelDetails.getArea(), "Центральный");
+                    assertEquals(hotelDetails.getStreet(), "Новокузнецкая");
+                    assertEquals(hotelDetails.getStar(), Star.FIVE);
+                }));
     }
 
     private HotelDetailsCreateEditDto getHotelDetailsCreatedEditDto() {

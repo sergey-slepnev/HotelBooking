@@ -182,7 +182,7 @@ public class HotelServiceTest extends UnitTestBase {
         assertTrue(actualResult);
     }
 
-    private static Hotel getHotel() {
+    private Hotel getHotel() {
         return Hotel.builder()
                 .id(EXISTENT_HOTEL_ID)
                 .owner(getUser())
@@ -192,14 +192,14 @@ public class HotelServiceTest extends UnitTestBase {
                 .build();
     }
 
-    private static User getUser() {
+    private User getUser() {
         return User.builder()
                 .id(FIRST_OWNER_ID)
                 .role(Role.ADMIN)
                 .build();
     }
 
-    private static HotelReadDto getHotelReadDto() {
+    private HotelReadDto getHotelReadDto() {
         return new HotelReadDto(
                 EXISTENT_HOTEL_ID,
                 FIRST_OWNER_ID,

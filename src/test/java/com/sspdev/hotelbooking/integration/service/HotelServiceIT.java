@@ -139,13 +139,12 @@ public class HotelServiceIT extends IntegrationTestBase {
         var hotelDetailsCreatedEditDto = getHotelDetailsCreatedEditDto();
 
         var updatedHotel = hotelService.update(EXISTENT_HOTEL_ID, hotelCreateEditDto, hotelDetailsCreatedEditDto);
-        updatedHotel.ifPresent(hotel -> {
-            assertAll(() -> {
-                assertEquals("SibirPlaza", hotel.getName());
-                assertEquals(false, hotel.getAvailable());
-                assertEquals(Status.BLOCKED, hotel.getStatus());
-            });
-        });
+        updatedHotel.ifPresent(hotel ->
+                assertAll(() -> {
+                    assertEquals("SibirPlaza", hotel.getName());
+                    assertEquals(false, hotel.getAvailable());
+                    assertEquals(Status.BLOCKED, hotel.getStatus());
+                }));
     }
 
     @Test

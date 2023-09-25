@@ -127,7 +127,7 @@ public class HotelDetailsServiceTest extends UnitTestBase {
         );
     }
 
-    private static Hotel getHotel() {
+    private Hotel getHotel() {
         return Hotel.builder()
                 .id(EXISTENT_HOTEL_ID)
                 .owner(getUser())
@@ -137,7 +137,7 @@ public class HotelDetailsServiceTest extends UnitTestBase {
                 .build();
     }
 
-    private static User getUser() {
+    private User getUser() {
         return User.builder()
                 .id(FIRST_OWNER_ID)
                 .role(Role.ADMIN)
