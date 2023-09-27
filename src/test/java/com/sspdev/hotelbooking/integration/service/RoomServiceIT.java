@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @RequiredArgsConstructor
 public class RoomServiceIT extends IntegrationTestBase {
 
+    private static final Integer EXISTENT_ROOM_ID = 1;
     private static final Integer EXISTENT_HOTEL_ID = 1;
     private static final Long NUMBER_OF_ROOMS_WITH_NO_PREDICATE = 16L;
     private static final Long NUMBER_OF_ROOMS_WITH_COST_FILTER = 5L;
@@ -33,7 +34,7 @@ public class RoomServiceIT extends IntegrationTestBase {
 
     @Test
     void findById_shouldFindRoomById_whenRoomExist() {
-        var maybeRoom = roomService.findById(EXISTENT_HOTEL_ID);
+        var maybeRoom = roomService.findById(EXISTENT_ROOM_ID);
 
         assertThat(maybeRoom).isPresent();
         maybeRoom.ifPresent(room ->
@@ -93,7 +94,7 @@ public class RoomServiceIT extends IntegrationTestBase {
 
         assertThat(actualRoom.getId()).isPositive();
         assertAll(() -> {
-            assertEquals(EXISTENT_HOTEL_ID, actualRoom.getHotelId());
+            assertEquals(EXISTENT_ROOM_ID, actualRoom.getHotelId());
             assertEquals(roomCreateEditDto.roomNo(), actualRoom.getRoomNo());
             assertEquals(roomCreateEditDto.type(), actualRoom.getType());
             assertEquals(roomCreateEditDto.square(), actualRoom.getSquare());
@@ -104,7 +105,26 @@ public class RoomServiceIT extends IntegrationTestBase {
             assertEquals(roomCreateEditDto.available(), actualRoom.getAvailable());
             assertEquals(roomCreateEditDto.description(), actualRoom.getDescription());
         });
+    }
 
+    @Test
+    void update_shouldUpdateRoom_whenRoomExists() {
+        var dtoToUpdate = getRoomCreateEditDtoToUpdate();
+
+        var actualRoom = roomService.update(EXISTENT_ROOM_ID, dtoToUpdate);
+
+        actualRoom.ifPresent(room ->
+                assertAll(() -> {
+                    assertEquals(dtoToUpdate.hotelId(), room.getHotelId());
+                    assertEquals(dtoToUpdate.roomNo(), room.getRoomNo());
+                    assertEquals(dtoToUpdate.type(), room.getType());
+                    assertEquals(dtoToUpdate.square(), room.getSquare());
+                    assertEquals(dtoToUpdate.adultBedCount(), room.getAdultBedCount());
+                    assertEquals(dtoToUpdate.childrenBedCount(), room.getChildrenBedCount());
+                    assertEquals(dtoToUpdate.cost(), room.getCost());
+                    assertEquals(dtoToUpdate.floor(), room.getFloor());
+                    assertEquals(dtoToUpdate.available(), room.getAvailable());
+                }));
     }
 
     private RoomCreateEditDto getRoomCreateEditDto() {
@@ -119,6 +139,22 @@ public class RoomServiceIT extends IntegrationTestBase {
                 1,
                 true,
                 "Отличный отель",
+                null
+        );
+    }
+
+    private RoomCreateEditDto getRoomCreateEditDtoToUpdate() {
+        return new RoomCreateEditDto(
+                EXISTENT_HOTEL_ID,
+                5,
+                RoomType.QDPL,
+                55.5,
+                3,
+                2,
+                BigDecimal.valueOf(2700),
+                2,
+                true,
+                "Отличный номер",
                 null
         );
     }
