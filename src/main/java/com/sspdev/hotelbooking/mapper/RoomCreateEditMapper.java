@@ -18,6 +18,18 @@ public class RoomCreateEditMapper implements Mapper<RoomCreateEditDto, Room> {
     @Override
     public Room map(RoomCreateEditDto object) {
         var room = new Room();
+        copy(object, room);
+
+        return room;
+    }
+
+    @Override
+    public Room map(RoomCreateEditDto fromObject, Room toObject) {
+        copy(fromObject, toObject);
+        return toObject;
+    }
+
+    private void copy(RoomCreateEditDto object, Room room) {
         room.setHotel(getHotel(object.hotelId()));
         room.setRoomNo(object.roomNo());
         room.setType(object.type());
@@ -28,8 +40,6 @@ public class RoomCreateEditMapper implements Mapper<RoomCreateEditDto, Room> {
         room.setAvailable(true);
         room.setFloor(object.floor());
         room.setDescription(object.description());
-
-        return room;
     }
 
     private Hotel getHotel(Integer hotelId) {

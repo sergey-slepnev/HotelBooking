@@ -55,4 +55,12 @@ public class RoomService {
                 .map(roomReadMapper::map)
                 .orElseThrow();
     }
+
+    @Transactional
+    public Optional<RoomReadDto> update(Integer roomId, RoomCreateEditDto roomCreateEditDto) {
+        return roomRepository.findById(roomId)
+                .map(roomEntity -> roomCreateEditMapper.map(roomCreateEditDto, roomEntity))
+                .map(roomRepository::saveAndFlush)
+                .map(roomReadMapper::map);
+    }
 }
