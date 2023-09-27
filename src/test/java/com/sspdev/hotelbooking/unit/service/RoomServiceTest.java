@@ -89,6 +89,21 @@ public class RoomServiceTest extends UnitTestBase {
         assertThat(actualRoom).isNotNull();
     }
 
+    @Test
+    void update_shouldUpdateExistentRoom() {
+        var room = getRoom();
+        var roomCreateEditDto = getRoomCreateEditDto();
+        var roomReadDto = getRoomReadDto();
+        when(roomRepository.findById(EXISTENT_ROOM_ID)).thenReturn(Optional.of(room));
+        when(roomCreateEditMapper.map(roomCreateEditDto, room)).thenReturn(room);
+        when(roomRepository.saveAndFlush(room)).thenReturn(room);
+        when(roomReadMapper.map(room)).thenReturn(roomReadDto);
+
+        var actualRoom = roomService.update(room.getId(), roomCreateEditDto);
+
+        assertThat(actualRoom).isPresent();
+    }
+
     private Room getRoom() {
         return Room.builder()
                 .id(EXISTENT_ROOM_ID)
