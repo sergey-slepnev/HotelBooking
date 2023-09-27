@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import static com.sspdev.hotelbooking.database.entity.QHotel.hotel;
 import static com.sspdev.hotelbooking.database.entity.QRoom.room;
+import static com.sspdev.hotelrepository.database.querydsl.QPredicates.builder;
 
 @RequiredArgsConstructor
 @Service
@@ -29,7 +30,7 @@ public class RoomService {
     }
 
     public Page<RoomReadDto> findAll(RoomFilter filter, Pageable pageable) {
-        var predicate = com.sspdev.hotelrepository.database.querydsl.QPredicates.builder()
+        var predicate = builder()
                 .add(filter.country(), hotel.hotelDetails.country::eq)
                 .add(filter.locality(), hotel.hotelDetails.locality::eq)
                 .add(filter.star(), hotel.hotelDetails.star::eq)

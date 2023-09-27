@@ -6,18 +6,28 @@ import com.sspdev.hotelbooking.database.entity.enums.RoomType;
 import com.sspdev.hotelbooking.database.entity.enums.Status;
 import com.sspdev.hotelbooking.database.repository.RoomRepository;
 import com.sspdev.hotelbooking.dto.RoomReadDto;
+import com.sspdev.hotelbooking.dto.filter.RoomFilter;
 import com.sspdev.hotelbooking.mapper.RoomReadMapper;
 import com.sspdev.hotelbooking.service.RoomService;
 import com.sspdev.hotelbooking.unit.UnitTestBase;
+import com.sspdev.hotelrepository.database.querydsl.QPredicates;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RequiredArgsConstructor
@@ -44,6 +54,20 @@ public class RoomServiceTest extends UnitTestBase {
 
         var actualRoom = roomService.findById(EXISTENT_ROOM_ID);
         assertThat(actualRoom).isPresent();
+    }
+
+    @Test
+    void findAll_ShouldFindAllRoomsByFilter() {
+        var roomFilter = RoomFilter.builder().build();
+        var predicate = QPredicates.builder().build();
+        var pageable = PageRequest.of(0, 20);
+        Page<Room> roomPage = new PageImpl<>(List.of(getRoom(), getRoom(), getRoom()));
+        when(roomRepository.findAll(predicate, pageable)).thenReturn(roomPage);
+
+        var actualRooms = roomService.findAll(roomFilter, pageable);
+
+        assertEquals(actualRooms.getTotalElements(), 3L);
+        verify(roomReadMapper, times(3)).map(any(Room.class));
     }
 
     private Room getRoom() {
