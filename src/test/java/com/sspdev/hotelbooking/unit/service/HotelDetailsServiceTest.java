@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -41,12 +43,14 @@ public class HotelDetailsServiceTest extends UnitTestBase {
     private final HotelDetailsService hotelDetailsService;
 
     @Test
-    void checkFindById() {
+    void findByHotelId_shouldFindHotelDetailsByHotelId_whenHotelExistent() {
         var hotelDetails = getHotelDetails();
         var hotelDetailsReadDto = getHotelDetailsReadDto();
+        when(hotelDetailsRepository.findByHotelId(EXISTENT_HOTEL_DETAILS_ID)).thenReturn(Optional.of(hotelDetails));
         when(hotelDetailsReadMapper.map(hotelDetails)).thenReturn(hotelDetailsReadDto);
 
         var actualHotelDetails = hotelDetailsService.findByHotelId(EXISTENT_HOTEL_ID);
+
         assertThat(actualHotelDetails).isPresent();
     }
 
@@ -69,11 +73,12 @@ public class HotelDetailsServiceTest extends UnitTestBase {
         var hotelDetailsCreatedEditDto = getHotelDetailsCreatedEditDto();
         var hotelDetails = getHotelDetails();
         var hotelDetailsReadDto = getHotelDetailsReadDto();
+        when(hotelDetailsRepository.findById(EXISTENT_HOTEL_DETAILS_ID)).thenReturn(Optional.of(hotelDetails));
         when(hotelDetailsCreateEditMapper.map(hotelDetailsCreatedEditDto, hotelDetails)).thenReturn(hotelDetails);
         when(hotelDetailsRepository.saveAndFlush(hotelDetails)).thenReturn(hotelDetails);
         when(hotelDetailsReadMapper.map(hotelDetails)).thenReturn(hotelDetailsReadDto);
 
-        var actualHotelDetails = hotelDetailsService.update(EXISTENT_HOTEL_DETAILS_ID, hotelDetailsCreatedEditDto);
+        var actualHotelDetails = hotelDetailsService.update(hotelDetails.getId(), hotelDetailsCreatedEditDto);
 
         assertThat(actualHotelDetails).isPresent();
     }

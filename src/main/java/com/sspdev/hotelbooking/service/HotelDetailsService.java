@@ -36,7 +36,7 @@ public class HotelDetailsService {
 
     @Transactional
     public Optional<HotelDetailsReadDto> update(Integer id, HotelDetailsCreateEditDto hotelDetails) {
-        return hotelDetailsRepository.findByHotelId(id)
+        return hotelDetailsRepository.findById(id)
                 .map(entity -> hotelDetailsCreateEditMapper.map(hotelDetails, entity))
                 .map(hotelDetailsRepository::saveAndFlush)
                 .map(hotelDetailsReadMapper::map);
