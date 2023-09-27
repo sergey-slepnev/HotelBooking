@@ -1,8 +1,10 @@
 package com.sspdev.hotelbooking.service;
 
 import com.sspdev.hotelbooking.database.repository.RoomRepository;
+import com.sspdev.hotelbooking.dto.RoomCreateEditDto;
 import com.sspdev.hotelbooking.dto.RoomReadDto;
 import com.sspdev.hotelbooking.dto.filter.RoomFilter;
+import com.sspdev.hotelbooking.mapper.RoomCreateEditMapper;
 import com.sspdev.hotelbooking.mapper.RoomReadMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,6 +25,7 @@ public class RoomService {
 
     private final RoomRepository roomRepository;
     private final RoomReadMapper roomReadMapper;
+    private final RoomCreateEditMapper roomCreateEditMapper;
 
     public Optional<RoomReadDto> findById(Integer roomId) {
         return roomRepository.findById(roomId)
@@ -42,5 +45,14 @@ public class RoomService {
 
         return roomRepository.findAll(predicate, pageable)
                 .map(roomReadMapper::map);
+    }
+
+    @Transactional
+    public RoomReadDto create(RoomCreateEditDto roomDto) {
+        return Optional.of(roomDto)
+                .map(roomCreateEditMapper::map)
+                .map(roomRepository::save)
+                .map(roomReadMapper::map)
+                .orElseThrow();
     }
 }
