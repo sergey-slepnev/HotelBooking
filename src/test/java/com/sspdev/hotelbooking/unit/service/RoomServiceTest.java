@@ -5,8 +5,10 @@ import com.sspdev.hotelbooking.database.entity.Room;
 import com.sspdev.hotelbooking.database.entity.enums.RoomType;
 import com.sspdev.hotelbooking.database.entity.enums.Status;
 import com.sspdev.hotelbooking.database.repository.RoomRepository;
+import com.sspdev.hotelbooking.dto.RoomCreateEditDto;
 import com.sspdev.hotelbooking.dto.RoomReadDto;
 import com.sspdev.hotelbooking.dto.filter.RoomFilter;
+import com.sspdev.hotelbooking.mapper.RoomCreateEditMapper;
 import com.sspdev.hotelbooking.mapper.RoomReadMapper;
 import com.sspdev.hotelbooking.service.RoomService;
 import com.sspdev.hotelbooking.unit.UnitTestBase;
@@ -42,6 +44,9 @@ public class RoomServiceTest extends UnitTestBase {
     @MockBean
     private final RoomRepository roomRepository;
 
+    @MockBean
+    private final RoomCreateEditMapper roomCreateEditMapper;
+
     @InjectMocks
     private final RoomService roomService;
 
@@ -68,6 +73,20 @@ public class RoomServiceTest extends UnitTestBase {
 
         assertEquals(actualRooms.getTotalElements(), 3L);
         verify(roomReadMapper, times(3)).map(any(Room.class));
+    }
+
+    @Test
+    void create_shouldCreateNewRoom() {
+        var roomCreateEditDto = getRoomCreateEditDto();
+        var room = getRoom();
+        var roomReadDto = getRoomReadDto();
+        when(roomCreateEditMapper.map(roomCreateEditDto)).thenReturn(room);
+        when(roomRepository.save(room)).thenReturn(room);
+        when(roomReadMapper.map(room)).thenReturn(roomReadDto);
+
+        var actualRoom = roomService.create(roomCreateEditDto);
+
+        assertThat(actualRoom).isNotNull();
     }
 
     private Room getRoom() {
@@ -100,6 +119,22 @@ public class RoomServiceTest extends UnitTestBase {
     private RoomReadDto getRoomReadDto() {
         return new RoomReadDto(
                 EXISTENT_ROOM_ID,
+                EXISTENT_HOTEL_ID,
+                1,
+                RoomType.DBL,
+                44.4,
+                3,
+                0,
+                BigDecimal.valueOf(1900),
+                1,
+                true,
+                "Отличный отель",
+                null
+        );
+    }
+
+    private RoomCreateEditDto getRoomCreateEditDto() {
+        return new RoomCreateEditDto(
                 EXISTENT_HOTEL_ID,
                 1,
                 RoomType.DBL,

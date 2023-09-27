@@ -1,6 +1,8 @@
 package com.sspdev.hotelbooking.integration.service;
 
 import com.sspdev.hotelbooking.database.entity.Room;
+import com.sspdev.hotelbooking.database.entity.enums.RoomType;
+import com.sspdev.hotelbooking.dto.RoomCreateEditDto;
 import com.sspdev.hotelbooking.dto.RoomReadDto;
 import com.sspdev.hotelbooking.dto.filter.RoomFilter;
 import com.sspdev.hotelbooking.integration.IntegrationTestBase;
@@ -81,5 +83,43 @@ public class RoomServiceIT extends IntegrationTestBase {
                 .map(RoomReadDto::getSquare).toList();
 
         assertThat(actualSquares).containsExactly(expectedSquares);
+    }
+
+    @Test
+    void create_shouldCreateNewRoomAndSaveInDb() {
+        var roomCreateEditDto = getRoomCreateEditDto();
+
+        var actualRoom = roomService.create(roomCreateEditDto);
+
+        assertThat(actualRoom.getId()).isPositive();
+        assertAll(() -> {
+            assertEquals(EXISTENT_HOTEL_ID, actualRoom.getHotelId());
+            assertEquals(roomCreateEditDto.roomNo(), actualRoom.getRoomNo());
+            assertEquals(roomCreateEditDto.type(), actualRoom.getType());
+            assertEquals(roomCreateEditDto.square(), actualRoom.getSquare());
+            assertEquals(roomCreateEditDto.adultBedCount(), actualRoom.getAdultBedCount());
+            assertEquals(roomCreateEditDto.childrenBedCount(), actualRoom.getChildrenBedCount());
+            assertEquals(roomCreateEditDto.cost(), actualRoom.getCost());
+            assertEquals(roomCreateEditDto.floor(), actualRoom.getFloor());
+            assertEquals(roomCreateEditDto.available(), actualRoom.getAvailable());
+            assertEquals(roomCreateEditDto.description(), actualRoom.getDescription());
+        });
+
+    }
+
+    private RoomCreateEditDto getRoomCreateEditDto() {
+        return new RoomCreateEditDto(
+                EXISTENT_HOTEL_ID,
+                1,
+                RoomType.DBL,
+                44.4,
+                3,
+                0,
+                BigDecimal.valueOf(1900),
+                1,
+                true,
+                "Отличный отель",
+                null
+        );
     }
 }
