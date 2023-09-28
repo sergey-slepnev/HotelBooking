@@ -20,6 +20,8 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RequiredArgsConstructor
 public class HotelServiceIT extends IntegrationTestBase {
@@ -144,6 +146,20 @@ public class HotelServiceIT extends IntegrationTestBase {
                 assertEquals(Status.BLOCKED, hotel.getStatus());
             });
         });
+    }
+
+    @Test
+    void delete_shouldDeleteHotel_whenHotelExists() {
+        var actualResult = hotelService.delete(EXISTENT_HOTEL_ID);
+
+        assertTrue(actualResult);
+    }
+
+    @Test
+    void delete_shouldReturnFalse_whenHotelNotExist() {
+        var actualResult = hotelService.delete(NON_EXISTENT_HOTEL_ID);
+
+        assertFalse(actualResult);
     }
 
     private HotelCreateEditDto getHotelCreateEditDto() {

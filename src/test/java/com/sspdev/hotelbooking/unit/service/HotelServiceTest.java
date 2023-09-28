@@ -30,7 +30,9 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -167,6 +169,17 @@ public class HotelServiceTest extends UnitTestBase {
 
         assertThat(update).isPresent();
         verify(hotelDetailsService).update(hotel.getId(), hotelDetailsCreatedEditDto);
+    }
+
+    @Test
+    void delete_shouldDeleteHotel_whenHotelExists() {
+        var hotel = getHotel();
+        when(hotelRepository.findById(EXISTENT_HOTEL_ID)).thenReturn(Optional.of(hotel));
+        doNothing().when(hotelRepository).delete(hotel);
+
+        var actualResult = hotelService.delete(EXISTENT_HOTEL_ID);
+
+        assertTrue(actualResult);
     }
 
     private static Hotel getHotel() {
