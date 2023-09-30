@@ -1,6 +1,7 @@
 package com.sspdev.hotelbooking.service;
 
 import com.sspdev.hotelbooking.database.entity.enums.Status;
+import com.sspdev.hotelbooking.database.querydsl.QPredicates;
 import com.sspdev.hotelbooking.database.repository.UserRepository;
 import com.sspdev.hotelbooking.dto.UserCreateEditDto;
 import com.sspdev.hotelbooking.dto.UserReadDto;
@@ -8,11 +9,15 @@ import com.sspdev.hotelbooking.dto.filter.UserFilter;
 import com.sspdev.hotelbooking.mapper.UserCreateEditMapper;
 import com.sspdev.hotelbooking.mapper.UserReadMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+
+import static com.sspdev.hotelbooking.database.entity.QUser.user;
 
 @RequiredArgsConstructor
 @Service
@@ -27,6 +32,18 @@ public class UserService {
         return userRepository.findAll().stream()
                 .map(userReadMapper::map)
                 .toList();
+    }
+
+    public Page<UserReadDto> findAll(UserFilter filter, Pageable pageable) {
+        var predicate = QPredicates.builder()
+                .add(filter.role(), user.role::eq)
+                .add(filter.firstName(), user.personalInfo.firstname::containsIgnoreCase)
+                .add(filter.lastName(), user.personalInfo.lastname::containsIgnoreCase)
+                .add(filter.status(), user.status::eq)
+                .build();
+
+        return userRepository.findAll(predicate, pageable)
+                .map(userReadMapper::map);
     }
 
     public List<UserReadDto> findAllByFilter(UserFilter userFilter) {
