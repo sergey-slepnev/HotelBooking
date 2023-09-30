@@ -2,6 +2,7 @@ package com.sspdev.hotelbooking.database.entity;
 
 import com.sspdev.hotelbooking.converter.CostConverter;
 import com.sspdev.hotelbooking.database.entity.enums.RoomType;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -70,7 +71,7 @@ public class Room implements BaseEntity<Integer> {
     private String description;
 
     @Builder.Default
-    @OneToMany(mappedBy = "room")
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
     private List<BookingRequest> requests = new ArrayList<>();
 
     @Builder.Default
