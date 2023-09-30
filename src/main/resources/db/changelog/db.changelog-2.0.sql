@@ -2,4 +2,4 @@
 
 --changeset sslepnev:1
 ALTER TABLE hotel_details
-    DROP CONSTRAINT hotel_details_hotel_id_key;
+    DROP CONSTRAINT IF EXISTS hotel_details_hotel_id_key;
