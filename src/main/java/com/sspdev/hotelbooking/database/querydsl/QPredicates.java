@@ -1,4 +1,4 @@
-package com.sspdev.hotelrepository.database.querydsl;
+package com.sspdev.hotelbooking.database.querydsl;
 
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Predicate;

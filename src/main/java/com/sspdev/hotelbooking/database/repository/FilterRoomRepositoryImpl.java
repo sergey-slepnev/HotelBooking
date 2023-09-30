@@ -2,6 +2,7 @@ package com.sspdev.hotelbooking.database.repository;
 
 import com.querydsl.jpa.impl.JPAQuery;
 import com.sspdev.hotelbooking.database.entity.Room;
+import com.sspdev.hotelbooking.database.querydsl.QPredicates;
 import com.sspdev.hotelbooking.dto.HotelRoomInfo;
 import com.sspdev.hotelbooking.dto.filter.RoomFilter;
 import jakarta.persistence.EntityManager;
@@ -51,7 +52,7 @@ public class FilterRoomRepositoryImpl implements FilterRoomRepository {
 
     @Override
     public List<Room> findAllByFilter(RoomFilter filter) {
-        var predicate = com.sspdev.hotelrepository.database.querydsl.QPredicates.builder()
+        var predicate = QPredicates.builder()
                 .add(filter.costFrom(), room.cost::goe)
                 .add(filter.costTo(), room.cost::loe)
                 .build();

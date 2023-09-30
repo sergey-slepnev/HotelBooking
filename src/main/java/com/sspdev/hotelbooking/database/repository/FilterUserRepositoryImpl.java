@@ -2,6 +2,7 @@ package com.sspdev.hotelbooking.database.repository;
 
 import com.querydsl.jpa.impl.JPAQuery;
 import com.sspdev.hotelbooking.database.entity.User;
+import com.sspdev.hotelbooking.database.querydsl.QPredicates;
 import com.sspdev.hotelbooking.dto.filter.UserFilter;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 import static com.sspdev.hotelbooking.database.entity.QUser.user;
-import static com.sspdev.hotelrepository.database.querydsl.QPredicates.builder;
 
 @RequiredArgsConstructor
 public class FilterUserRepositoryImpl implements FilterUserRepository {
@@ -18,7 +18,7 @@ public class FilterUserRepositoryImpl implements FilterUserRepository {
 
     @Override
     public List<User> findAllByFilter(UserFilter filter) {
-        var predicate = builder()
+        var predicate = QPredicates.builder()
                 .add(filter.role(), user.role::eq)
                 .add(filter.firstName(), user.personalInfo.firstname::containsIgnoreCase)
                 .add(filter.lastName(), user.personalInfo.lastname::containsIgnoreCase)

@@ -2,6 +2,7 @@ package com.sspdev.hotelbooking.database.repository;
 
 import com.querydsl.jpa.impl.JPAQuery;
 import com.sspdev.hotelbooking.database.entity.Review;
+import com.sspdev.hotelbooking.database.querydsl.QPredicates;
 import com.sspdev.hotelbooking.dto.filter.ReviewFilter;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ public class FilterReviewRepositoryImpl implements FilterReviewRepository {
 
     @Override
     public List<Review> findAllByFilter(ReviewFilter filter) {
-        var predicate = com.sspdev.hotelrepository.database.querydsl.QPredicates.builder()
+        var predicate = QPredicates.builder()
                 .add(filter.hotelName(), review.hotel.name::eq)
                 .add(filter.ratingFrom(), review.rating::goe)
                 .add(filter.ratingTo(), review.rating::loe)
