@@ -4,6 +4,7 @@ import com.sspdev.hotelbooking.database.entity.PersonalInfo;
 import com.sspdev.hotelbooking.database.entity.User;
 import com.sspdev.hotelbooking.database.entity.enums.Role;
 import com.sspdev.hotelbooking.database.entity.enums.Status;
+import com.sspdev.hotelbooking.database.querydsl.QPredicates;
 import com.sspdev.hotelbooking.database.repository.UserRepository;
 import com.sspdev.hotelbooking.dto.UserReadDto;
 import com.sspdev.hotelbooking.dto.filter.UserFilter;
@@ -19,6 +20,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -64,6 +68,20 @@ public class UserServiceTest extends UnitTestBase {
 
         assertNotNull(actualResult);
         assertThat(actualResult.size()).isEqualTo(expectedResult.size());
+    }
+
+    @Test
+    void findAll_ShouldFindAllUsersByFilter_withPageable() {
+        var userFilter = UserFilter.builder().build();
+        var predicate = QPredicates.builder().build();
+        var pageable = PageRequest.of(0, 20);
+        Page<User> usersPage = new PageImpl<>(List.of(TestDataUtil.getUser(), TestDataUtil.getUser()));
+        when(userRepository.findAll(predicate, pageable)).thenReturn(usersPage);
+
+        var actualUsers = userService.findAll(userFilter, pageable);
+
+        assertEquals(actualUsers.getTotalElements(), 2L);
+        verify(userReadMapper, times(2)).map(any(User.class));
     }
 
     @ParameterizedTest

@@ -1,5 +1,7 @@
 package com.sspdev.hotelbooking.integration.service;
 
+import com.sspdev.hotelbooking.database.entity.PersonalInfo;
+import com.sspdev.hotelbooking.database.entity.User;
 import com.sspdev.hotelbooking.database.entity.enums.Role;
 import com.sspdev.hotelbooking.database.entity.enums.Status;
 import com.sspdev.hotelbooking.dto.UserReadDto;
@@ -14,6 +16,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.util.stream.Stream;
 
@@ -63,6 +67,37 @@ public class UserServiceIT extends IntegrationTestBase {
                         FIRST_NAME_FILTER_COLLECTION_SIZE,
                         new String[]{"SecondOwner@gmail.com"}
                 ));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getArgumentsForFindAllWithUserFilterAndPageable")
+    void findAll_shouldFindAllUsersAscSorted_withUserFilterAndPageable(UserFilter userFilter, String... expectedFirstNames) {
+        var sort = Sort.sort(User.class).by(User::getPersonalInfo).by(PersonalInfo::getFirstname);
+        var pageable = PageRequest.of(0, 20, sort);
+
+        var actualUsers = userService.findAll(userFilter, pageable);
+        var actualFirstName = actualUsers.stream()
+                .map(UserReadDto::getFirstName).toList();
+
+        assertThat(actualFirstName).containsExactly(expectedFirstNames);
+    }
+
+    static Stream<Arguments> getArgumentsForFindAllWithUserFilterAndPageable() {
+        return Stream.of(
+//                no conditional filter
+                Arguments.of(UserFilter.builder().build(),
+                        new String[]{"Andrey", "Jack", "Michail", "Natalya", "Sergey"}),
+//                with "a" in firstname filter
+                Arguments.of(UserFilter.builder()
+                                .firstName("a")
+                                .build(),
+                        new String[]{"Andrey", "Jack", "Michail", "Natalya"}),
+//                with-User-role filter
+                Arguments.of(UserFilter.builder()
+                                .role(Role.USER)
+                                .build(),
+                        new String[]{"Michail", "Natalya"})
+        );
     }
 
     @Test
