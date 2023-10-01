@@ -30,6 +30,7 @@ dependencies {
     implementation 'org.postgresql:postgresql'
     implementation 'org.liquibase:liquibase-core'
     implementation 'com.querydsl:querydsl-jpa::jakarta'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     annotationProcessor 'com.querydsl:querydsl-apt::jakarta'
     annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
