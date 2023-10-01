@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Users</title>
+</head>
+<body>
+<form action="/my-booking/users">
+    <div th:each="role : ${roles}">
+        <label>
+            <input th:id="${role}" type="radio" name="role" th:value="${role}" th:checked="${role == filter.role()}">
+        </label>
+        <label th:for="${role}" th:text="${role}">Role</label>
+    </div>
+    <label for="firstName">First name
+        <input id="firstName" type="text" name="firstName">
+    </label><br>
+    <label for="lastName">Last name
+        <input id="lastName" type="text" name="lastName">
+    </label><br>
+    <div th:each="status : ${statuses}">
+        <label>
+            <input th:id="${status}" type="radio" name="status" th:value="${status}"
+                   th:checked="${status == filter.status()}">
+        </label>
+        <label th:for="${status}" th:text="${status}">Status</label>
+    </div>
+
+    <div>
+        <label for="page">Page:
+            <input id="page" type="number" name="page" th:value="${users.metadata.page}">
+        </label>
+        <label for="size">Size:
+            <input id="size" type="number" name="size" th:value="${users.metadata.size}">
+        </label>
+    </div>
+    <button type="submit">Filter</button>
+</form>
+<div th:each="user : ${users.getContent()}">
+    <span th:text="${user.username}"></span>
+</div>
+</body>
+</html>
