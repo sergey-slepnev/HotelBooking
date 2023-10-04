@@ -31,6 +31,7 @@ dependencies {
     implementation 'org.liquibase:liquibase-core'
     implementation 'com.querydsl:querydsl-jpa::jakarta'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     annotationProcessor 'com.querydsl:querydsl-apt::jakarta'
     annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
