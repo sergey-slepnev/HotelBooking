@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>User</title>
+</head>
+<body>
+<form th:action="@{/my-booking/users/{id}(id=${user.id})}" th:object="${user}">
+    <h4 th:text="|#{user.firstname}: *{firstName}|">Firstname</h4>
+    <h4 th:text="|#{user.lastname}: *{lastName}|">Lastname</h4>
+    <h4 th:text="|#{user.phone}: *{phone}|">Phone</h4>
+    <h4 th:text="|#{user.email}: *{getUsername}|">Email</h4>
+    <h4 th:text="|#{user.birth_date}: *{birthdate}|">Birthdate</h4>
+    <h4 th:text="|#{user.avatar}:|">Avatar</h4>
+</form>
+</body>
+</html>
