@@ -7,10 +7,13 @@ import com.sspdev.hotelbooking.dto.filter.UserFilter;
 import com.sspdev.hotelbooking.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 @RequestMapping("/my-booking/users")
@@ -28,5 +31,16 @@ public class UserController {
         model.addAttribute("statuses", Status.values());
 
         return "user/users";
+    }
+
+    @GetMapping("/{id}")
+    public String findById(@PathVariable("id") Integer id,
+                           Model model) {
+        return userService.findById(id)
+                .map(user -> {
+                    model.addAttribute("user", user);
+                    return "user/user";
+                })
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 }
