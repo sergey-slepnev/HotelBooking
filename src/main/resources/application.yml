@@ -9,3 +9,4 @@ spring:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
       ddl-auto: validate
+    open-in-view: false
