@@ -12,3 +12,6 @@ spring:
     open-in-view: false
   messages:
     basename: messages
+  servlet:
+    multipart:
+      location: C:\Users\LENOVO\IdeaProjects\MyProjects\HotelBooking\images
