@@ -5,6 +5,7 @@ import com.sspdev.hotelbooking.database.entity.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Value;
+import lombok.experimental.FieldNameConstants;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @Value
 @NoArgsConstructor(force = true)
 @AllArgsConstructor
+@FieldNameConstants
 public class UserReadDto {
 
     Integer id;
