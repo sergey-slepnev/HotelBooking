@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registration</title>
+</head>
+<body>
+<form th:action="@{my-booking/users/create}" method="post" th:object="${user}">
+
+    <label for="firstName"><span th:text="#{user.firstname}">First name</span>
+        <input id="firstName" type="text" name="firstName" th:value="${user.firstName}">
+    </label><br>
+    <label for="lastName"><span th:text="#{user.lastname}">Last name</span>
+        <input id="lastName" type="text" name="lastName" th:value="${user.lastName}">
+    </label><br>
+    <label for="phone"><span th:text="#{user.phone}">Phone</span>
+        <input id="phone" type="text" name="phone" th:value="${user.phone}">
+    </label><br>
+    <label for="username"><span th:text="#{login.email}">Username</span>
+        <input id="username" type="text" name="username" th:value="${user.username}">
+    </label><br>
+    <label for="birthDate"><span th:text="#{user.birth_date}">Date of birth</span>
+        <input id="birthDate" type="date" name="birthDate" th:default="${#execInfo.now}"
+               th:value="${user.getBirthDate}">
+    </label><br>
+    <label for="rawPassword"><span th:text="#{login.password}">Password</span>
+        <input id="rawPassword" type="password" name="rawPassword">
+    </label><br>
+    <label for="role"><span th:text="#{user.role}"></span>
+        <select name="role" id="role">
+            <option></option>
+            <option value="USER" th:text="#{role.user}">USER</option>
+            <option value="OWNER" th:text="#{role.owner}">OWNER</option>
+        </select><br>
+    </label>
+    <button type="submit" th:text="#{button.to_register}">Register</button>
+</form>
+</body>
+</html>
