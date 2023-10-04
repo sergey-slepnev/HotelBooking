@@ -31,6 +31,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @RequiredArgsConstructor
 @WebMvcTest(UserController.class)
@@ -90,6 +91,14 @@ class UserControllerTest {
 
         mockMvc.perform(get("/my-booking/users/" + NON_EXISTENT_USER_ID))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void registration_shouldReturnRegistrationPage() throws Exception {
+        mockMvc.perform(get("/my-booking/users/registration"))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(view().name("user/registration"))
+                .andExpect(model().attributeExists("user"));
     }
 
     private UserReadDto getUserReadDto() {
