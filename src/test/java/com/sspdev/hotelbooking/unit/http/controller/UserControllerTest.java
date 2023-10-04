@@ -8,6 +8,7 @@ import com.sspdev.hotelbooking.dto.filter.UserFilter;
 import com.sspdev.hotelbooking.http.controller.UserController;
 import com.sspdev.hotelbooking.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -19,10 +20,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -32,6 +35,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RequiredArgsConstructor
 @WebMvcTest(UserController.class)
 class UserControllerTest {
+
+    private static final Integer EXISTENT_USER_ID = 1;
+    private static final Integer NON_EXISTENT_USER_ID = 999;
 
     private final MockMvc mockMvc;
 
@@ -54,7 +60,7 @@ class UserControllerTest {
         when(userService.findAll(any(UserFilter.class), any(Pageable.class))).thenReturn(userReadDtoPage);
 
         var mvcResult = mockMvc.perform(get("/my-booking/users"))
-                .andExpect(status().isOk())
+                .andExpect(status().is2xxSuccessful())
                 .andExpect(model().attributeExists("users", "roles", "filter", "statuses"))
                 .andExpect(content().contentType("text/html;charset=UTF-8"))
                 .andExpect(model().attribute("users", pageResponse))
@@ -68,9 +74,27 @@ class UserControllerTest {
         assertThat(string).contains("totalElements=" + expectedTotalElementsInPage);
     }
 
+    @Test
+    void findById_shouldFindUserById_whenUserExists() throws Exception {
+        var expectedUserReadDto = getUserReadDto();
+        when(userService.findById(anyInt())).thenReturn(Optional.of(expectedUserReadDto));
+
+        mockMvc.perform(get("/my-booking/users/" + EXISTENT_USER_ID))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(model().attribute("user", getUserReadDto()));
+    }
+
+    @Test
+    void findById_shouldReturnNotFound_whenUserNotExist() throws Exception {
+        when(userService.findById(NON_EXISTENT_USER_ID)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/my-booking/users/" + NON_EXISTENT_USER_ID))
+                .andExpect(status().isNotFound());
+    }
+
     private UserReadDto getUserReadDto() {
         return new UserReadDto(
-                1,
+                EXISTENT_USER_ID,
                 Role.USER,
                 "user",
                 "123",
