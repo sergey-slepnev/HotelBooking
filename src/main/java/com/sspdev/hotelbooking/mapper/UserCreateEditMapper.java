@@ -5,9 +5,13 @@ import com.sspdev.hotelbooking.database.entity.User;
 import com.sspdev.hotelbooking.database.entity.enums.Status;
 import com.sspdev.hotelbooking.dto.UserCreateEditDto;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
+
+import static java.util.function.Predicate.not;
 
 @Component
 public class UserCreateEditMapper implements Mapper<UserCreateEditDto, User> {
@@ -37,8 +41,11 @@ public class UserCreateEditMapper implements Mapper<UserCreateEditDto, User> {
         personalInfo.setBirthDate(object.getBirthDate());
         user.setPersonalInfo(personalInfo);
         user.setPhone(object.getPhone());
-        user.setImage(object.getImage().getOriginalFilename());
         user.setStatus(Status.NEW);
         user.setRegisteredAt(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+
+        Optional.ofNullable(object.getImage())
+                .filter(not(MultipartFile::isEmpty))
+                .ifPresent(image -> user.setImage(image.getOriginalFilename()));
     }
 }
