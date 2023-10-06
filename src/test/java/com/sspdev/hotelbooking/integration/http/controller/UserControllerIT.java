@@ -4,6 +4,7 @@ import com.sspdev.hotelbooking.database.entity.enums.Role;
 import com.sspdev.hotelbooking.database.entity.enums.Status;
 import com.sspdev.hotelbooking.dto.UserReadDto;
 import com.sspdev.hotelbooking.integration.IntegrationTestBase;
+import com.sspdev.hotelbooking.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -47,6 +48,7 @@ class UserControllerIT extends IntegrationTestBase {
     private static final Integer NUMBER_OF_USERS = 2;
 
     private final MockMvc mockMvc;
+    private final UserService userService;
 
     @ParameterizedTest
     @MethodSource("getArgumentsForFindAllWithFilter")
@@ -126,6 +128,23 @@ class UserControllerIT extends IntegrationTestBase {
                         flash().attributeCount(2),
                         flash().attributeExists("user", "errors"),
                         flash().attribute("errors", hasSize(5)));
+    }
+
+    @Test
+    void update_shouldReturnUserUpdatePage_whenUserInSession() throws Exception {
+        var existentUser = userService.findById(EXISTENT_USER_ID);
+
+        mockMvc.perform(get("/my-booking/users/" + EXISTENT_USER_ID + "/update")
+                        .sessionAttr("user", existentUser.get()))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(view().name("user/update"))
+                .andExpect(model().attribute("user", existentUser.get()));
+    }
+
+    @Test
+    void update_shouldReturnClientError_whenThereIsNoUserInSession() throws Exception {
+        mockMvc.perform(get("/my-booking/users/" + EXISTENT_USER_ID + "/update"))
+                .andExpect(status().is4xxClientError());
     }
 
     private UserReadDto getUserReadDto() {

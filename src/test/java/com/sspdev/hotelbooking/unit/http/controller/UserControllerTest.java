@@ -82,7 +82,7 @@ class UserControllerTest {
 
         mockMvc.perform(get("/my-booking/users/" + EXISTENT_USER_ID))
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(model().attribute("user", getUserReadDto()));
+                .andExpect(model().attribute("user", expectedUserReadDto));
     }
 
     @Test
@@ -99,6 +99,15 @@ class UserControllerTest {
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(view().name("user/registration"))
                 .andExpect(model().attributeExists("user"));
+    }
+
+    @Test
+    void update_shouldReturnUpdatePage_whenUserInSession() throws Exception {
+        mockMvc.perform(get("/my-booking/users/" + EXISTENT_USER_ID + "/update")
+                        .sessionAttr("user", getUserReadDto()))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(view().name("user/update"));
+
     }
 
     private UserReadDto getUserReadDto() {
