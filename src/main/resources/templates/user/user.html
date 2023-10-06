@@ -5,13 +5,23 @@
     <title>User</title>
 </head>
 <body>
-<form th:action="@{/my-booking/users/{id}(id=${user.id})}" th:object="${user}">
+<div th:insert="~{fragment/locale}"></div>
+<form th:action="@{/users/{id}(id=${user.id})}" enctype="multipart/form-data" th:object="${user}">
+
     <h4 th:text="|#{user.firstname}: *{firstName}|">Firstname</h4>
     <h4 th:text="|#{user.lastname}: *{lastName}|">Lastname</h4>
     <h4 th:text="|#{user.phone}: *{phone}|">Phone</h4>
     <h4 th:text="|#{user.email}: *{getUsername}|">Email</h4>
     <h4 th:text="|#{user.birth_date}: *{birthdate}|">Birthdate</h4>
     <h4 th:text="|#{user.avatar}:|">Avatar</h4>
+
+    <div th:if="${user.image}">
+        <img th:src="@{/api/v1/users/{userId}/avatar(userId=${user.id})}" alt="User image">
+    </div>
 </form>
+
+<a th:href="@{/my-booking/users/{id}/update(id=${user.id})}">
+    <button type="submit" th:text="#{button.update}">Update user</button>
+</a>
 </body>
 </html>
