@@ -16,12 +16,22 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
-import static com.sspdev.hotelbooking.dto.UserReadDto.Fields.role;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.birthDate;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.firstName;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.lastName;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.phone;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.rawPassword;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.role;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.username;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -59,11 +69,11 @@ class UserControllerIT extends IntegrationTestBase {
         return Stream.of(
                 Arguments.of("role", "",
                         TOTAL_NUMBER_OF_USERS),
-                Arguments.of(role, "ADMIN",
+                Arguments.of(UserReadDto.Fields.role, "ADMIN",
                         NUMBER_OF_ADMINS),
-                Arguments.of(role, "OWNER",
+                Arguments.of(UserReadDto.Fields.role, "OWNER",
                         NUMBER_OF_OWNERS),
-                Arguments.of(role, "USER",
+                Arguments.of(UserReadDto.Fields.role, "USER",
                         NUMBER_OF_USERS)
         );
     }
@@ -83,6 +93,41 @@ class UserControllerIT extends IntegrationTestBase {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void create_shouldCreateNewUser_whenUserValid() throws Exception {
+        mockMvc.perform(post("/my-booking/users/create")
+                        .param(username, "Test@gmail.com")
+                        .param(firstName, "Anton")
+                        .param(lastName, "Sidorov")
+                        .param(phone, "8-888-88-88-88")
+                        .param(rawPassword, "testPassword")
+                        .param(role, Role.USER.name())
+                        .param(birthDate, "1988-10-10"))
+                .andExpectAll(
+                        status().is3xxRedirection(),
+                        redirectedUrl("/my-booking/users"),
+                        flash().attributeCount(0)
+                );
+    }
+
+    @Test
+    void create_shouldRedirectToRegistrationPage_whenUserInvalid() throws Exception {
+        mockMvc.perform(post("/my-booking/users/create")
+                        .param(username, "TestUsername")
+                        .param(firstName, "Me")
+                        .param(lastName, "My")
+                        .param(phone, "22")
+                        .param(rawPassword, "12")
+                        .param(role, Role.USER.name())
+                        .param(birthDate, "1988-10-10"))
+                .andExpectAll(
+                        status().is3xxRedirection(),
+                        redirectedUrl("/my-booking/users/registration"),
+                        flash().attributeCount(2),
+                        flash().attributeExists("user", "errors"),
+                        flash().attribute("errors", hasSize(5)));
+    }
+
     private UserReadDto getUserReadDto() {
         return new UserReadDto(
                 EXISTENT_USER_ID,
@@ -95,6 +140,6 @@ class UserControllerIT extends IntegrationTestBase {
                 "8-835-66-99-333",
                 "AdminAvatar.jpg",
                 Status.APPROVED,
-                LocalDateTime.of(2022, 9, 8, 10,0));
+                LocalDateTime.of(2022, 9, 8, 10, 0));
     }
 }
