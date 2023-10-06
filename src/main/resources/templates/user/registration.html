@@ -5,7 +5,8 @@
     <title>Registration</title>
 </head>
 <body>
-<form th:action="@{my-booking/users/create}" method="post" th:object="${user}">
+<div th:insert="~{fragment/locale}"></div>
+<form th:action="@{/users/create}" enctype="multipart/form-data" method="post" th:object="${user}">
 
     <label for="firstName"><span th:text="#{user.firstname}">First name</span>
         <input id="firstName" type="text" name="firstName" th:value="${user.firstName}">
@@ -20,8 +21,7 @@
         <input id="username" type="text" name="username" th:value="${user.username}">
     </label><br>
     <label for="birthDate"><span th:text="#{user.birth_date}">Date of birth</span>
-        <input id="birthDate" type="date" name="birthDate" th:default="${#execInfo.now}"
-               th:value="${user.getBirthDate}">
+        <input id="birthDate" type="date" name="birthDate" th:default="${#execInfo.now}" th:value="${user.getBirthDate}">
     </label><br>
     <label for="rawPassword"><span th:text="#{login.password}">Password</span>
         <input id="rawPassword" type="password" name="rawPassword">
@@ -33,7 +33,14 @@
             <option value="OWNER" th:text="#{role.owner}">OWNER</option>
         </select><br>
     </label>
+    <label for="image"><span th:text="#{user.avatar}">Avatar</span>
+        <input id="image" type="file" name="image">
+    </label><br>
     <button type="submit" th:text="#{button.to_register}">Register</button>
 </form>
+
+<div th:if="${errors}">
+    <p style="color: red" th:each="error : ${errors}" th:text="${error.defaultMessage}">Error message</p>
+</div>
 </body>
 </html>
