@@ -4,6 +4,7 @@ import com.sspdev.hotelbooking.database.entity.enums.Role;
 import com.sspdev.hotelbooking.database.entity.enums.Status;
 import com.sspdev.hotelbooking.dto.PageResponse;
 import com.sspdev.hotelbooking.dto.UserCreateEditDto;
+import com.sspdev.hotelbooking.dto.UserReadDto;
 import com.sspdev.hotelbooking.dto.filter.UserFilter;
 import com.sspdev.hotelbooking.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +19,14 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/my-booking/users")
+@SessionAttributes("user")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -68,5 +72,12 @@ public class UserController {
         userService.create(userCreateDto);
 
         return "redirect:/my-booking/users";
+    }
+
+    @GetMapping("/{id}/update")
+    public String update(@SessionAttribute("user") UserReadDto user,
+                         Model model) {
+        model.addAttribute("user", user);
+        return "user/update";
     }
 }
