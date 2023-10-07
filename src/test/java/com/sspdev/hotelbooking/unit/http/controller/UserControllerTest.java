@@ -98,7 +98,7 @@ class UserControllerTest {
         mockMvc.perform(get("/my-booking/users/registration"))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(view().name("user/registration"))
-                .andExpect(model().attributeExists("user"));
+                .andExpect(model().attributeExists("userCreateDto"));
     }
 
     @Test

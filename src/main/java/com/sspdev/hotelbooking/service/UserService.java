@@ -104,7 +104,7 @@ public class UserService {
 
     @SneakyThrows
     private void uploadImage(MultipartFile image) {
-        if (!image.isEmpty()) {
+        if (image != null) {
             applicationContentService.uploadImage(image.getOriginalFilename(), image.getInputStream());
         }
     }

@@ -82,7 +82,7 @@ public class TestDataUtil {
                 LocalDate.of(2000, 10, 10),
                 "+7-954-984-98-98",
                 Role.USER,
-                new MockMultipartFile("userAvatar", new byte[]{})
+                new MockMultipartFile("userAvatar.jpg", "userAvatar.jpg", "application/octet-stream", new byte[]{})
         );
     }
 
