@@ -23,5 +23,8 @@
 <a th:href="@{/my-booking/users/{id}/update(id=${user.id})}">
     <button type="submit" th:text="#{button.update}">Update user</button>
 </a>
+<form th:action="@{/my-booking/users/{id}/delete(id=${user.id})}" method="post">
+    <button type="submit" th:text="#{button.delete_user}">Delete user</button>
+</form>
 </body>
 </html>

@@ -94,4 +94,12 @@ public class UserController {
                 .map(it -> "redirect:/my-booking/users")
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
+
+    @PostMapping("{id}/delete")
+    public String delete(@PathVariable("id") Integer id) {
+        if (!userService.delete(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return "redirect:/my-booking/users";
+    }
 }
