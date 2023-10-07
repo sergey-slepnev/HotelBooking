@@ -55,22 +55,21 @@ public class UserController {
     }
 
     @GetMapping("/registration")
-    public String registration(Model model, @ModelAttribute("user") UserCreateEditDto createDto) {
-        model.addAttribute("user", createDto);
+    public String registration(Model model, @ModelAttribute("userCreateDto") UserCreateEditDto userCreateDto) {
+        model.addAttribute("userCreateDto", userCreateDto);
         return "user/registration";
     }
 
     @PostMapping("/create")
-    public String create(@ModelAttribute("user") @Validated UserCreateEditDto userCreateDto,
+    public String create(@ModelAttribute("userCreateDto") @Validated UserCreateEditDto userCreateDto,
                          BindingResult bindingResult,
                          RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            redirectAttributes.addFlashAttribute("user", userCreateDto);
+            redirectAttributes.addFlashAttribute("userCreateDto", userCreateDto);
             redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
             return "redirect:/my-booking/users/registration";
         }
         userService.create(userCreateDto);
-
         return "redirect:/my-booking/users";
     }
 
@@ -79,5 +78,20 @@ public class UserController {
                          Model model) {
         model.addAttribute("user", user);
         return "user/update";
+    }
+
+    @PostMapping("/{id}/update")
+    public String update(@PathVariable("id") Integer id,
+                         @ModelAttribute("updateDto") @Validated UserCreateEditDto updateDto,
+                         BindingResult bindingResult,
+                         RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("user", updateDto);
+            redirectAttributes.addAttribute("errors", bindingResult.getAllErrors());
+            return "redirect:/my-booking/users/" + id + "/update";
+        }
+        return userService.update(id, updateDto)
+                .map(it -> "redirect:/my-booking/users")
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 }

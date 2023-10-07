@@ -77,7 +77,10 @@ public class UserService {
     @Transactional
     public Optional<UserReadDto> update(Integer id, UserCreateEditDto createEditDto) {
         return userRepository.findById(id)
-                .map(entity -> userCreateEditMapper.map(createEditDto, entity))
+                .map(entity -> {
+                    uploadImage(createEditDto.getImage());
+                    return userCreateEditMapper.map(createEditDto, entity);
+                })
                 .map(userRepository::saveAndFlush)
                 .map(userReadMapper::map);
     }
