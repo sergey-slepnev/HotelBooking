@@ -6,7 +6,7 @@
 </head>
 <body>
 <div th:insert="~{fragment/locale}"></div>
-<form th:action="@{my-booking/users/{id}/update(id=${user.id})}" enctype="multipart/form-data" method="post"
+<form th:action="@{/my-booking/users/{id}/update(id=${user.id})}" enctype="multipart/form-data" method="post"
       th:object="${user}">
     <input type="hidden" name="id" th:value="${user.id}">
     <label for="firstName"><span th:text="#{user.firstname}">First name:</span>
@@ -29,7 +29,8 @@
     </label><br>
     <div th:if="${user.image}">
         <img th:src="@{/api/v1/users/{userId}/avatar(userId=${user.id})}" alt="User image">
-    </div><br>
+    </div>
+    <br>
     <label for="image"><span th:text="#{user.avatar}">Avatar:</span>
         <input id="image" type="file" name="image">
     </label><br>

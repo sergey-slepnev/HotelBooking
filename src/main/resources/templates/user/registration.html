@@ -6,22 +6,22 @@
 </head>
 <body>
 <div th:insert="~{fragment/locale}"></div>
-<form th:action="@{/users/create}" enctype="multipart/form-data" method="post" th:object="${user}">
+<form th:action="@{/my-booking/users/create}" enctype="multipart/form-data" method="post" th:object="${userCreateDto}">
 
     <label for="firstName"><span th:text="#{user.firstname}">First name</span>
-        <input id="firstName" type="text" name="firstName" th:value="${user.firstName}">
+        <input id="firstName" type="text" name="firstName" th:value="${userCreateDto.firstName}">
     </label><br>
     <label for="lastName"><span th:text="#{user.lastname}">Last name</span>
-        <input id="lastName" type="text" name="lastName" th:value="${user.lastName}">
+        <input id="lastName" type="text" name="lastName" th:value="${userCreateDto.lastName}">
     </label><br>
     <label for="phone"><span th:text="#{user.phone}">Phone</span>
-        <input id="phone" type="text" name="phone" th:value="${user.phone}">
+        <input id="phone" type="text" name="phone" th:value="${userCreateDto.phone}">
     </label><br>
     <label for="username"><span th:text="#{login.email}">Username</span>
-        <input id="username" type="text" name="username" th:value="${user.username}">
+        <input id="username" type="text" name="username" th:value="${userCreateDto.username}">
     </label><br>
     <label for="birthDate"><span th:text="#{user.birth_date}">Date of birth</span>
-        <input id="birthDate" type="date" name="birthDate" th:default="${#execInfo.now}" th:value="${user.getBirthDate}">
+        <input id="birthDate" type="date" name="birthDate" th:default="${#execInfo.now}" th:value="${userCreateDto.getBirthDate}">
     </label><br>
     <label for="rawPassword"><span th:text="#{login.password}">Password</span>
         <input id="rawPassword" type="password" name="rawPassword">
