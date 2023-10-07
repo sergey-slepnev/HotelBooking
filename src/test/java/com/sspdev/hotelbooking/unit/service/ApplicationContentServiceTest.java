@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @RequiredArgsConstructor
@@ -26,5 +27,12 @@ class ApplicationContentServiceTest extends UnitTestBase {
         when(inputStream.readAllBytes()).thenReturn("someContent".getBytes());
 
         applicationContentService.uploadImage("fullImagePath", inputStream);
+    }
+
+    @Test
+    void getImage_shouldReturnImage_whenImageExists() {
+        var actualImage = applicationContentService.getImage("fullImagePath");
+
+        assertThat(actualImage).isPresent();
     }
 }
