@@ -147,6 +147,19 @@ class UserControllerIT extends IntegrationTestBase {
                 .andExpect(status().is4xxClientError());
     }
 
+    @Test
+    void delete_shouldDeleteUser_whenUserExists() throws Exception {
+        mockMvc.perform(post("/my-booking/users/" + EXISTENT_USER_ID + "/delete"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/my-booking/users"));
+    }
+
+    @Test
+    void delete_shouldReturn404_whenUserNotExist() throws Exception {
+        mockMvc.perform(post("/my-booking/users/" + NON_EXISTENT_USER_ID + "/delete"))
+                .andExpect(status().is4xxClientError());
+    }
+
     private UserReadDto getUserReadDto() {
         return new UserReadDto(
                 EXISTENT_USER_ID,

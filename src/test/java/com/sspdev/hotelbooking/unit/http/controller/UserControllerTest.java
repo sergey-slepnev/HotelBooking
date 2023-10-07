@@ -28,8 +28,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -107,7 +109,23 @@ class UserControllerTest {
                         .sessionAttr("user", getUserReadDto()))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(view().name("user/update"));
+    }
 
+    @Test
+    void delete_shouldDeleteUser_whenUserExists() throws Exception {
+        when(userService.delete(EXISTENT_USER_ID)).thenReturn(true);
+
+        mockMvc.perform(post("/my-booking/users/"  + EXISTENT_USER_ID + "/delete"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/my-booking/users"));
+    }
+
+    @Test
+    void delete_shouldReturn404_whenUserNotExist() throws Exception {
+        when(userService.delete(NON_EXISTENT_USER_ID)).thenReturn(false);
+
+        mockMvc.perform(post("/my-booking/users/"  + NON_EXISTENT_USER_ID + "/delete"))
+                .andExpect(status().is4xxClientError());
     }
 
     private UserReadDto getUserReadDto() {
