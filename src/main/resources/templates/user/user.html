@@ -13,6 +13,7 @@
     <h4 th:text="|#{user.phone}: *{phone}|">Phone</h4>
     <h4 th:text="|#{user.email}: *{getUsername}|">Email</h4>
     <h4 th:text="|#{user.birth_date}: *{birthdate}|">Birthdate</h4>
+    <h4 th:text="|#{user.status}: *{status}|">Status</h4>
     <h4 th:text="|#{user.avatar}:|">Avatar</h4>
 
     <div th:if="${user.image}">
@@ -26,5 +27,17 @@
 <form th:action="@{/my-booking/users/{id}/delete(id=${user.id})}" method="post">
     <button type="submit" th:text="#{button.delete_user}">Delete user</button>
 </form>
+
+<span th:text="#{user.change_status}"></span>
+<form th:action="@{/my-booking/users/{id}/change-status(id=${user.id})}" method="post">
+    <div th:each="status : ${statuses}">
+        <label>
+            <input th:id="${status}" type="radio" name="status" th:value="${status}">
+        </label>
+        <label th:for="${status}" th:text="${status}">Status</label>
+    </div>
+    <button type="submit" th:text="#{button.change_status}"></button>
+</form>
+
 </body>
 </html>

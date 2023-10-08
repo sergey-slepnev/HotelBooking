@@ -26,7 +26,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/my-booking/users")
-@SessionAttributes("user")
+@SessionAttributes({"user", "statuses"})
 @RequiredArgsConstructor
 public class UserController {
 
@@ -49,6 +49,7 @@ public class UserController {
         return userService.findById(id)
                 .map(user -> {
                     model.addAttribute("user", user);
+                    model.addAttribute("statuses", Status.values());
                     return "user/user";
                 })
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -101,5 +102,13 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         return "redirect:/my-booking/users";
+    }
+
+    @PostMapping("/{id}/change-status")
+    public String changeStatus(Status status,
+                               @PathVariable("id") Integer id,
+                               Model model) {
+        userService.changeStatus(status, id);
+        return "redirect:/my-booking/users/" + id;
     }
 }
