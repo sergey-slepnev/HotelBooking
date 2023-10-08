@@ -102,17 +102,17 @@ public class UserService {
         userRepository.flush();
     }
 
-    @SneakyThrows
-    private void uploadImage(MultipartFile image) {
-        if (image != null) {
-            applicationContentService.uploadImage(image.getOriginalFilename(), image.getInputStream());
-        }
-    }
-
     public Optional<byte[]> findImage(Integer userId) {
         return userRepository.findById(userId)
                 .map(User::getImage)
                 .filter(StringUtils::hasText)
                 .flatMap(applicationContentService::getImage);
+    }
+
+    @SneakyThrows
+    private void uploadImage(MultipartFile image) {
+        if (image != null) {
+            applicationContentService.uploadImage(image.getOriginalFilename(), image.getInputStream());
+        }
     }
 }

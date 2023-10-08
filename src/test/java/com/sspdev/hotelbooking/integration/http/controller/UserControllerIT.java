@@ -160,6 +160,14 @@ class UserControllerIT extends IntegrationTestBase {
                 .andExpect(status().is4xxClientError());
     }
 
+    @Test
+    void changeStatus_shouldChangeStatus_whenUserExists() throws Exception {
+        mockMvc.perform(post("/my-booking/users/" + EXISTENT_USER_ID + "/change-status")
+                        .param("status", Status.BLOCKED.name()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/my-booking/users/" + EXISTENT_USER_ID));
+    }
+
     private UserReadDto getUserReadDto() {
         return new UserReadDto(
                 EXISTENT_USER_ID,

@@ -106,8 +106,7 @@ public class UserController {
 
     @PostMapping("/{id}/change-status")
     public String changeStatus(Status status,
-                               @PathVariable("id") Integer id,
-                               Model model) {
+                               @PathVariable("id") Integer id) {
         userService.changeStatus(status, id);
         return "redirect:/my-booking/users/" + id;
     }
