@@ -16,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -92,7 +93,10 @@ class UserControllerTest {
         when(userService.findById(NON_EXISTENT_USER_ID)).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/my-booking/users/" + NON_EXISTENT_USER_ID))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult ->
+                        requireNonNull(mvcResult.getResolvedException()).getClass()
+                                .equals(ResponseStatusException.class));
     }
 
     @Test

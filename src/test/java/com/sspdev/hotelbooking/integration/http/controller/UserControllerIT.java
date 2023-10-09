@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -92,7 +93,10 @@ class UserControllerIT extends IntegrationTestBase {
     @Test
     void findById_shouldReturnNotFound_whenUserNotExist() throws Exception {
         mockMvc.perform(get("/my-booking/users/" + NON_EXISTENT_USER_ID))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult ->
+                        requireNonNull(mvcResult.getResolvedException()).getClass()
+                                .equals(ResponseStatusException.class));
     }
 
     @Test
