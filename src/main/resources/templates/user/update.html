@@ -5,7 +5,7 @@
     <title>Update user</title>
 </head>
 <body>
-<div th:insert="~{fragment/locale}"></div>
+<div th:insert="~{fragment/header}"></div>
 <form th:action="@{/my-booking/users/{id}/update(id=${user.id})}" enctype="multipart/form-data" method="post"
       th:object="${user}">
     <input type="hidden" name="id" th:value="${user.id}">

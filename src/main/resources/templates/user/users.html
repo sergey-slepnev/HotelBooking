@@ -6,6 +6,7 @@
     <title>Users</title>
 </head>
 <body>
+<div th:insert="~{fragment/header}"></div>
 <form action="/my-booking/users">
     <div th:each="role : ${roles}">
         <label>

@@ -5,7 +5,7 @@
     <title>User</title>
 </head>
 <body>
-<div th:insert="~{fragment/locale}"></div>
+<div th:insert="~{fragment/header}"></div>
 <form th:action="@{/users/{id}(id=${user.id})}" enctype="multipart/form-data" th:object="${user}">
 
     <h4 th:text="|#{user.firstname}: *{firstName}|">Firstname</h4>
