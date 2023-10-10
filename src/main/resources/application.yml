@@ -19,3 +19,6 @@ spring:
   servlet:
     multipart:
       location: C:\Users\LENOVO\IdeaProjects\MyProjects\HotelBooking\images
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher

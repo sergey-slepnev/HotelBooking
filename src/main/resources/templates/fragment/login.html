@@ -6,22 +6,24 @@
 </head>
 <body>
 <div th:fragment="login">
-    <!--    <div th:if="${#authentication.principal == 'anonymousUser'}">-->
+    <div th:if="${session.get('authUser') == null}">
 
-    <form action="/login" method="post">
-        <div style="color: red" th:if="${param.error}">
-            Bad credentials
-        </div>
-        <label for="username"><span th:text="#{login.email}">Username:</span>
-            <input id="username" type="text" name="username">
-        </label><br>
-        <label for="password"><span th:text="#{login.password}">Password:</span>
-            <input id="password" type="password" name="password">
-        </label><br>
-        <button type="submit" th:text="#{button.login}">Login</button>
-    </form>
-
-    <!--    </div>-->
+        <form action="/login" method="post">
+            <div style="color: red" th:if="${param.error}">
+                Bad credentials
+            </div>
+            <label for="username"><span th:text="#{login.email}">Username:</span>
+                <input id="username" type="text" name="username">
+            </label><br>
+            <label for="password"><span th:text="#{login.password}">Password:</span>
+                <input id="password" type="password" name="password">
+            </label><br>
+            <button type="submit" th:text="#{button.login}">Login</button>
+        </form>
+        <form action="/my-booking/registration" method="get">
+            <button type="submit" th:text="#{button.registration}">Registration</button>
+        </form>
+    </div>
 </div>
 </body>
 </html>
