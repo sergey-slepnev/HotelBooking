@@ -18,24 +18,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
-import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.birthDate;
-import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.firstName;
-import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.lastName;
-import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.phone;
-import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.rawPassword;
-import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.role;
-import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.username;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.*;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RequiredArgsConstructor
 @AutoConfigureMockMvc

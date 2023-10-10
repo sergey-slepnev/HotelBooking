@@ -10,6 +10,7 @@ import com.sspdev.hotelbooking.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -55,12 +56,6 @@ public class UserController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping("/registration")
-    public String registration(Model model, @ModelAttribute("userCreateDto") UserCreateEditDto userCreateDto) {
-        model.addAttribute("userCreateDto", userCreateDto);
-        return "user/registration";
-    }
-
     @PostMapping("/create")
     public String create(@ModelAttribute("userCreateDto") @Validated UserCreateEditDto userCreateDto,
                          BindingResult bindingResult,
@@ -101,6 +96,7 @@ public class UserController {
         if (!userService.delete(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
+        SecurityContextHolder.clearContext();
         return "redirect:/my-booking/users";
     }
 

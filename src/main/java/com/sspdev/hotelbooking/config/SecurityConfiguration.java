@@ -10,21 +10,23 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.DefaultSecurityFilterChain;
+import org.springframework.security.web.savedrequest.NullRequestCache;
 
 import java.io.IOException;
 
 import static com.sspdev.hotelbooking.database.entity.enums.Role.USER;
 
+@RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfiguration {
 
     private final UserRepository userRepository;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    public DefaultSecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        var requestCache = new NullRequestCache();
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(urlConfig -> urlConfig
@@ -36,12 +38,16 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 "/my-booking/users/{\\d+}",
                                 "/my-booking/users",
-                                "/my-booking/users/{\\d+}/change-status")
+                                "/my-booking/users/{\\d+}/change-status",
+                                "/my-booking/users/{\\d+}/update",
+                                "/my-booking/users/{\\d+}/delete")
                         .hasAuthority(USER.getAuthority()))
 
+                .requestCache(cache -> cache.requestCache(requestCache))
+
                 .formLogin(login -> login
-                        .loginPage("/my-booking")
-                        .loginProcessingUrl("/login")
+                        .loginPage("/my-booking").permitAll()
+                        .loginProcessingUrl("/login").permitAll()
                         .successHandler((request, response, authentication) -> userRepository.findByUsername(authentication.getName())
                                 .ifPresent(user -> {
                                     request.getSession(true).setAttribute("authUser", user);
