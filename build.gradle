@@ -61,6 +61,7 @@ compileQuerydsl {
 test {
     useJUnitPlatform()
     finalizedBy jacocoTestReport
+    finalizedBy jacocoTestCoverageVerification
 }
 
 jacocoTestReport {
