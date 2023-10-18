@@ -4,9 +4,11 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.3'
     id 'io.freefair.lombok' version '8.3'
     id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
+    id 'jacoco'
 }
 
 apply from: 'version.gradle'
+apply plugin: 'jacoco'
 
 group = 'com.sspdev'
 version = '0.0.1-SNAPSHOT'
@@ -58,6 +60,34 @@ compileQuerydsl {
 
 test {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = false
+        csv.required = false
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    "**/dto/*",
+                    "**/entity/*"
+            ])
+        }))
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            enabled = true
+            limit {
+                minimum = 0.9
+            }
+        }
+    }
 }
 
 wrapper {
