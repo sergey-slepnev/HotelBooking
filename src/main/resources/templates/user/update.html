@@ -7,10 +7,10 @@
 <body>
 <div th:insert="~{fragment/header}"></div>
 <form th:action="@{/my-booking/users/{id}/update(id=${user.id})}" enctype="multipart/form-data" method="post"
-      th:object="${user}">
+th:object="${user}">
     <input type="hidden" name="id" th:value="${user.id}">
     <label for="firstName"><span th:text="#{user.firstname}">First name:</span>
-        <input id="firstName" type="text" name="firstName" th:value="*{firstName}">
+        <input id="firstName" type="text" name="firstName" th:value="${user.firstName}">
     </label><br>
     <label for="lastName"><span th:text="#{user.lastname}">Last name:</span>
         <input id="lastName" type="text" name="lastName" th:value="*{lastName}">
@@ -24,21 +24,18 @@
     <label for="birthDate"><span th:text="#{user.birth_date}">Date of birth:</span>
         <input id="birthDate" type="date" name="birthDate" th:value="*{birthdate}">
     </label><br>
-    <label for="rawPassword"><span th:text="#{user.password}">Password:</span>
-        <input id="rawPassword" type="password" name="rawPassword" th:value="*{password}">
-    </label><br>
     <div th:if="${user.image}">
-        <img th:src="@{/api/v1/users/{userId}/avatar(userId=${user.id})}" alt="User image">
+        <img th:src="@{/api/v1/users/{userId}/avatar(userId=${user.id})}" alt="User image" th:value="*{image}">
     </div>
     <br>
     <label for="image"><span th:text="#{user.avatar}">Avatar:</span>
         <input id="image" type="file" name="image">
     </label><br>
-    <input type="hidden" name="role" th:value="*{role}">
+    <input type="hidden" name="role" th:value="${user.role}">
     <div th:if="${errors}">
         <p style="color: red" th:each="error : ${errors}" th:text="${error.defaultMessage}">Error message</p>
     </div>
-    <button type="submit">Update</button>
+    <button type="submit" th:text="#{button.update}">Update</button>
 </form>
 
 <form th:action="@{/users/{userId}/delete(userId=${user.id})}" th:if="${user.role.name() == 'ADMIN'}" method="post"

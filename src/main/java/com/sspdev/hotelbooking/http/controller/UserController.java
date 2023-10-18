@@ -7,6 +7,9 @@ import com.sspdev.hotelbooking.dto.UserCreateEditDto;
 import com.sspdev.hotelbooking.dto.UserReadDto;
 import com.sspdev.hotelbooking.dto.filter.UserFilter;
 import com.sspdev.hotelbooking.service.UserService;
+import com.sspdev.hotelbooking.validation.group.CreateAction;
+import com.sspdev.hotelbooking.validation.group.UpdateAction;
+import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -15,13 +18,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.SessionAttribute;
-import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -57,13 +54,13 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public String create(@ModelAttribute("userCreateDto") @Validated UserCreateEditDto userCreateDto,
+    public String create(@ModelAttribute("userCreateDto") @Validated({Default.class, CreateAction.class}) UserCreateEditDto userCreateDto,
                          BindingResult bindingResult,
                          RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("userCreateDto", userCreateDto);
             redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
-            return "redirect:/my-booking/users/registration";
+            return "redirect:/my-booking/registration";
         }
         userService.create(userCreateDto);
         return "redirect:/my-booking/users";
@@ -78,16 +75,16 @@ public class UserController {
 
     @PostMapping("/{id}/update")
     public String update(@PathVariable("id") Integer id,
-                         @ModelAttribute("updateDto") @Validated UserCreateEditDto updateDto,
+                         @ModelAttribute @Validated({Default.class, UpdateAction.class}) UserCreateEditDto updateDto,
                          BindingResult bindingResult,
                          RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("user", updateDto);
-            redirectAttributes.addAttribute("errors", bindingResult.getAllErrors());
-            return "redirect:/my-booking/users/" + id + "/update";
+            redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
+            return "redirect:/my-booking/users/{id}/update";
         }
         return userService.update(id, updateDto)
-                .map(it -> "redirect:/my-booking/users")
+                .map(it -> "redirect:/my-booking/users/{id}")
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+<div th:fragment="logout">
+    <div th:if="${session.authUser != null}">
+        <a th:href="@{/my-booking/users/{userId}(userId=${session.authUser.id})}"
+           th:text="|${session.authUser.getUsername} ${session.authUser.role}|">Username
+        </a>
+        <form action="/logout" method="post">
+            <button type="submit" th:text="#{button.logout}">Logout</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

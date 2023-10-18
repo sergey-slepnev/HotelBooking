@@ -15,7 +15,7 @@ import org.springframework.security.web.savedrequest.NullRequestCache;
 
 import java.io.IOException;
 
-import static com.sspdev.hotelbooking.database.entity.enums.Role.USER;
+import static com.sspdev.hotelbooking.database.entity.enums.Role.*;
 
 @RequiredArgsConstructor
 @Configuration
@@ -33,15 +33,17 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 "/login",
                                 "/my-booking",
-                                "/my-booking/registration"
+                                "/my-booking/registration",
+                                "/my-booking/users/create"
                         ).permitAll()
                         .requestMatchers(
                                 "/my-booking/users/{\\d+}",
+                                "/api/v1/users/{\\d+}/avatar",
                                 "/my-booking/users",
                                 "/my-booking/users/{\\d+}/change-status",
                                 "/my-booking/users/{\\d+}/update",
                                 "/my-booking/users/{\\d+}/delete")
-                        .hasAuthority(USER.getAuthority()))
+                        .hasAnyAuthority(USER.getAuthority(), OWNER.getAuthority(), ADMIN.getAuthority()))
 
                 .requestCache(cache -> cache.requestCache(requestCache))
 
@@ -53,7 +55,14 @@ public class SecurityConfiguration {
                                     request.getSession(true).setAttribute("authUser", user);
                                     request.getSession().getAttributeNames();
                                     redirectToUserPage(response, user);
-                                })));
+                                })))
+
+                .logout(logout -> logout
+                .logoutUrl("/logout").permitAll()
+                .logoutSuccessUrl("/my-booking")
+                .clearAuthentication(true)
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID"));
 
         return httpSecurity.build();
     }

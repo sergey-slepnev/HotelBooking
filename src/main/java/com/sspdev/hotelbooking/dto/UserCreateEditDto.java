@@ -1,6 +1,7 @@
 package com.sspdev.hotelbooking.dto;
 
 import com.sspdev.hotelbooking.database.entity.enums.Role;
+import com.sspdev.hotelbooking.validation.group.CreateAction;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -20,8 +21,8 @@ public class UserCreateEditDto {
     @Size(min = 1, max = 128, message = "{error.length.username}")
     String username;
 
-    @NotBlank(message = "{error.blank.password}")
-    @Size(min = 3, max = 128, message = "{error.length.password}")
+    @NotBlank(message = "{error.blank.password}", groups = CreateAction.class)
+    @Size(min = 3, max = 128, message = "{error.length.password}", groups = CreateAction.class)
     String rawPassword;
 
     @NotBlank(message = "{error.blank.firstname}")

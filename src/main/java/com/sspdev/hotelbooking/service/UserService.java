@@ -79,11 +79,11 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public Optional<UserReadDto> update(Integer id, UserCreateEditDto createEditDto) {
+    public Optional<UserReadDto> update(Integer id, UserCreateEditDto updateDto) {
         return userRepository.findById(id)
                 .map(entity -> {
-                    uploadImage(createEditDto.getImage());
-                    return userCreateEditMapper.map(createEditDto, entity);
+                    uploadImage(updateDto.getImage());
+                    return userCreateEditMapper.map(updateDto, entity);
                 })
                 .map(userRepository::saveAndFlush)
                 .map(userReadMapper::map);
