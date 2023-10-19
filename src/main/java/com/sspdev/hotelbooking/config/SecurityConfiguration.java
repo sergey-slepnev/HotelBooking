@@ -15,7 +15,9 @@ import org.springframework.security.web.savedrequest.NullRequestCache;
 
 import java.io.IOException;
 
-import static com.sspdev.hotelbooking.database.entity.enums.Role.*;
+import static com.sspdev.hotelbooking.database.entity.enums.Role.ADMIN;
+import static com.sspdev.hotelbooking.database.entity.enums.Role.OWNER;
+import static com.sspdev.hotelbooking.database.entity.enums.Role.USER;
 
 @RequiredArgsConstructor
 @Configuration

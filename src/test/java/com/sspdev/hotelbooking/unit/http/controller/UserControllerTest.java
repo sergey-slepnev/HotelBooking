@@ -3,18 +3,22 @@ package com.sspdev.hotelbooking.unit.http.controller;
 import com.sspdev.hotelbooking.database.entity.enums.Role;
 import com.sspdev.hotelbooking.database.entity.enums.Status;
 import com.sspdev.hotelbooking.dto.PageResponse;
+import com.sspdev.hotelbooking.dto.UserCreateEditDto;
 import com.sspdev.hotelbooking.dto.UserReadDto;
 import com.sspdev.hotelbooking.dto.filter.UserFilter;
 import com.sspdev.hotelbooking.http.controller.UserController;
+import com.sspdev.hotelbooking.service.ApplicationContentService;
 import com.sspdev.hotelbooking.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,18 +28,34 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.birthDate;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.firstName;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.lastName;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.phone;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.rawPassword;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.role;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.username;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @RequiredArgsConstructor
-@WebMvcTest(UserController.class)
+@WebMvcTest(value = UserController.class)
 @WithMockUser(username = "test@gmail.com", password = "test", authorities = {"ADMIN", "USER", "OWNER"})
+@ImportAutoConfiguration
 class UserControllerTest {
 
     private static final Integer EXISTENT_USER_ID = 1;
@@ -48,6 +68,9 @@ class UserControllerTest {
 
     @MockBean
     private final UserService userService;
+
+    @MockBean
+    private final ApplicationContentService applicationContentService;
 
     @ParameterizedTest
     @ValueSource(longs = {0L, 5L, 10L, 100L})
@@ -114,10 +137,30 @@ class UserControllerTest {
     }
 
     @Test
+    void update_shouldRedirectToUpdatePage_whenUpdateDtoInvalid() throws Exception {
+        mockMvc.perform(post("/my-booking/users/" + EXISTENT_USER_ID + "/update")
+                        .with(csrf())
+                        .param(username, "NewUsenamegmailcom")
+                        .param(firstName, "A")
+                        .param(lastName, "S")
+                        .param(phone, "8-888-88-88-88")
+                        .param(rawPassword, "testPassword")
+                        .param(role, Role.USER.name())
+                        .param(birthDate, "1988-10-10"))
+                .andExpectAll(
+                        status().is3xxRedirection(),
+                        redirectedUrlPattern("/my-booking/users/{\\d+}/update"),
+                        flash().attributeCount(2),
+                        flash().attributeExists("user", "errors"),
+                        flash().attribute("errors", hasSize(3))
+                );
+    }
+
+    @Test
     void delete_shouldDeleteUser_whenUserExists() throws Exception {
         when(userService.delete(EXISTENT_USER_ID)).thenReturn(true);
 
-        mockMvc.perform(post("/my-booking/users/"  + EXISTENT_USER_ID + "/delete"))
+        mockMvc.perform(post("/my-booking/users/" + EXISTENT_USER_ID + "/delete"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/my-booking/users"));
     }
@@ -126,7 +169,7 @@ class UserControllerTest {
     void delete_shouldReturn404_whenUserNotExist() throws Exception {
         when(userService.delete(NON_EXISTENT_USER_ID)).thenReturn(false);
 
-        mockMvc.perform(post("/my-booking/users/"  + NON_EXISTENT_USER_ID + "/delete"))
+        mockMvc.perform(post("/my-booking/users/" + NON_EXISTENT_USER_ID + "/delete"))
                 .andExpect(status().is4xxClientError());
     }
 
@@ -143,5 +186,18 @@ class UserControllerTest {
                 "user_avatar",
                 Status.NEW,
                 LocalDateTime.of(2023, 5, 5, 10, 10));
+    }
+
+    private UserCreateEditDto getUserCreateEditDto() {
+        return new UserCreateEditDto(
+                "user",
+                "123",
+                "Petr",
+                "Petrov",
+                LocalDate.of(2000, 10, 10),
+                "+7-954-984-98-98",
+                Role.USER,
+                new MockMultipartFile("userAvatar.jpg", "userAvatar.jpg", "application/octet-stream", new byte[]{})
+        );
     }
 }

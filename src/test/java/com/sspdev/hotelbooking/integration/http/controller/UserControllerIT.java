@@ -18,13 +18,25 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
-import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.*;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.birthDate;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.firstName;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.lastName;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.phone;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.rawPassword;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.role;
+import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.username;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @RequiredArgsConstructor
 @AutoConfigureMockMvc
@@ -117,7 +129,7 @@ class UserControllerIT extends IntegrationTestBase {
                         .param(birthDate, "1988-10-10"))
                 .andExpectAll(
                         status().is3xxRedirection(),
-                        redirectedUrl("/my-booking/users/registration"),
+                        redirectedUrl("/my-booking/registration"),
                         flash().attributeCount(2),
                         flash().attributeExists("userCreateDto", "errors"),
                         flash().attribute("errors", hasSize(5)));
@@ -138,6 +150,41 @@ class UserControllerIT extends IntegrationTestBase {
     void update_shouldReturnClientError_whenThereIsNoUserInSession() throws Exception {
         mockMvc.perform(get("/my-booking/users/" + EXISTENT_USER_ID + "/update"))
                 .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void update_shouldUpdateExistentUser_whenCreateDtoValid() throws Exception {
+        mockMvc.perform(post("/my-booking/users/" + EXISTENT_USER_ID + "/update")
+                        .with(csrf())
+                        .param(username, "NewUsename@gmail.com")
+                        .param(firstName, "Anton")
+                        .param(lastName, "Sidorov")
+                        .param(phone, "8-888-88-88-88")
+                        .param(rawPassword, "testPassword")
+                        .param(role, Role.USER.name())
+                        .param(birthDate, "1988-10-10"))
+                .andExpectAll(
+                        status().is3xxRedirection(),
+                        redirectedUrl("/my-booking/users/" + EXISTENT_USER_ID),
+                        flash().attributeCount(0));
+    }
+
+    @Test
+    void update_shouldRedirectToUpdatePage_whenCreateDtoInvalid() throws Exception {
+        mockMvc.perform(post("/my-booking/users/" + EXISTENT_USER_ID + "/update")
+                        .with(csrf())
+                        .param(username, "NewUsenamegmailcom")
+                        .param(firstName, "AA")
+                        .param(lastName, "SS")
+                        .param(phone, "8-888-88-88-88")
+                        .param(rawPassword, "testPassword")
+                        .param(role, Role.USER.name())
+                        .param(birthDate, "1988-10-10"))
+                .andExpectAll(
+                        status().is3xxRedirection(),
+                        redirectedUrl("/my-booking/users/" + EXISTENT_USER_ID + "/update"),
+                        flash().attributeCount(2),
+                        flash().attribute("errors", hasSize(3)));
     }
 
     @Test
