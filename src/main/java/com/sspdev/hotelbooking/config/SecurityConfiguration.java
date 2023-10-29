@@ -15,9 +15,7 @@ import org.springframework.security.web.savedrequest.NullRequestCache;
 
 import java.io.IOException;
 
-import static com.sspdev.hotelbooking.database.entity.enums.Role.ADMIN;
-import static com.sspdev.hotelbooking.database.entity.enums.Role.OWNER;
-import static com.sspdev.hotelbooking.database.entity.enums.Role.USER;
+import static com.sspdev.hotelbooking.database.entity.enums.Role.*;
 
 @RequiredArgsConstructor
 @Configuration
@@ -33,6 +31,7 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(urlConfig -> urlConfig
                         .requestMatchers(
+                                "my-booking/rooms/search",
                                 "/login",
                                 "/my-booking",
                                 "/my-booking/registration",
@@ -44,10 +43,15 @@ public class SecurityConfiguration {
                                 "/my-booking/users/{\\d+}",
                                 "/api/v1/users/{\\d+}/avatar",
                                 "/my-booking/users",
-                                "/my-booking/users/{\\d+}/change-status",
                                 "/my-booking/users/{\\d+}/update",
-                                "/my-booking/users/{\\d+}/delete")
-                        .hasAnyAuthority(USER.getAuthority(), OWNER.getAuthority(), ADMIN.getAuthority()))
+                                "/my-booking/users/{\\d+}/delete"
+                        ).hasAnyAuthority(USER.getAuthority(), OWNER.getAuthority(), ADMIN.getAuthority())
+                        .requestMatchers(
+                                "my-booking/rooms/{\\d+}/{\\d+}/add"
+                        ).hasAuthority(OWNER.getAuthority())
+                        .requestMatchers(
+                                "/my-booking/users/{\\d+}/change-status"
+                        ).hasAuthority(ADMIN.getAuthority()))
 
                 .requestCache(cache -> cache.requestCache(requestCache))
 
@@ -62,11 +66,11 @@ public class SecurityConfiguration {
                                 })))
 
                 .logout(logout -> logout
-                .logoutUrl("/logout").permitAll()
-                .logoutSuccessUrl("/my-booking")
-                .clearAuthentication(true)
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID"));
+                        .logoutUrl("/logout").permitAll()
+                        .logoutSuccessUrl("/my-booking")
+                        .clearAuthentication(true)
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID"));
 
         return httpSecurity.build();
     }
