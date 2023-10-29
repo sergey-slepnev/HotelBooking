@@ -36,7 +36,9 @@ public class SecurityConfiguration {
                                 "/login",
                                 "/my-booking",
                                 "/my-booking/registration",
-                                "/my-booking/users/create"
+                                "/my-booking/users/create",
+                                "my-booking/rooms",
+                                "my-booking/rooms/{\\d+}"
                         ).permitAll()
                         .requestMatchers(
                                 "/my-booking/users/{\\d+}",
