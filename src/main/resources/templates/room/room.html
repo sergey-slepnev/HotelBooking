@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Room</title>
+</head>
+<body>
+<div th:insert="~{fragment/header}"></div>
+<form th:action="@{my-booking/rooms/{id}(id=${room.id})}" enctype="multipart/form-data" th:object="${room}">
+
+    <h4 th:text="|#{room.type}: *{type}|">Type</h4>
+    <h4 th:text="|#{room.square}: *{square}|">Square</h4>
+    <h4 th:text="|#{room.adult_beds}: *{adultBedCount}|">AdultBedCount</h4>
+    <h4 th:text="|#{room.children_beds}: *{childrenBedCount}|">childrenBedCount</h4>
+    <h4 th:text="|#{room.cost}: *{cost}|">Cost</h4>
+    <h4 th:text="|#{room.floor}: *{floor}|">Floor</h4>
+    <h4 th:text="|#{room.description}: *{description}|">Description</h4>
+
+<!--    <div th:if="${room.content}">-->
+<!--        <img th:src="@{/api/v1/users/{userId}/avatar(userId=${user.id})}" alt="User image">-->
+<!--    </div>-->
+</form>
+
+<!--<a th:href="@{/my-booking/users/{id}/update(id=${user.id})}">-->
+<!--    <button type="submit" th:text="#{button.update}">Update user</button>-->
+<!--</a>-->
+<!--<form th:action="@{/my-booking/users/{id}/delete(id=${user.id})}" method="post">-->
+<!--    <button type="submit" th:text="#{button.delete_user}">Delete user</button>-->
+<!--</form>-->
+
+<!--<span th:text="#{user.change_status}"></span>-->
+<!--<form th:action="@{/my-booking/users/{id}/change-status(id=${user.id})}" method="post">-->
+<!--    <div th:each="status : ${statuses}">-->
+<!--        <label>-->
+<!--            <input th:id="${status}" type="radio" name="status" th:value="${status}">-->
+<!--        </label>-->
+<!--        <label th:for="${status}" th:text="${status}">Status</label>-->
+<!--    </div>-->
+<!--    <button type="submit" th:text="#{button.change_status}"></button>-->
+<!--</form>-->
+
+</body>
+</html>
