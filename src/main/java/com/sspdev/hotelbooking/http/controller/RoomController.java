@@ -1,7 +1,11 @@
 package com.sspdev.hotelbooking.http.controller;
 
+import com.sspdev.hotelbooking.database.entity.enums.Star;
+import com.sspdev.hotelbooking.dto.PageResponse;
+import com.sspdev.hotelbooking.dto.filter.RoomFilter;
 import com.sspdev.hotelbooking.service.RoomService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,5 +30,14 @@ public class RoomController {
                     return "room/room";
                 })
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping("/search")
+    public String findAll(Model model, RoomFilter filter, Pageable pageable) {
+        var roomPage = roomService.findAll(filter, pageable);
+        model.addAttribute("rooms", PageResponse.of(roomPage));
+        model.addAttribute("filter", filter);
+        model.addAttribute("stars", Star.values());
+        return "room/search";
     }
 }
