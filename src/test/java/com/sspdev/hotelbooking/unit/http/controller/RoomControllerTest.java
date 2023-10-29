@@ -1,11 +1,17 @@
 package com.sspdev.hotelbooking.unit.http.controller;
 
+import com.sspdev.hotelbooking.database.entity.enums.Role;
 import com.sspdev.hotelbooking.database.entity.enums.RoomType;
+import com.sspdev.hotelbooking.database.entity.enums.Status;
+import com.sspdev.hotelbooking.dto.HotelReadDto;
 import com.sspdev.hotelbooking.dto.PageResponse;
 import com.sspdev.hotelbooking.dto.RoomReadDto;
+import com.sspdev.hotelbooking.dto.UserReadDto;
 import com.sspdev.hotelbooking.dto.filter.RoomFilter;
 import com.sspdev.hotelbooking.http.controller.RoomController;
+import com.sspdev.hotelbooking.service.HotelService;
 import com.sspdev.hotelbooking.service.RoomService;
+import com.sspdev.hotelbooking.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -18,15 +24,17 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RequiredArgsConstructor
 @WebMvcTest(value = RoomController.class)
@@ -35,6 +43,10 @@ public class RoomControllerTest {
 
     public static final Integer EXISTENT_ROOM_ID = 1;
     public static final Integer NON_EXISTENT_ROOM_ID = 999;
+    private static final Integer EXISTENT_OWNER_ID = 4;
+    private static final Integer EXISTENT_HOTEL_ID = 1;
+    private static final Integer NON_EXISTENT_OWNER_ID = 999;
+    private static final Integer NON_EXISTENT_HOTEL_ID = 999;
 
     private final MockMvc mockMvc;
 
@@ -43,6 +55,12 @@ public class RoomControllerTest {
 
     @MockBean
     private final Page<RoomReadDto> roomReadDtoPage;
+
+    @MockBean
+    private final HotelService hotelService;
+
+    @MockBean
+    private final UserService userService;
 
     @Test
     void findById_shouldFindRoomById_whenRoomExists() throws Exception {
@@ -59,6 +77,28 @@ public class RoomControllerTest {
         when(roomService.findById(NON_EXISTENT_ROOM_ID)).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/my-booking/rooms/" + EXISTENT_ROOM_ID))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void create_shouldReturnAddRoomPage() throws Exception {
+        var existentOwner = getUserReadDto();
+        var existentHotel = getHotelReadDto();
+        when(userService.findById(EXISTENT_OWNER_ID)).thenReturn(Optional.of(existentOwner));
+        when(hotelService.findById(EXISTENT_HOTEL_ID)).thenReturn(Optional.of(existentHotel));
+
+        mockMvc.perform(get("/my-booking/rooms/" + EXISTENT_OWNER_ID + "/" + EXISTENT_HOTEL_ID + "/add")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("room/add"))
+                .andExpect(model().attributeExists("hotel", "types", "stars", "contentTypes"));
+    }
+
+    @Test
+    void create_shouldReturnNotFound_whenUserAndHotelNotExist() throws Exception {
+        when(userService.findById(NON_EXISTENT_OWNER_ID)).thenReturn(Optional.empty());
+        when(hotelService.findById(NON_EXISTENT_HOTEL_ID)).thenReturn(Optional.empty());
+        mockMvc.perform(get("/my-booking/rooms" + NON_EXISTENT_OWNER_ID + "/" + NON_EXISTENT_HOTEL_ID + "/add"))
                 .andExpect(status().isNotFound());
     }
 
@@ -101,5 +141,29 @@ public class RoomControllerTest {
                 "Nice room in moscowPlaza",
                 null
         );
+    }
+
+    private HotelReadDto getHotelReadDto() {
+        return new HotelReadDto(
+                EXISTENT_HOTEL_ID,
+                EXISTENT_OWNER_ID,
+                "MoscowPlaza",
+                true,
+                Status.APPROVED);
+    }
+
+    private UserReadDto getUserReadDto() {
+        return new UserReadDto(
+                4,
+                Role.USER,
+                "user",
+                "123",
+                "Petr",
+                "Petrov",
+                LocalDate.of(2000, 10, 10),
+                "+7-954-984-98-98",
+                "user_avatar",
+                Status.NEW,
+                LocalDateTime.of(2023, 5, 5, 10, 10));
     }
 }

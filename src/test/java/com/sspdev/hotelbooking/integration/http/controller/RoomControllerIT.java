@@ -30,6 +30,10 @@ class RoomControllerIT extends IntegrationTestBase {
     private static final Integer NON_EXISTENT_ROOM_ID = 999;
     private static final Integer ALL_ROOMS = 16;
     private static final Integer COST_FROM_ROOMS_NUMBER = 13;
+    private static final Integer EXISTENT_OWNER_ID = 4;
+    private static final Integer EXISTENT_HOTEL_ID = 1;
+    private static final Integer NON_EXISTENT_OWNER_ID = 999;
+    private static final Integer NON_EXISTENT_HOTEL_ID = 999;
 
     private final MockMvc mockMvc;
 
@@ -73,6 +77,21 @@ class RoomControllerIT extends IntegrationTestBase {
                 Arguments.of(RoomFilter.Fields.costFrom, "", ALL_ROOMS),
                 Arguments.of(RoomFilter.Fields.costFrom, "1100", COST_FROM_ROOMS_NUMBER
                 ));
+    }
+
+    @Test
+    void create_shouldReturnAddRoomPage() throws Exception {
+        mockMvc.perform(get("/my-booking/rooms/" + EXISTENT_OWNER_ID + "/" + EXISTENT_HOTEL_ID + "/add")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("room/add"))
+                .andExpect(model().attributeExists("hotel", "types", "stars", "contentTypes"));
+    }
+
+    @Test
+    void create_shouldReturnNotFound_whenUserAndHotelNotExist() throws Exception {
+        mockMvc.perform(get("/my-booking/rooms" + NON_EXISTENT_OWNER_ID + "/" + NON_EXISTENT_HOTEL_ID + "/add"))
+                .andExpect(status().isNotFound());
     }
 
     private RoomReadDto getRoomReadDto() {
