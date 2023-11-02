@@ -10,7 +10,6 @@ import com.sspdev.hotelbooking.dto.filter.UserFilter;
 import com.sspdev.hotelbooking.mapper.UserCreateEditMapper;
 import com.sspdev.hotelbooking.mapper.UserReadMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,7 +18,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 import java.util.List;
@@ -70,7 +68,7 @@ public class UserService implements UserDetailsService {
     public UserReadDto create(UserCreateEditDto createDto) {
         return Optional.of(createDto)
                 .map(dto -> {
-                    uploadImage(dto.getImage());
+                    applicationContentService.uploadImage(dto.getImage());
                     return userCreateEditMapper.map(dto);
                 })
                 .map(userRepository::save)
@@ -82,7 +80,7 @@ public class UserService implements UserDetailsService {
     public Optional<UserReadDto> update(Integer id, UserCreateEditDto updateDto) {
         return userRepository.findById(id)
                 .map(entity -> {
-                    uploadImage(updateDto.getImage());
+                    applicationContentService.uploadImage(updateDto.getImage());
                     return userCreateEditMapper.map(updateDto, entity);
                 })
                 .map(userRepository::saveAndFlush)
@@ -122,12 +120,5 @@ public class UserService implements UserDetailsService {
                                 user.getPassword(),
                                 Collections.singleton(user.getRole())))
                 .orElseThrow(() -> new UsernameNotFoundException("Failed to retrieve user: " + username));
-    }
-
-    @SneakyThrows
-    private void uploadImage(MultipartFile image) {
-        if (image != null) {
-            applicationContentService.uploadImage(image.getOriginalFilename(), image.getInputStream());
-        }
     }
 }
