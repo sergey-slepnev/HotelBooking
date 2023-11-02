@@ -2,17 +2,21 @@ package com.sspdev.hotelbooking.unit.service;
 
 import com.sspdev.hotelbooking.database.entity.Hotel;
 import com.sspdev.hotelbooking.database.entity.Room;
+import com.sspdev.hotelbooking.database.entity.enums.ContentType;
 import com.sspdev.hotelbooking.database.entity.enums.RoomType;
 import com.sspdev.hotelbooking.database.entity.enums.Status;
+import com.sspdev.hotelbooking.database.querydsl.QPredicates;
 import com.sspdev.hotelbooking.database.repository.RoomRepository;
+import com.sspdev.hotelbooking.dto.RoomContentCreateDto;
+import com.sspdev.hotelbooking.dto.RoomContentReadDto;
 import com.sspdev.hotelbooking.dto.RoomCreateEditDto;
 import com.sspdev.hotelbooking.dto.RoomReadDto;
 import com.sspdev.hotelbooking.dto.filter.RoomFilter;
 import com.sspdev.hotelbooking.mapper.RoomCreateEditMapper;
 import com.sspdev.hotelbooking.mapper.RoomReadMapper;
+import com.sspdev.hotelbooking.service.RoomContentService;
 import com.sspdev.hotelbooking.service.RoomService;
 import com.sspdev.hotelbooking.unit.UnitTestBase;
-import com.sspdev.hotelrepository.database.querydsl.QPredicates;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -20,6 +24,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,21 +33,23 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RequiredArgsConstructor
 public class RoomServiceTest extends UnitTestBase {
 
     private static final Integer EXISTENT_ROOM_ID = 1;
     private static final Integer EXISTENT_HOTEL_ID = 1;
+    private static final Integer EXISTENT_ROOM_CONTENT_ID = 1;
 
     @MockBean
     private final RoomReadMapper roomReadMapper;
 
     @MockBean
     private final RoomRepository roomRepository;
+
+    @MockBean
+    private final RoomContentService roomContentService;
 
     @MockBean
     private final RoomCreateEditMapper roomCreateEditMapper;
@@ -80,11 +87,14 @@ public class RoomServiceTest extends UnitTestBase {
         var roomCreateEditDto = getRoomCreateEditDto();
         var room = getRoom();
         var roomReadDto = getRoomReadDto();
+        var roomContentCreateDto = getRoomContentCreateDto();
+        var roomContentReadDto = getRoomContentReadDto();
         when(roomCreateEditMapper.map(roomCreateEditDto)).thenReturn(room);
         when(roomRepository.save(room)).thenReturn(room);
+        when(roomContentService.save(roomContentCreateDto)).thenReturn(roomContentReadDto);
         when(roomReadMapper.map(room)).thenReturn(roomReadDto);
 
-        var actualRoom = roomService.create(roomCreateEditDto);
+        var actualRoom = roomService.create(roomCreateEditDto, roomContentCreateDto);
 
         assertThat(actualRoom).isNotNull();
     }
@@ -161,6 +171,23 @@ public class RoomServiceTest extends UnitTestBase {
                 true,
                 "Отличный отель",
                 null
+        );
+    }
+
+    private RoomContentCreateDto getRoomContentCreateDto() {
+        return new RoomContentCreateDto(
+                new MockMultipartFile("RoomPhoto.jpg", "RoomPhoto.jpg", "application/octet-stream", new byte[]{}),
+                ContentType.PHOTO,
+                EXISTENT_ROOM_ID
+        );
+    }
+
+    private RoomContentReadDto getRoomContentReadDto() {
+        return new RoomContentReadDto(
+                EXISTENT_ROOM_CONTENT_ID,
+                "RoomPhoto.jpg",
+                ContentType.PHOTO.name(),
+                EXISTENT_ROOM_ID
         );
     }
 }

@@ -1,7 +1,9 @@
 package com.sspdev.hotelbooking.integration.service;
 
 import com.sspdev.hotelbooking.database.entity.Room;
+import com.sspdev.hotelbooking.database.entity.enums.ContentType;
 import com.sspdev.hotelbooking.database.entity.enums.RoomType;
+import com.sspdev.hotelbooking.dto.RoomContentCreateDto;
 import com.sspdev.hotelbooking.dto.RoomCreateEditDto;
 import com.sspdev.hotelbooking.dto.RoomReadDto;
 import com.sspdev.hotelbooking.dto.filter.RoomFilter;
@@ -14,6 +16,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.math.BigDecimal;
 import java.util.stream.Stream;
@@ -87,10 +90,11 @@ public class RoomServiceIT extends IntegrationTestBase {
     }
 
     @Test
-    void create_shouldCreateNewRoomAndSaveInDb() {
+    void create_shouldCreateNewRoomAndSaveInDbWithContent() {
         var roomCreateEditDto = getRoomCreateEditDto();
+        var roomContentCreateDto = getRoomContentCreateDto();
 
-        var actualRoom = roomService.create(roomCreateEditDto);
+        var actualRoom = roomService.create(roomCreateEditDto, roomContentCreateDto);
 
         assertThat(actualRoom.getId()).isPositive();
         assertAll(() -> {
@@ -156,6 +160,14 @@ public class RoomServiceIT extends IntegrationTestBase {
                 true,
                 "Отличный номер",
                 null
+        );
+    }
+
+    private RoomContentCreateDto getRoomContentCreateDto() {
+        return new RoomContentCreateDto(
+                new MockMultipartFile("RoomPhoto.jpg", "RoomPhoto.jpg", "application/octet-stream", new byte[]{}),
+                ContentType.PHOTO,
+                EXISTENT_ROOM_ID
         );
     }
 }
