@@ -1,9 +1,12 @@
 package com.sspdev.hotelbooking.service;
 
+import com.sspdev.hotelbooking.database.querydsl.QPredicates;
 import com.sspdev.hotelbooking.database.repository.RoomRepository;
+import com.sspdev.hotelbooking.dto.RoomContentCreateDto;
 import com.sspdev.hotelbooking.dto.RoomCreateEditDto;
 import com.sspdev.hotelbooking.dto.RoomReadDto;
 import com.sspdev.hotelbooking.dto.filter.RoomFilter;
+import com.sspdev.hotelbooking.mapper.RoomContentCreateMapper;
 import com.sspdev.hotelbooking.mapper.RoomCreateEditMapper;
 import com.sspdev.hotelbooking.mapper.RoomReadMapper;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +19,6 @@ import java.util.Optional;
 
 import static com.sspdev.hotelbooking.database.entity.QHotel.hotel;
 import static com.sspdev.hotelbooking.database.entity.QRoom.room;
-import static com.sspdev.hotelrepository.database.querydsl.QPredicates.builder;
 
 @RequiredArgsConstructor
 @Service
@@ -26,6 +28,8 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final RoomReadMapper roomReadMapper;
     private final RoomCreateEditMapper roomCreateEditMapper;
+    private final RoomContentService roomContentService;
+    private final RoomContentCreateMapper roomContentCreateMapper;
 
     public Optional<RoomReadDto> findById(Integer roomId) {
         return roomRepository.findById(roomId)
@@ -33,7 +37,7 @@ public class RoomService {
     }
 
     public Page<RoomReadDto> findAll(RoomFilter filter, Pageable pageable) {
-        var predicate = builder()
+        var predicate = QPredicates.builder()
                 .add(filter.country(), hotel.hotelDetails.country::eq)
                 .add(filter.locality(), hotel.hotelDetails.locality::eq)
                 .add(filter.star(), hotel.hotelDetails.star::eq)
@@ -48,11 +52,16 @@ public class RoomService {
     }
 
     @Transactional
-    public RoomReadDto create(RoomCreateEditDto roomDto) {
+    public RoomReadDto create(RoomCreateEditDto roomDto, RoomContentCreateDto contentCreateDto) {
         return Optional.of(roomDto)
                 .map(roomCreateEditMapper::map)
                 .map(roomRepository::save)
                 .map(roomReadMapper::map)
+                .map(room -> {
+                    contentCreateDto.setRoomId(room.getId());
+                    roomContentService.save(contentCreateDto);
+                    return room;
+                })
                 .orElseThrow();
     }
 
