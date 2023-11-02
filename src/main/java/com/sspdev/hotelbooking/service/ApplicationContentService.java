@@ -4,10 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.nio.file.StandardOpenOption.CREATE;
@@ -21,11 +22,14 @@ public class ApplicationContentService {
     private final String bucket;
 
     @SneakyThrows
-    public void uploadImage(String imagePath, InputStream content) {
-        var fullImagePath = Path.of(bucket, imagePath);
-        try (content) {
-            Files.createDirectories(fullImagePath.getParent());
-            Files.write(fullImagePath, content.readAllBytes(), CREATE, TRUNCATE_EXISTING);
+    public void uploadImage(MultipartFile content) {
+        var inputStream = content.getInputStream();
+        var fullImagePath = Path.of(bucket, content.getOriginalFilename());
+        if (!Objects.equals(content.getOriginalFilename(), "")) {
+            try (inputStream) {
+                Files.createDirectories(fullImagePath.getParent());
+                Files.write(fullImagePath, inputStream.readAllBytes(), CREATE, TRUNCATE_EXISTING);
+            }
         }
     }
 
