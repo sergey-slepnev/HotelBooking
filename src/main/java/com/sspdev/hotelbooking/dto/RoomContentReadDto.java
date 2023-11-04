@@ -9,5 +9,10 @@ import lombok.experimental.SuperBuilder;
 @Data
 public class RoomContentReadDto extends ContentReadDto {
 
-    Integer roomId;
+    private Integer roomId;
+
+    public RoomContentReadDto(Integer id, String link, String type, Integer roomId) {
+        super(id, link, type);
+        this.roomId = roomId;
+    }
 }

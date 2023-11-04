@@ -4,6 +4,8 @@ import com.sspdev.hotelbooking.database.entity.enums.ContentType;
 import com.sspdev.hotelbooking.database.entity.enums.RoomType;
 import com.sspdev.hotelbooking.database.entity.enums.Star;
 import com.sspdev.hotelbooking.dto.PageResponse;
+import com.sspdev.hotelbooking.dto.RoomContentCreateDto;
+import com.sspdev.hotelbooking.dto.RoomCreateEditDto;
 import com.sspdev.hotelbooking.dto.filter.RoomFilter;
 import com.sspdev.hotelbooking.service.HotelService;
 import com.sspdev.hotelbooking.service.RoomService;
@@ -12,10 +14,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/my-booking/rooms")
@@ -58,5 +64,22 @@ public class RoomController {
                     return "room/add";
                 })
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+    @PostMapping("/{userId}/{hotelId}/create")
+    public String create(@PathVariable("userId") Integer userId,
+                         @PathVariable("hotelId") Integer hotelId,
+                         RoomContentCreateDto contentCreateDto,
+                         @Validated RoomCreateEditDto createRoomDto,
+                         BindingResult bindingResult,
+                         RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("room", createRoomDto);
+            redirectAttributes.addFlashAttribute("roomContent", contentCreateDto);
+            redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
+            return "redirect:/my-booking/rooms/{userId}/{hotelId}/add";
+        }
+        var createdRoom = roomService.create(createRoomDto, contentCreateDto);
+        return "redirect:/my-booking/rooms/" + createdRoom.getId();
     }
 }
