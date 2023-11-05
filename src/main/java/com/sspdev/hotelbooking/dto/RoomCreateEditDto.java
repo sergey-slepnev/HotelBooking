@@ -4,10 +4,12 @@ import com.sspdev.hotelbooking.database.entity.enums.RoomType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.experimental.FieldNameConstants;
 
 import java.math.BigDecimal;
 import java.util.List;
 
+@FieldNameConstants
 public record RoomCreateEditDto(
 
         Integer hotelId,

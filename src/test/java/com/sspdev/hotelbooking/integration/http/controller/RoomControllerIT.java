@@ -16,10 +16,12 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.util.stream.Stream;
 
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.*;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RequiredArgsConstructor
@@ -92,6 +94,24 @@ class RoomControllerIT extends IntegrationTestBase {
     void create_shouldReturnNotFound_whenUserAndHotelNotExist() throws Exception {
         mockMvc.perform(get("/my-booking/rooms" + NON_EXISTENT_OWNER_ID + "/" + NON_EXISTENT_HOTEL_ID + "/add"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void create_postShouldCreateNewRoom_whenRoomCreateEditDtoValid() throws Exception {
+        mockMvc.perform(post("/my-booking/rooms/" + EXISTENT_OWNER_ID + "/" + EXISTENT_HOTEL_ID + "/create")
+                        .with(csrf())
+                        .param(hotelId, "1")
+                        .param(roomNo, "1")
+                        .param(type, RoomType.DBL.name())
+                        .param(square, "50")
+                        .param(adultBedCount, "4")
+                        .param(childrenBedCount, "1")
+                        .param(cost, "550")
+                        .param(floor, "3")
+                        .param(available, "true"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/my-booking/rooms/{\\d+}"))
+                .andExpect(flash().attributeCount(0));
     }
 
     private RoomReadDto getRoomReadDto() {
