@@ -20,6 +20,6 @@ public class RoomReadDto {
     Integer floor;
     Boolean available;
     String description;
-    List<ContentReadDto> content;
+    List<RoomContentReadDto> content;
 
 }

@@ -31,13 +31,14 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(urlConfig -> urlConfig
                         .requestMatchers(
-                                "my-booking/rooms/search",
+                                "/my-booking/rooms/search",
                                 "/login",
                                 "/my-booking",
                                 "/my-booking/registration",
                                 "/my-booking/users/create",
-                                "my-booking/rooms",
-                                "my-booking/rooms/{\\d+}"
+                                "/my-booking/rooms",
+                                "/my-booking/rooms/{\\d+}",
+                                "/api/v1/rooms/{\\d+}/content/{d\\+}"
                         ).permitAll()
                         .requestMatchers(
                                 "/my-booking/users/{\\d+}",
@@ -47,8 +48,8 @@ public class SecurityConfiguration {
                                 "/my-booking/users/{\\d+}/delete"
                         ).hasAnyAuthority(USER.getAuthority(), OWNER.getAuthority(), ADMIN.getAuthority())
                         .requestMatchers(
-                                "my-booking/rooms/{\\d+}/{\\d+}/add",
-                                "my-booking/rooms/{\\d+}/{\\d+}/create"
+                                "/my-booking/rooms/{\\d+}/{\\d+}/add",
+                                "/my-booking/rooms/{\\d+}/{\\d+}/create"
                         ).hasAuthority(OWNER.getAuthority())
                         .requestMatchers(
                                 "/my-booking/users/{\\d+}/change-status"

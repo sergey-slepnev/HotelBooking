@@ -2,10 +2,14 @@ package com.sspdev.hotelbooking.mapper;
 
 import com.sspdev.hotelbooking.database.entity.Room;
 import com.sspdev.hotelbooking.dto.RoomReadDto;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+@RequiredArgsConstructor
 @Component
 public class RoomReadMapper implements Mapper<Room, RoomReadDto> {
+
+    private final RoomContentReadMapper roomContentReadMapper;
 
     @Override
     public RoomReadDto map(Room object) {
@@ -21,7 +25,7 @@ public class RoomReadMapper implements Mapper<Room, RoomReadDto> {
                 object.getFloor(),
                 object.isAvailable(),
                 object.getDescription(),
-                null
+                object.getRoomContents().stream().map(roomContentReadMapper::map).toList()
         );
     }
 }

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -32,5 +33,11 @@ public class RoomContentService {
                 .map(roomContentRepository::save)
                 .map(roomContentReadMapper::map)
                 .orElseThrow();
+    }
+
+    public List<RoomContentReadDto> findByRoom(Integer id) {
+        return roomContentRepository.findByRoomId(id).stream()
+                .map(roomContentReadMapper::map)
+                .toList();
     }
 }
