@@ -81,6 +81,13 @@ VALUES (1, (SELECT id FROM hotel WHERE name = 'MoscowPlaza'), 1, 'TRPL', 25.3, 3
         'Nice room in minskPlaza');
 SELECT SETVAL('room_id_seq', (SELECT MAX(id) FROM room));
 
+INSERT INTO room_content(id, room_id, link, type)
+VALUES (1, 1, 'first_room_1.jpg', 'PHOTO'),
+       (2, 1, 'first_room_2.jpg', 'PHOTO'),
+       (3, 1, 'first_room_3.jpg', 'PHOTO'),
+       (4, 1, 'first_room_4.jpg', 'PHOTO');
+SELECT SETVAL('room_content_id_seq', (SELECT MAX(id) FROM room_content));
+
 INSERT INTO booking_request(id, created_at, hotel_id, room_id, user_id, check_in, check_out, status)
 VALUES (1, '2022-10-10 12:05', (SELECT id FROM hotel WHERE name = 'MoscowPlaza'), 1, 2, '2022-10-10', '2022-10-15',
         'NEW'),
