@@ -1,7 +1,9 @@
 package com.sspdev.hotelbooking.unit.http.rest;
 
 import com.sspdev.hotelbooking.database.entity.enums.ContentType;
+import com.sspdev.hotelbooking.database.entity.enums.RoomType;
 import com.sspdev.hotelbooking.dto.RoomContentReadDto;
+import com.sspdev.hotelbooking.dto.RoomReadDto;
 import com.sspdev.hotelbooking.http.rest.RoomContentRestController;
 import com.sspdev.hotelbooking.service.ApplicationContentService;
 import com.sspdev.hotelbooking.service.RoomContentService;
@@ -12,6 +14,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -20,7 +23,9 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RequiredArgsConstructor
@@ -31,6 +36,7 @@ class RoomContentRestControllerTest {
     private static final Integer EXISTENT_ROOM_ID = 1;
     private static final Integer EXISTENT_CONTENT_ID = 1;
     private static final Integer NON_EXISTENT_CONTENT_ID = 999;
+    private static final Integer EXISTENT_HOTEL_ID = 1;
 
     @MockBean
     private final RoomContentService roomContentService;
@@ -61,12 +67,52 @@ class RoomContentRestControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void delete_shouldDeleteContentAndRedirectToRoomPage_whenContentExists() throws Exception {
+        var roomInSession = getRoomReadDto();
+        when(roomContentService.delete(EXISTENT_CONTENT_ID)).thenReturn(true);
+
+        mockMvc.perform(post("/api/v1/rooms/content/" + EXISTENT_CONTENT_ID + "/delete")
+                        .sessionAttr("room", roomInSession)
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/my-booking/rooms/{d\\+}"));
+    }
+
+    @Test
+    void delete_shouldReturnNotFound_whenContentNotExist() throws Exception {
+        var roomInSession = getRoomReadDto();
+        when(roomContentService.delete(EXISTENT_CONTENT_ID)).thenReturn(true);
+
+        mockMvc.perform(post("/api/v1/rooms/content/" + NON_EXISTENT_CONTENT_ID + "/delete")
+                        .sessionAttr("room", roomInSession)
+                        .with(csrf()))
+                .andExpect(status().isNotFound());
+    }
+
     private RoomContentReadDto getRoomContentReadDto() {
         return new RoomContentReadDto(
                 EXISTENT_CONTENT_ID,
                 "testPhoto.jpg",
                 ContentType.PHOTO.name(),
                 EXISTENT_ROOM_ID
+        );
+    }
+
+    private RoomReadDto getRoomReadDto() {
+        return new RoomReadDto(
+                EXISTENT_ROOM_ID,
+                EXISTENT_HOTEL_ID,
+                1,
+                RoomType.DBL,
+                44.4,
+                3,
+                0,
+                BigDecimal.valueOf(1900),
+                1,
+                true,
+                "Отличный отель",
+                null
         );
     }
 }
