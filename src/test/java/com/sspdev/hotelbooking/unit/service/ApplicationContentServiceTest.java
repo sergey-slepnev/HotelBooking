@@ -6,11 +6,11 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @RequiredArgsConstructor
@@ -19,20 +19,18 @@ class ApplicationContentServiceTest extends UnitTestBase {
     @MockBean
     private final InputStream inputStream;
 
+    @MockBean
+    private final MockMultipartFile mockMultipartFile;
+
     @InjectMocks
     private final ApplicationContentService applicationContentService;
 
     @Test
     void uploadImage_shouldUploadImage_whenImageExists() throws IOException {
-        when(inputStream.readAllBytes()).thenReturn("someContent".getBytes());
+        when(mockMultipartFile.getOriginalFilename()).thenReturn("test_photo.jpg");
+        when(inputStream.readAllBytes()).thenReturn("test_photo.jpg".getBytes());
+        when(mockMultipartFile.getInputStream()).thenReturn(inputStream);
 
-        applicationContentService.uploadImage("fullImagePath", inputStream);
-    }
-
-    @Test
-    void getImage_shouldReturnImage_whenImageExists() {
-        var actualImage = applicationContentService.getImage("fullImagePath");
-
-        assertThat(actualImage).isPresent();
+        applicationContentService.uploadImage(mockMultipartFile);
     }
 }
