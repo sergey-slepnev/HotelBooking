@@ -41,6 +41,7 @@ public class RoomContentService {
                 .toList();
     }
 
+    @Transactional
     public boolean delete(Integer id) {
         return roomContentRepository.findById(id)
                 .map(content -> {

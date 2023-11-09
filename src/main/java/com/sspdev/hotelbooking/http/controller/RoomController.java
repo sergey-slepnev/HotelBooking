@@ -6,6 +6,7 @@ import com.sspdev.hotelbooking.database.entity.enums.Star;
 import com.sspdev.hotelbooking.dto.PageResponse;
 import com.sspdev.hotelbooking.dto.RoomContentCreateDto;
 import com.sspdev.hotelbooking.dto.RoomCreateEditDto;
+import com.sspdev.hotelbooking.dto.RoomReadDto;
 import com.sspdev.hotelbooking.dto.filter.RoomFilter;
 import com.sspdev.hotelbooking.service.HotelService;
 import com.sspdev.hotelbooking.service.RoomService;
@@ -20,11 +21,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/my-booking/rooms")
+@SessionAttributes(names = "room", types = RoomReadDto.class)
 @RequiredArgsConstructor
 public class RoomController {
 
