@@ -40,4 +40,14 @@ public class RoomContentService {
                 .map(roomContentReadMapper::map)
                 .toList();
     }
+
+    public boolean delete(Integer id) {
+        return roomContentRepository.findById(id)
+                .map(content -> {
+                    roomContentRepository.delete(content);
+                    roomContentRepository.flush();
+                    return true;
+                })
+                .orElse(false);
+    }
 }
