@@ -49,7 +49,8 @@ public class SecurityConfiguration {
                         ).hasAnyAuthority(USER.getAuthority(), OWNER.getAuthority(), ADMIN.getAuthority())
                         .requestMatchers(
                                 "/my-booking/rooms/{\\d+}/{\\d+}/add",
-                                "/my-booking/rooms/{\\d+}/{\\d+}/create"
+                                "/my-booking/rooms/{\\d+}/{\\d+}/create",
+                                "/api/v1/rooms/content/{d\\+}/delete"
                         ).hasAuthority(OWNER.getAuthority())
                         .requestMatchers(
                                 "/my-booking/users/{\\d+}/change-status"
