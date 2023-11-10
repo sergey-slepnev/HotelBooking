@@ -58,10 +58,8 @@ public class RoomService {
                 .map(roomRepository::save)
                 .map(roomReadMapper::map)
                 .map(room -> {
-                    if (!contentCreateDto.getContent().isEmpty()) {
-                        contentCreateDto.setRoomId(room.getId());
-                        roomContentService.save(contentCreateDto);
-                    }
+                    contentCreateDto.setRoomId(room.getId());
+                    roomContentService.save(contentCreateDto);
                     return room;
                 })
                 .orElseThrow();
