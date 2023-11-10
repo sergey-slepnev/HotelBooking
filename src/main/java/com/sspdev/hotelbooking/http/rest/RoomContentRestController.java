@@ -1,5 +1,6 @@
 package com.sspdev.hotelbooking.http.rest;
 
+import com.sspdev.hotelbooking.dto.RoomContentCreateDto;
 import com.sspdev.hotelbooking.dto.RoomContentReadDto;
 import com.sspdev.hotelbooking.dto.RoomReadDto;
 import com.sspdev.hotelbooking.service.ApplicationContentService;
@@ -11,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,5 +57,24 @@ public class RoomContentRestController {
                 .location(URI.create("/my-booking/rooms/" + room.getId()))
                 .build()
                 : notFound().build();
+    }
+
+    @PostMapping("/{roomId}/content/create")
+    public ResponseEntity<RoomContentReadDto> create(@PathVariable("roomId") Integer roomId,
+                                                     @ModelAttribute("content") RoomContentCreateDto contentCreateDto) {
+        if (!contentCreateDto.getContent().isEmpty()) {
+            contentCreateDto.setRoomId(roomId);
+            roomContentService.save(contentCreateDto);
+
+            return status(HttpStatus.FOUND)
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .contentLength(contentCreateDto.getContent().getSize())
+                    .location(URI.create("/my-booking/rooms/" + roomId))
+                    .build();
+        } else {
+            return status(HttpStatus.FOUND)
+                    .location(URI.create("/my-booking/rooms/" + roomId))
+                    .build();
+        }
     }
 }
