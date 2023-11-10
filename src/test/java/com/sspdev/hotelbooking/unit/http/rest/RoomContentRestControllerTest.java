@@ -2,6 +2,7 @@ package com.sspdev.hotelbooking.unit.http.rest;
 
 import com.sspdev.hotelbooking.database.entity.enums.ContentType;
 import com.sspdev.hotelbooking.database.entity.enums.RoomType;
+import com.sspdev.hotelbooking.dto.RoomContentCreateDto;
 import com.sspdev.hotelbooking.dto.RoomContentReadDto;
 import com.sspdev.hotelbooking.dto.RoomReadDto;
 import com.sspdev.hotelbooking.http.rest.RoomContentRestController;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -19,11 +22,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static com.sspdev.hotelbooking.dto.RoomContentCreateDto.Fields.roomId;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -90,6 +96,40 @@ class RoomContentRestControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void create_shouldCreateNewRoomContent_whenContentExists() throws Exception {
+        var createDto = getRoomContentCreateDto();
+        var readDto = getRoomContentReadDto();
+
+        when(roomContentService.save(createDto)).thenReturn(readDto);
+
+        mockMvc.perform(multipart("/api/v1/rooms/" + EXISTENT_ROOM_ID + "/content/create")
+                        .file("content", createDto.getContent().getBytes())
+                        .param(roomId, String.valueOf(EXISTENT_ROOM_ID))
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(content().contentType(APPLICATION_OCTET_STREAM))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/my-booking/rooms/{d\\+}"));
+    }
+
+    @Test
+    void create_shouldJustRedirectToRoomPage_whenContentEmpty() throws Exception {
+        var createDto = getRoomContentCreateDto();
+        var readDto = getRoomContentReadDto();
+
+        when(roomContentService.save(createDto)).thenReturn(readDto);
+
+        mockMvc.perform(multipart("/api/v1/rooms/" + EXISTENT_ROOM_ID + "/content/create")
+                        .file("content", createDto.getContent().getBytes())
+                        .param(roomId, String.valueOf(EXISTENT_ROOM_ID))
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(content().contentType(APPLICATION_OCTET_STREAM))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/my-booking/rooms/{d\\+}"));
+    }
+
     private RoomContentReadDto getRoomContentReadDto() {
         return new RoomContentReadDto(
                 EXISTENT_CONTENT_ID,
@@ -113,6 +153,19 @@ class RoomContentRestControllerTest {
                 true,
                 "Отличный отель",
                 null
+        );
+    }
+
+    private RoomContentCreateDto getRoomContentCreateDto() {
+        var content = new MockMultipartFile(
+                "content",
+                "testPhoto.jpg",
+                MediaType.APPLICATION_OCTET_STREAM_VALUE,
+                new byte[]{0, 0, 0, 0});
+        return new RoomContentCreateDto(
+                content,
+                ContentType.PHOTO,
+                EXISTENT_ROOM_ID
         );
     }
 }
