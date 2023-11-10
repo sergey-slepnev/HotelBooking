@@ -1,5 +1,6 @@
 package com.sspdev.hotelbooking.service;
 
+import com.sspdev.hotelbooking.database.entity.enums.ContentType;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,7 @@ import java.util.Optional;
 
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.util.Objects.requireNonNull;
 
 @Service
 @RequiredArgsConstructor
@@ -39,5 +41,13 @@ public class ApplicationContentService {
         return Files.exists(fullImagePath)
                 ? Optional.of(Files.readAllBytes(fullImagePath))
                 : Optional.empty();
+    }
+
+    @SneakyThrows
+    public ContentType getContentType(MultipartFile multipartFile) {
+        var pathToContent = Path.of(requireNonNull(multipartFile.getOriginalFilename()));
+        return Files.probeContentType(pathToContent).startsWith("image")
+                ? ContentType.PHOTO
+                : ContentType.VIDEO;
     }
 }
