@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.net.URI;
 
@@ -61,20 +64,26 @@ public class RoomContentRestController {
 
     @PostMapping("/{roomId}/content/create")
     public ResponseEntity<RoomContentReadDto> create(@PathVariable("roomId") Integer roomId,
-                                                     @ModelAttribute("content") RoomContentCreateDto contentCreateDto) {
+                                                     @ModelAttribute("content") @Validated RoomContentCreateDto contentCreateDto,
+                                                     BindingResult bindingResult,
+                                                     RedirectAttributes redirectAttributes) {
+        ResponseEntity<RoomContentReadDto> responseWithoutContent = status(HttpStatus.FOUND)
+                .location(URI.create("/my-booking/rooms/" + roomId))
+                .build();
         if (!contentCreateDto.getContent().isEmpty()) {
+            if (bindingResult.hasErrors()) {
+                redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
+                return responseWithoutContent;
+            }
             contentCreateDto.setRoomId(roomId);
             roomContentService.save(contentCreateDto);
-
             return status(HttpStatus.FOUND)
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .contentLength(contentCreateDto.getContent().getSize())
                     .location(URI.create("/my-booking/rooms/" + roomId))
                     .build();
         } else {
-            return status(HttpStatus.FOUND)
-                    .location(URI.create("/my-booking/rooms/" + roomId))
-                    .build();
+            return responseWithoutContent;
         }
     }
 }

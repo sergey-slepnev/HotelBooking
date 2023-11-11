@@ -1,7 +1,7 @@
 package com.sspdev.hotelbooking.dto;
 
 import com.sspdev.hotelbooking.database.entity.enums.ContentType;
-import com.sspdev.hotelbooking.validation.CheckContentSize;
+import com.sspdev.hotelbooking.validation.CheckContentType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 @FieldNameConstants
 public abstract class ContentCreateDto {
 
-    @CheckContentSize
+    @CheckContentType
     private MultipartFile content;
 
     private ContentType contentType;
