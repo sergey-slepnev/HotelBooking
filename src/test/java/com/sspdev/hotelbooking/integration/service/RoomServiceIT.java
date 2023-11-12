@@ -24,6 +24,8 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RequiredArgsConstructor
 public class RoomServiceIT extends IntegrationTestBase {
@@ -32,6 +34,7 @@ public class RoomServiceIT extends IntegrationTestBase {
     private static final Integer EXISTENT_HOTEL_ID = 1;
     private static final Long NUMBER_OF_ROOMS_WITH_NO_PREDICATE = 16L;
     private static final Long NUMBER_OF_ROOMS_WITH_COST_FILTER = 5L;
+    private static final Integer NOT_EXISTENT_ROOM_ID = 999;
 
     private final RoomService roomService;
 
@@ -129,6 +132,20 @@ public class RoomServiceIT extends IntegrationTestBase {
                     assertEquals(dtoToUpdate.floor(), room.getFloor());
                     assertEquals(dtoToUpdate.available(), room.getAvailable());
                 }));
+    }
+
+    @Test
+    void delete_shouldReturnTrue_whenRoomExists() {
+        var isDeleted = roomService.delete(EXISTENT_ROOM_ID);
+
+        assertTrue(isDeleted);
+    }
+
+    @Test
+    void delete_shouldReturnFalse_whenRoomNotExist() {
+        var isDeleted = roomService.delete(NOT_EXISTENT_ROOM_ID);
+
+        assertFalse(isDeleted);
     }
 
     private RoomCreateEditDto getRoomCreateEditDto() {

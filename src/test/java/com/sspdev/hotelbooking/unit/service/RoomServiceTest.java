@@ -32,8 +32,12 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RequiredArgsConstructor
 public class RoomServiceTest extends UnitTestBase {
@@ -41,6 +45,7 @@ public class RoomServiceTest extends UnitTestBase {
     private static final Integer EXISTENT_ROOM_ID = 1;
     private static final Integer EXISTENT_HOTEL_ID = 1;
     private static final Integer EXISTENT_ROOM_CONTENT_ID = 1;
+    private static final Integer NOT_EXISTENT_ROOM_ID = 999;
 
     @MockBean
     private final RoomReadMapper roomReadMapper;
@@ -112,6 +117,26 @@ public class RoomServiceTest extends UnitTestBase {
         var actualRoom = roomService.update(room.getId(), roomCreateEditDto);
 
         assertThat(actualRoom).isPresent();
+    }
+
+    @Test
+    void delete_shouldReturnTrue_whenRoomExists() {
+        var existentRoom = getRoom();
+        when(roomRepository.findById(EXISTENT_ROOM_ID)).thenReturn(Optional.of(existentRoom));
+
+        var isDeleted = roomService.delete(EXISTENT_ROOM_ID);
+
+        assertTrue(isDeleted);
+        verify(roomRepository, times(1)).delete(existentRoom);
+        verify(roomRepository, times(1)).flush();
+    }
+
+    @Test
+    void delete_shouldReturnFalse_whenRoomNotExist() {
+        when(roomRepository.findById(NOT_EXISTENT_ROOM_ID)).thenReturn(Optional.empty());
+        var isDeleted = roomService.delete(NOT_EXISTENT_ROOM_ID);
+
+        assertFalse(isDeleted);
     }
 
     private Room getRoom() {
