@@ -74,4 +74,15 @@ public class RoomService {
                 .map(roomRepository::saveAndFlush)
                 .map(roomReadMapper::map);
     }
+
+    @Transactional
+    public boolean delete(Integer id) {
+        return roomRepository.findById(id)
+                .map(room -> {
+                    roomRepository.delete(room);
+                    roomRepository.flush();
+                    return true;
+                })
+                .orElse(false);
+    }
 }
