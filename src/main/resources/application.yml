@@ -29,3 +29,6 @@ spring:
 server:
   tomcat:
     max-swallow-size: -1
+my-app:
+  content:
+    no-image-available: NoImageAvailable.jpg

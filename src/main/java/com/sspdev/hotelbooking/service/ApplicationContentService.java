@@ -23,6 +23,9 @@ public class ApplicationContentService {
     @Value("${spring.servlet.multipart.location}")
     private final String bucket;
 
+    @Value("${my-app.content.no-image-available}")
+    private final String contentNotFoundImage;
+
     @SneakyThrows
     public void uploadImage(MultipartFile content) {
         var inputStream = content.getInputStream();
@@ -38,9 +41,10 @@ public class ApplicationContentService {
     @SneakyThrows
     public Optional<byte[]> getImage(String imagePath) {
         var fullImagePath = Path.of(bucket, imagePath);
+        var contentNotFoundImagePath = Path.of(bucket, contentNotFoundImage);
         return Files.exists(fullImagePath)
                 ? Optional.of(Files.readAllBytes(fullImagePath))
-                : Optional.empty();
+                : Optional.of(Files.readAllBytes(contentNotFoundImagePath));
     }
 
     @SneakyThrows
