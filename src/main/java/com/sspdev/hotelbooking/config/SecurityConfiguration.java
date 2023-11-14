@@ -15,7 +15,9 @@ import org.springframework.security.web.savedrequest.NullRequestCache;
 
 import java.io.IOException;
 
-import static com.sspdev.hotelbooking.database.entity.enums.Role.*;
+import static com.sspdev.hotelbooking.database.entity.enums.Role.ADMIN;
+import static com.sspdev.hotelbooking.database.entity.enums.Role.OWNER;
+import static com.sspdev.hotelbooking.database.entity.enums.Role.USER;
 
 @RequiredArgsConstructor
 @Configuration
@@ -23,6 +25,15 @@ import static com.sspdev.hotelbooking.database.entity.enums.Role.*;
 public class SecurityConfiguration {
 
     private final UserRepository userRepository;
+
+    @SneakyThrows
+    private static void redirectToUserPage(HttpServletResponse response, User user) {
+        try {
+            response.sendRedirect("/my-booking/users/" + user.getId());
+        } catch (IOException exception) {
+            throw new RuntimeException();
+        }
+    }
 
     @Bean
     public DefaultSecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -41,7 +52,11 @@ public class SecurityConfiguration {
                                 "/api/v1/hotels/{\\d+}/content/{d\\+}",
                                 "/my-booking/rooms",
                                 "/my-booking/rooms/{\\d+}",
-                                "/api/v1/rooms/{\\d+}/content/{d\\+}"
+                                "/api/v1/rooms/{\\d+}/content/{d\\+}",
+                                "/my-booking/hotels",
+                                "/my-booking/hotels/{\\d+}",
+                                "/api/v1/hotels/{\\d+}/content/{d\\+}",
+                                "/my-booking/rooms/{d\\+}/rooms-by-hotel"
                         ).permitAll()
                         .requestMatchers(
                                 "/my-booking/users/{\\d+}",
@@ -53,7 +68,8 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 "/my-booking/rooms/{\\d+}/{\\d+}/add",
                                 "/my-booking/rooms/{\\d+}/{\\d+}/create",
-                                "/api/v1/rooms/content/{d\\+}/delete"
+                                "/api/v1/rooms/content/{d\\+}/delete",
+                                "/my-booking/rooms/{d\\+}/delete"
                         ).hasAuthority(OWNER.getAuthority())
                         .requestMatchers(
                                 "/my-booking/users/{\\d+}/change-status"
@@ -79,14 +95,5 @@ public class SecurityConfiguration {
                         .deleteCookies("JSESSIONID"));
 
         return httpSecurity.build();
-    }
-
-    @SneakyThrows
-    private static void redirectToUserPage(HttpServletResponse response, User user) {
-        try {
-            response.sendRedirect("/my-booking/users/" + user.getId());
-        } catch (IOException exception) {
-            throw new RuntimeException();
-        }
     }
 }
