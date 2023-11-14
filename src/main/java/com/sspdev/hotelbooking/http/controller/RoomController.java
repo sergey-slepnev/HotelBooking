@@ -85,4 +85,12 @@ public class RoomController {
         var createdRoom = roomService.create(createRoomDto, contentCreateDto);
         return "redirect:/my-booking/rooms/" + createdRoom.getId();
     }
+
+    @GetMapping("/{hotelId}/rooms-by-hotel")
+    public String findByHotel(@PathVariable("hotelId") Integer hotelId,
+                              Model model) {
+        var roomsByHotel = roomService.findByHotel(hotelId);
+        model.addAttribute("rooms", roomsByHotel);
+        return "room/rooms-by-hotel";
+    }
 }
