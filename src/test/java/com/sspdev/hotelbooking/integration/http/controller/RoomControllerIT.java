@@ -4,6 +4,7 @@ import com.sspdev.hotelbooking.database.entity.enums.RoomType;
 import com.sspdev.hotelbooking.dto.RoomReadDto;
 import com.sspdev.hotelbooking.dto.filter.RoomFilter;
 import com.sspdev.hotelbooking.integration.IntegrationTestBase;
+import com.sspdev.hotelbooking.service.HotelService;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -42,15 +43,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class RoomControllerIT extends IntegrationTestBase {
 
     private static final Integer EXISTENT_ROOM_ID = 1;
-    private static final Integer NON_EXISTENT_ROOM_ID = 999;
+    private static final Integer NOT_EXISTENT_ROOM_ID = 999;
     private static final Integer ALL_ROOMS = 16;
     private static final Integer COST_FROM_ROOMS_NUMBER = 13;
     private static final Integer EXISTENT_OWNER_ID = 4;
     private static final Integer EXISTENT_HOTEL_ID = 1;
-    private static final Integer NON_EXISTENT_OWNER_ID = 999;
-    private static final Integer NON_EXISTENT_HOTEL_ID = 999;
+    private static final Integer NOT_EXISTENT_OWNER_ID = 999;
+    private static final Integer NOT_EXISTENT_HOTEL_ID = 999;
 
     private final MockMvc mockMvc;
+    private final HotelService hotelService;
+
+    static Stream<Arguments> getArgumentsForFindAllByFilter() {
+        return Stream.of(
+                Arguments.of(RoomFilter.Fields.costFrom, "", ALL_ROOMS),
+                Arguments.of(RoomFilter.Fields.costFrom, "1100", COST_FROM_ROOMS_NUMBER
+                ));
+    }
 
     @Test
     void findById_shouldFindRoomById_whenRoomExists() throws Exception {
@@ -65,7 +74,7 @@ class RoomControllerIT extends IntegrationTestBase {
 
     @Test
     void findById_shouldReturnNotFound_whenRoomNotExist() throws Exception {
-        mockMvc.perform(get("/my-booking/rooms/" + NON_EXISTENT_ROOM_ID)
+        mockMvc.perform(get("/my-booking/rooms/" + NOT_EXISTENT_ROOM_ID)
                         .with(csrf()))
                 .andExpect(status().isNotFound())
                 .andExpect(mvcResult ->
@@ -87,13 +96,6 @@ class RoomControllerIT extends IntegrationTestBase {
         assertThat(stringResult).contains("totalElements=" + expectedNumbersOfRooms);
     }
 
-    static Stream<Arguments> getArgumentsForFindAllByFilter() {
-        return Stream.of(
-                Arguments.of(RoomFilter.Fields.costFrom, "", ALL_ROOMS),
-                Arguments.of(RoomFilter.Fields.costFrom, "1100", COST_FROM_ROOMS_NUMBER
-                ));
-    }
-
     @Test
     void create_shouldReturnAddRoomPage() throws Exception {
         mockMvc.perform(get("/my-booking/rooms/" + EXISTENT_OWNER_ID + "/" + EXISTENT_HOTEL_ID + "/add")
@@ -105,7 +107,7 @@ class RoomControllerIT extends IntegrationTestBase {
 
     @Test
     void create_shouldReturnNotFound_whenUserAndHotelNotExist() throws Exception {
-        mockMvc.perform(get("/my-booking/rooms" + NON_EXISTENT_OWNER_ID + "/" + NON_EXISTENT_HOTEL_ID + "/add"))
+        mockMvc.perform(get("/my-booking/rooms" + NOT_EXISTENT_OWNER_ID + "/" + NOT_EXISTENT_HOTEL_ID + "/add"))
                 .andExpect(status().isNotFound());
     }
 
@@ -139,12 +141,29 @@ class RoomControllerIT extends IntegrationTestBase {
 
     @Test
     void findByHotel_shouldReturnRoomsByHotelPageWithNotRooms() throws Exception {
-        mockMvc.perform(get("/my-booking/rooms/" + NON_EXISTENT_HOTEL_ID + "/rooms-by-hotel"))
+        mockMvc.perform(get("/my-booking/rooms/" + NOT_EXISTENT_HOTEL_ID + "/rooms-by-hotel"))
                 .andExpect(status().isOk())
                 .andExpect(model().size(1))
                 .andExpect(model().attributeExists("rooms"))
                 .andExpect(model().attribute("rooms", hasSize(0)))
                 .andExpect(view().name("room/rooms-by-hotel"));
+    }
+
+    @Test
+    void delete_shouldDeleteAndRedirectToHotelPage_whenRoomExists() throws Exception {
+        var hotelInSession = hotelService.findById(EXISTENT_HOTEL_ID);
+        mockMvc.perform(post("/my-booking/rooms/" + EXISTENT_ROOM_ID + "/delete")
+                        .sessionAttr("hotel", hotelInSession.get()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/my-booking/hotels/{d\\+}"));
+    }
+
+    @Test
+    void delete_shouldReturnNotFound_whenRoomNotExist() throws Exception {
+        var hotelInSession = hotelService.findById(EXISTENT_HOTEL_ID);
+        mockMvc.perform(post("/my-booking/rooms/" + NOT_EXISTENT_ROOM_ID + "/delete")
+                        .sessionAttr("hotel", hotelInSession.get()))
+                .andExpect(status().isNotFound());
     }
 
     private RoomReadDto getRoomReadDto() {
