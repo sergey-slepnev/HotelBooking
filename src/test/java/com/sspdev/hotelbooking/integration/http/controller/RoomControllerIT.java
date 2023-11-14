@@ -16,13 +16,26 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.util.stream.Stream;
 
-import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.*;
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.adultBedCount;
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.available;
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.childrenBedCount;
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.cost;
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.floor;
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.hotelId;
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.roomNo;
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.square;
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.type;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @RequiredArgsConstructor
 @AutoConfigureMockMvc(addFilters = false)
@@ -112,6 +125,26 @@ class RoomControllerIT extends IntegrationTestBase {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrlPattern("/my-booking/rooms/{\\d+}"))
                 .andExpect(flash().attributeCount(0));
+    }
+
+    @Test
+    void findByHotel_shouldFindRoomsByHotelPage_whenHotelAndRoomsExist() throws Exception {
+        mockMvc.perform(get("/my-booking/rooms/" + EXISTENT_HOTEL_ID + "/rooms-by-hotel"))
+                .andExpect(status().isOk())
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("rooms"))
+                .andExpect(model().attribute("rooms", hasSize(4)))
+                .andExpect(view().name("room/rooms-by-hotel"));
+    }
+
+    @Test
+    void findByHotel_shouldReturnRoomsByHotelPageWithNotRooms() throws Exception {
+        mockMvc.perform(get("/my-booking/rooms/" + NON_EXISTENT_HOTEL_ID + "/rooms-by-hotel"))
+                .andExpect(status().isOk())
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("rooms"))
+                .andExpect(model().attribute("rooms", hasSize(0)))
+                .andExpect(view().name("room/rooms-by-hotel"));
     }
 
     private RoomReadDto getRoomReadDto() {
