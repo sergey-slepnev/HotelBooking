@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.sspdev.hotelbooking.database.entity.QHotel.hotel;
@@ -84,5 +85,11 @@ public class RoomService {
                     return true;
                 })
                 .orElse(false);
+    }
+
+    public List<RoomReadDto> findByHotel(Integer hotelId) {
+        return roomRepository.findByHotelId(hotelId).stream()
+                .map(roomReadMapper::map)
+                .toList();
     }
 }
