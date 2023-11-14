@@ -170,7 +170,7 @@ public class RoomControllerTest extends UnitTestBase {
     }
 
     @Test
-            void delete_shouldDeleteAndRedirectToHotelPage_whenRoomExists() throws Exception {
+    void delete_shouldDeleteAndRedirectToHotelPage_whenRoomExists() throws Exception {
         var hotelInSession = getHotelReadDto();
         var existentRoom = getRoomReadDto();
 
