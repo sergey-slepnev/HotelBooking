@@ -27,6 +27,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @RequiredArgsConstructor
@@ -49,16 +51,12 @@ public class RoomServiceTest extends UnitTestBase {
 
     @MockBean
     private final RoomReadMapper roomReadMapper;
-
     @MockBean
     private final RoomRepository roomRepository;
-
     @MockBean
     private final RoomContentService roomContentService;
-
     @MockBean
     private final RoomCreateEditMapper roomCreateEditMapper;
-
     @InjectMocks
     private final RoomService roomService;
 
@@ -137,6 +135,28 @@ public class RoomServiceTest extends UnitTestBase {
         var isDeleted = roomService.delete(NOT_EXISTENT_ROOM_ID);
 
         assertFalse(isDeleted);
+    }
+
+    @Test
+    void findByHotel_shouldFindRoomsByHotel_whenRoomsExist() {
+        var existentRoom = getRoom();
+        when(roomRepository.findByHotelId(EXISTENT_HOTEL_ID)).thenReturn(List.of(existentRoom, existentRoom));
+
+        var expectedRooms = roomService.findByHotel(EXISTENT_HOTEL_ID);
+
+        assertThat(expectedRooms).hasSize(2);
+        verify(roomReadMapper, times(2)).map(existentRoom);
+    }
+
+    @Test
+    void findByHotel_shouldReturnEmptyListOfRooms() {
+        var existentRoom = getRoom();
+        when(roomRepository.findByHotelId(EXISTENT_HOTEL_ID)).thenReturn(Collections.emptyList());
+
+        var expectedRooms = roomService.findByHotel(EXISTENT_HOTEL_ID);
+
+        assertThat(expectedRooms).hasSize(0);
+        verifyNoInteractions(roomReadMapper);
     }
 
     private Room getRoom() {
