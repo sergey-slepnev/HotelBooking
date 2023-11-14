@@ -26,15 +26,6 @@ public class SecurityConfiguration {
 
     private final UserRepository userRepository;
 
-    @SneakyThrows
-    private static void redirectToUserPage(HttpServletResponse response, User user) {
-        try {
-            response.sendRedirect("/my-booking/users/" + user.getId());
-        } catch (IOException exception) {
-            throw new RuntimeException();
-        }
-    }
-
     @Bean
     public DefaultSecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         var requestCache = new NullRequestCache();
@@ -71,7 +62,8 @@ public class SecurityConfiguration {
                                 "/api/v1/rooms/content/{d\\+}/delete",
                                 "/my-booking/rooms/{d\\+}/delete",
                                 "/my-booking/rooms/{d\\+}/update",
-                                "/my-booking/rooms/{d\\+}/edit"
+                                "/my-booking/rooms/{d\\+}/edit",
+                                "/my-booking/rooms/{d\\+}/delete"
                         ).hasAuthority(OWNER.getAuthority())
                         .requestMatchers(
                                 "/my-booking/users/{\\d+}/change-status"
@@ -97,5 +89,14 @@ public class SecurityConfiguration {
                         .deleteCookies("JSESSIONID"));
 
         return httpSecurity.build();
+    }
+
+    @SneakyThrows
+    private static void redirectToUserPage(HttpServletResponse response, User user) {
+        try {
+            response.sendRedirect("/my-booking/users/" + user.getId());
+        } catch (IOException exception) {
+            throw new RuntimeException();
+        }
     }
 }
