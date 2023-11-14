@@ -9,10 +9,12 @@ import com.sspdev.hotelbooking.dto.RoomCreateEditDto;
 import com.sspdev.hotelbooking.dto.RoomReadDto;
 import com.sspdev.hotelbooking.dto.UserReadDto;
 import com.sspdev.hotelbooking.dto.filter.RoomFilter;
+import com.sspdev.hotelbooking.integration.annotation.IT;
 import com.sspdev.hotelbooking.service.HotelService;
 import com.sspdev.hotelbooking.service.RoomService;
 import com.sspdev.hotelbooking.service.UserService;
 import com.sspdev.hotelbooking.unit.UnitTestBase;
+import com.sspdev.hotelbooking.unit.annotation.UT;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -170,7 +172,7 @@ public class RoomControllerTest extends UnitTestBase {
     }
 
     @Test
-    void delete_shouldDeleteAndRedirectToHotelPage_whenRoomExists() throws Exception {
+            void delete_shouldDeleteAndRedirectToHotelPage_whenRoomExists() throws Exception {
         var hotelInSession = getHotelReadDto();
         var existentRoom = getRoomReadDto();
 
