@@ -3,6 +3,7 @@ package com.sspdev.hotelbooking.http.controller;
 import com.sspdev.hotelbooking.database.entity.enums.ContentType;
 import com.sspdev.hotelbooking.database.entity.enums.RoomType;
 import com.sspdev.hotelbooking.database.entity.enums.Star;
+import com.sspdev.hotelbooking.dto.HotelReadDto;
 import com.sspdev.hotelbooking.dto.PageResponse;
 import com.sspdev.hotelbooking.dto.RoomContentCreateDto;
 import com.sspdev.hotelbooking.dto.RoomCreateEditDto;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -92,5 +94,15 @@ public class RoomController {
         var roomsByHotel = roomService.findByHotel(hotelId);
         model.addAttribute("rooms", roomsByHotel);
         return "room/rooms-by-hotel";
+    }
+
+    @PostMapping("/{id}/delete")
+    public String delete(@PathVariable("id") Integer id,
+                         @SessionAttribute("hotel") HotelReadDto hotel) {
+        if (roomService.delete(id)) {
+            return "redirect:/my-booking/hotels/" + hotel.getId();
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
     }
 }
