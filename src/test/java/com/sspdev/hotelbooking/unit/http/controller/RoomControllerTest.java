@@ -8,15 +8,15 @@ import com.sspdev.hotelbooking.dto.PageResponse;
 import com.sspdev.hotelbooking.dto.RoomReadDto;
 import com.sspdev.hotelbooking.dto.UserReadDto;
 import com.sspdev.hotelbooking.dto.filter.RoomFilter;
-import com.sspdev.hotelbooking.http.controller.RoomController;
 import com.sspdev.hotelbooking.service.HotelService;
 import com.sspdev.hotelbooking.service.RoomService;
 import com.sspdev.hotelbooking.service.UserService;
+import com.sspdev.hotelbooking.unit.UnitTestBase;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,20 +26,24 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @RequiredArgsConstructor
-@WebMvcTest(value = RoomController.class)
+@AutoConfigureMockMvc
 @WithMockUser(username = "test@gmail.com", password = "test", authorities = {"USER", "OWNER", "ADMIN"})
-public class RoomControllerTest {
+public class RoomControllerTest extends UnitTestBase {
 
     public static final Integer EXISTENT_ROOM_ID = 1;
     public static final Integer NON_EXISTENT_ROOM_ID = 999;
@@ -98,7 +102,7 @@ public class RoomControllerTest {
     void create_shouldReturnNotFound_whenUserAndHotelNotExist() throws Exception {
         when(userService.findById(NON_EXISTENT_OWNER_ID)).thenReturn(Optional.empty());
         when(hotelService.findById(NON_EXISTENT_HOTEL_ID)).thenReturn(Optional.empty());
-        mockMvc.perform(get("/my-booking/rooms" + NON_EXISTENT_OWNER_ID + "/" + NON_EXISTENT_HOTEL_ID + "/add"))
+        mockMvc.perform(get("/my-booking/rooms/" + NON_EXISTENT_OWNER_ID + "/" + NON_EXISTENT_HOTEL_ID + "/add"))
                 .andExpect(status().isNotFound());
     }
 
@@ -124,6 +128,31 @@ public class RoomControllerTest {
         var stringResult = mvcResult.getModelAndView().getModel().get("rooms").toString();
 
         assertThat(stringResult).contains("totalElements=" + expectedTotalElements);
+    }
+
+    @Test
+    void findByHotel_shouldFindRoomsByHotelPage_whenHotelAndRoomsExist() throws Exception {
+        var room = getRoomReadDto();
+        when(roomService.findByHotel(EXISTENT_HOTEL_ID)).thenReturn(List.of(room, room));
+
+        mockMvc.perform(get("/my-booking/rooms/" + EXISTENT_HOTEL_ID + "/rooms-by-hotel"))
+                .andExpect(status().isOk())
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("rooms"))
+                .andExpect(model().attribute("rooms", hasSize(2)))
+                .andExpect(view().name("room/rooms-by-hotel"));
+    }
+
+    @Test
+    void findByHotel_shouldReturnRoomsByHotelPageWithNotRooms() throws Exception {
+        when(roomService.findByHotel(NON_EXISTENT_HOTEL_ID)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/my-booking/rooms/" + NON_EXISTENT_HOTEL_ID + "/rooms-by-hotel"))
+                .andExpect(status().isOk())
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("rooms"))
+                .andExpect(model().attribute("rooms", hasSize(0)))
+                .andExpect(view().name("room/rooms-by-hotel"));
     }
 
     private RoomReadDto getRoomReadDto() {
