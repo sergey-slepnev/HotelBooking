@@ -35,6 +35,7 @@ public class RoomServiceIT extends IntegrationTestBase {
     private static final Long NUMBER_OF_ROOMS_WITH_NO_PREDICATE = 16L;
     private static final Long NUMBER_OF_ROOMS_WITH_COST_FILTER = 5L;
     private static final Integer NOT_EXISTENT_ROOM_ID = 999;
+    private static final Integer NOT_EXISTENT_HOTEL_ID = 999;
 
     private final RoomService roomService;
 
@@ -146,6 +147,20 @@ public class RoomServiceIT extends IntegrationTestBase {
         var isDeleted = roomService.delete(NOT_EXISTENT_ROOM_ID);
 
         assertFalse(isDeleted);
+    }
+
+    @Test
+    void findByHotel_shouldFindRoomsByHotel_whenRoomsExist() {
+        var expectedRooms = roomService.findByHotel(EXISTENT_HOTEL_ID);
+
+        assertThat(expectedRooms).hasSize(4);
+    }
+
+    @Test
+    void findByHotel_shouldReturnEmptyListOfRooms() {
+        var expectedRooms = roomService.findByHotel(NOT_EXISTENT_HOTEL_ID);
+
+        assertThat(expectedRooms).hasSize(0);
     }
 
     private RoomCreateEditDto getRoomCreateEditDto() {
