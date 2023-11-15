@@ -5,6 +5,7 @@ import com.sspdev.hotelbooking.database.entity.enums.RoomType;
 import com.sspdev.hotelbooking.database.entity.enums.Status;
 import com.sspdev.hotelbooking.dto.HotelReadDto;
 import com.sspdev.hotelbooking.dto.PageResponse;
+import com.sspdev.hotelbooking.dto.RoomCreateEditDto;
 import com.sspdev.hotelbooking.dto.RoomReadDto;
 import com.sspdev.hotelbooking.dto.UserReadDto;
 import com.sspdev.hotelbooking.dto.filter.RoomFilter;
@@ -186,6 +187,18 @@ public class RoomControllerTest extends UnitTestBase {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void update_shouldReturnEditRoomPage_whenRoomExist() throws Exception {
+        var room = getRoomReadDto();
+        when(roomService.findById(EXISTENT_ROOM_ID)).thenReturn(Optional.of(room));
+
+        mockMvc.perform(get("/my-booking/rooms/" + EXISTENT_ROOM_ID + "/update")
+                        .sessionAttr("room", room))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("types", RoomType.values()))
+                .andExpect(view().name("room/edit"));
+    }
+
     private RoomReadDto getRoomReadDto() {
         return new RoomReadDto(
                 EXISTENT_ROOM_ID,
@@ -225,5 +238,21 @@ public class RoomControllerTest extends UnitTestBase {
                 "user_avatar",
                 Status.NEW,
                 LocalDateTime.of(2023, 5, 5, 10, 10));
+    }
+
+    private RoomCreateEditDto getRoomEditDto() {
+        return new RoomCreateEditDto(
+                EXISTENT_HOTEL_ID,
+                1,
+                RoomType.TRPL,
+                50.5,
+                2,
+                1,
+                BigDecimal.valueOf(2500),
+                1,
+                true,
+                "Просторная комната",
+                null
+        );
     }
 }

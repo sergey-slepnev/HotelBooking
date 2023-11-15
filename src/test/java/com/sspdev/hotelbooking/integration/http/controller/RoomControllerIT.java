@@ -5,6 +5,7 @@ import com.sspdev.hotelbooking.dto.RoomReadDto;
 import com.sspdev.hotelbooking.dto.filter.RoomFilter;
 import com.sspdev.hotelbooking.integration.IntegrationTestBase;
 import com.sspdev.hotelbooking.service.HotelService;
+import com.sspdev.hotelbooking.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -53,6 +54,7 @@ class RoomControllerIT extends IntegrationTestBase {
 
     private final MockMvc mockMvc;
     private final HotelService hotelService;
+    private final RoomService roomService;
 
     static Stream<Arguments> getArgumentsForFindAllByFilter() {
         return Stream.of(
@@ -164,6 +166,17 @@ class RoomControllerIT extends IntegrationTestBase {
         mockMvc.perform(post("/my-booking/rooms/" + NOT_EXISTENT_ROOM_ID + "/delete")
                         .sessionAttr("hotel", hotelInSession.get()))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void update_shouldReturnEditRoomPage_whenRoomExist() throws Exception {
+        var room = roomService.findById(EXISTENT_ROOM_ID);
+
+        mockMvc.perform(get("/my-booking/rooms/" + EXISTENT_ROOM_ID + "/update")
+                        .sessionAttr("room", room.get()))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("types", RoomType.values()))
+                .andExpect(view().name("room/edit"));
     }
 
     private RoomReadDto getRoomReadDto() {
