@@ -66,7 +66,9 @@ public class SecurityConfiguration {
                                 "/my-booking/rooms/{\\d+}/{\\d+}/add",
                                 "/my-booking/rooms/{\\d+}/{\\d+}/create",
                                 "/api/v1/rooms/content/{d\\+}/delete",
-                                "/my-booking/rooms/{d\\+}/delete"
+                                "/my-booking/rooms/{d\\+}/delete",
+                                "/my-booking/rooms/{d\\+}/update",
+                                "/my-booking/rooms/{d\\+}/edit"
                         ).hasAuthority(OWNER.getAuthority())
                         .requestMatchers(
                                 "/my-booking/users/{\\d+}/change-status"

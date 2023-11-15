@@ -22,6 +22,7 @@ import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.adultBedCount
 import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.available;
 import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.childrenBedCount;
 import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.cost;
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.description;
 import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.floor;
 import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.hotelId;
 import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.roomNo;
@@ -177,6 +178,40 @@ class RoomControllerIT extends IntegrationTestBase {
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("types", RoomType.values()))
                 .andExpect(view().name("room/edit"));
+    }
+
+    @Test
+    void update_shouldUpdateRoom_whenEditDtoValid() throws Exception {
+        mockMvc.perform(post("/my-booking/rooms/" + EXISTENT_ROOM_ID + "/edit")
+                .param(hotelId, String.valueOf(EXISTENT_HOTEL_ID))
+                .param(roomNo, "5")
+                .param(type, RoomType.QDPL.name())
+                .param(square, "60")
+                .param(adultBedCount, "3")
+                .param(childrenBedCount, "1")
+                .param(cost, "6000")
+                .param(floor, "6")
+                .param(available, "true")
+                .param(description, "Отличная комната")
+        ).andExpectAll(
+                status().is3xxRedirection(),
+                redirectedUrlPattern("/my-booking/rooms/{d\\+}"),
+                flash().attributeCount(0));
+    }
+
+    @Test
+    void update_shouldRedirectToUpdatePage_whenEditDtoInvalid() throws Exception {
+        mockMvc.perform(post("/my-booking/rooms/" + EXISTENT_ROOM_ID + "/edit")
+                .param(hotelId, String.valueOf(EXISTENT_HOTEL_ID))
+                .param(cost, "6000")
+                .param(floor, "6")
+                .param(available, "true")
+        ).andExpectAll(
+                status().is3xxRedirection(),
+                redirectedUrlPattern("/my-booking/rooms/{d\\+}/update"),
+                flash().attributeCount(2),
+                flash().attributeExists("roomEditDto", "errors"),
+                flash().attribute("errors", hasSize(4)));
     }
 
     private RoomReadDto getRoomReadDto() {
