@@ -11,6 +11,8 @@ import com.sspdev.hotelbooking.dto.RoomReadDto;
 import com.sspdev.hotelbooking.dto.filter.RoomFilter;
 import com.sspdev.hotelbooking.service.HotelService;
 import com.sspdev.hotelbooking.service.RoomService;
+import com.sspdev.hotelbooking.validation.group.UpdateAction;
+import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -104,6 +106,21 @@ public class RoomController {
                          @ModelAttribute("roomEditDto") RoomCreateEditDto roomEditDto) {
         model.addAttribute("types", RoomType.values());
         return "room/edit";
+    }
+
+    @PostMapping("{id}/edit")
+    public String update(@PathVariable("id") Integer id,
+                         @ModelAttribute("roomEditDto") @Validated({Default.class, UpdateAction.class}) RoomCreateEditDto roomEditDto,
+                         BindingResult bindingResult,
+                         RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
+            redirectAttributes.addFlashAttribute("roomEditDto", roomEditDto);
+            return "redirect:/my-booking/rooms/" + id + "/update";
+        }
+        return roomService.update(id, roomEditDto)
+                .map(it -> "redirect:/my-booking/rooms/" + id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @PostMapping("/{id}/delete")
