@@ -63,7 +63,8 @@ public class SecurityConfiguration {
                                 "/my-booking/rooms/{d\\+}/delete",
                                 "/my-booking/rooms/{d\\+}/update",
                                 "/my-booking/rooms/{d\\+}/edit",
-                                "/my-booking/rooms/{d\\+}/delete"
+                                "/my-booking/rooms/{d\\+}/delete",
+                                "/my-booking/rooms/{d\\+}/edit"
                         ).hasAuthority(OWNER.getAuthority())
                         .requestMatchers(
                                 "/my-booking/users/{\\d+}/change-status"
