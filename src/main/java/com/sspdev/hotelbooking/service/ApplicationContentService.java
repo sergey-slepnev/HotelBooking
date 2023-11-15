@@ -58,6 +58,6 @@ public class ApplicationContentService {
     public boolean isContentValid(MultipartFile content) {
         var contentPath = Path.of(requireNonNull(content.getOriginalFilename()));
         var contentType = Files.probeContentType(contentPath);
-        return contentType == null || contentType.startsWith("image") || contentType.startsWith("video");
+        return contentType != null && (contentType.startsWith("image") || contentType.startsWith("video"));
     }
 }

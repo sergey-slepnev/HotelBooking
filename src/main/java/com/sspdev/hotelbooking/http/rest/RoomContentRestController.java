@@ -107,7 +107,7 @@ public class RoomContentRestController {
             return responseWithoutContent;
         }
     }
-//
+
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<RoomContentReadDto> handlerException(MaxUploadSizeExceededException exception,

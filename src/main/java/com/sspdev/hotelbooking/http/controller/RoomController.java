@@ -30,6 +30,9 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Collection;
+import java.util.stream.Stream;
+
 @Controller
 @RequestMapping("/my-booking/rooms")
 @SessionAttributes(names = "room", types = RoomReadDto.class)
@@ -77,14 +80,20 @@ public class RoomController {
     @PostMapping("/{userId}/{hotelId}/create")
     public String create(@PathVariable("userId") Integer userId,
                          @PathVariable("hotelId") Integer hotelId,
-                         RoomContentCreateDto contentCreateDto,
                          @Validated RoomCreateEditDto createRoomDto,
-                         BindingResult bindingResult,
+                         BindingResult roomBindingResult,
+                         @Validated RoomContentCreateDto contentCreateDto,
+                         BindingResult contentBindingResult,
                          RedirectAttributes redirectAttributes) {
-        if (bindingResult.hasErrors()) {
+        if (roomBindingResult.hasErrors() || contentBindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("room", createRoomDto);
             redirectAttributes.addFlashAttribute("roomContent", contentCreateDto);
-            redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
+            var allErrors = Stream.of(
+                            roomBindingResult.getAllErrors(),
+                            contentBindingResult.getAllErrors())
+                    .flatMap(Collection::stream)
+                    .toList();
+            redirectAttributes.addFlashAttribute("errors", allErrors);
             return "redirect:/my-booking/rooms/{userId}/{hotelId}/add";
         }
         var createdRoom = roomService.create(createRoomDto, contentCreateDto);
