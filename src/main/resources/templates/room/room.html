@@ -31,5 +31,30 @@
     </div>
 </div>
 
+<div sec:authorize="hasAuthority('OWNER')">
+    <form th:action="@{/api/v1/rooms/{roomId}/content/create(roomId=${room.id})}" enctype="multipart/form-data"
+          method="post">
+        <input type="file" name="content" id="content"><br>
+        <button type="submit" th:text="#{button.add_image}">Add image</button>
+        <br>
+    </form>
+</div>
+
+<div th:if="errors">
+    <p style="color: red" th:each="error : ${errors}" th:text="${error}">Error message</p>
+</div>
+
+<div sec:authorize="hasAuthority('OWNER')">
+    <form th:action="@{/my-booking/rooms/{roomId}/update(roomId=${room.id})}">
+        <button type="submit" th:text="#{button.update_room}">Update room</button>
+        <br>
+    </form>
+</div>
+
+<div sec:authorize="hasAnyAuthority('OWNER', 'ADMIN')">
+    <form th:action="@{/my-booking/rooms/{id}/delete(id=${room.id})}" method="post">
+        <button type="submit" th:text="#{button.delete_room}">Delete room</button>
+    </form>
+</div>
 </body>
 </html>
