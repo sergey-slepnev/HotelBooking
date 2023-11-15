@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <head>
     <meta charset="UTF-8">
     <title>User</title>
@@ -20,24 +21,27 @@
         <img th:src="@{/api/v1/users/{userId}/avatar(userId=${user.id})}" alt="User image">
     </div>
 </form>
-
-<a th:href="@{/my-booking/users/{id}/update(id=${user.id})}">
-    <button type="submit" th:text="#{button.update}">Update user</button>
-</a>
-<form th:action="@{/my-booking/users/{id}/delete(id=${user.id})}" method="post">
-    <button type="submit" th:text="#{button.delete_user}">Delete user</button>
-</form>
-
-<span th:text="#{user.change_status}"></span>
-<form th:action="@{/my-booking/users/{id}/change-status(id=${user.id})}" method="post">
-    <div th:each="status : ${statuses}">
-        <label>
-            <input th:id="${status}" type="radio" name="status" th:value="${status}">
-        </label>
-        <label th:for="${status}" th:text="${status}">Status</label>
-    </div>
-    <button type="submit" th:text="#{button.change_status}"></button>
-</form>
-
+<div sec:authorize="hasAnyAuthority('USER', 'OWNER', 'ADMIN')">
+    <a th:href="@{/my-booking/users/{id}/update(id=${user.id})}">
+        <button type="submit" th:text="#{button.update}">Update user</button>
+    </a>
+</div>
+<div sec:authorize="hasAnyAuthority('USER', 'OWNER', 'ADMIN')">
+    <form th:action="@{/my-booking/users/{id}/delete(id=${user.id})}" method="post">
+        <button type="submit" th:text="#{button.delete_user}">Delete user</button>
+    </form>
+</div>
+<div sec:authorize="hasAuthority('ADMIN')">
+    <span th:text="#{user.change_status}"></span>
+    <form th:action="@{/my-booking/users/{id}/change-status(id=${user.id})}" method="post">
+        <div th:each="status : ${statuses}">
+            <label>
+                <input th:id="${status}" type="radio" name="status" th:value="${status}">
+            </label>
+            <label th:for="${status}" th:text="${status}">Status</label>
+        </div>
+        <button type="submit" th:text="#{button.change_status}"></button>
+    </form>
+</div>
 </body>
 </html>
