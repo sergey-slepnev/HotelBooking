@@ -26,11 +26,11 @@ public class UserCreateEditDto {
     String rawPassword;
 
     @NotBlank(message = "{error.blank.firstname}")
-    @Size(min = 3, max = 128, message = "{error.length.firstname}")
+    @Size(min = 1, max = 128, message = "{error.length.firstname}")
     String firstName;
 
     @NotBlank(message = "{error.blank.lastname}")
-    @Size(min = 3, max = 128, message = "{error.length.lastname}")
+    @Size(min = 1, max = 128, message = "{error.length.lastname}")
     String lastName;
 
     @Past(message = "{error.birthdate}")
