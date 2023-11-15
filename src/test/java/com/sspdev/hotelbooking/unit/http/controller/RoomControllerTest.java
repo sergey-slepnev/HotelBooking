@@ -31,6 +31,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.adultBedCount;
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.available;
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.childrenBedCount;
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.cost;
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.description;
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.floor;
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.hotelId;
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.roomNo;
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.square;
+import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.type;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.ArgumentMatchers.any;
@@ -38,6 +48,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -199,6 +210,47 @@ public class RoomControllerTest extends UnitTestBase {
                 .andExpect(view().name("room/edit"));
     }
 
+    @Test
+    void update_shouldUpdateRoom_whenEditDtoValid() throws Exception {
+        var roomEditDto = getRoomEditDto();
+        var roomReadDto = getRoomReadDto();
+
+        when(roomService.update(EXISTENT_ROOM_ID, roomEditDto)).thenReturn(Optional.of(roomReadDto));
+
+        mockMvc.perform(post("/my-booking/rooms/" + EXISTENT_ROOM_ID + "/edit")
+                .param(hotelId, String.valueOf(EXISTENT_HOTEL_ID))
+                .param(roomNo, "1")
+                .param(type, RoomType.TRPL.name())
+                .param(square, "25.3")
+                .param(adultBedCount, "3")
+                .param(childrenBedCount, "0")
+                .param(cost, "1500.99")
+                .param(floor, "1")
+                .param(available, "true")
+                .param(description, "Nice room in moscowPlaza")
+        ).andExpectAll(
+                status().is3xxRedirection(),
+                redirectedUrlPattern("/my-booking/rooms/{d\\+}"),
+                flash().attributeCount(0));
+    }
+
+    @Test
+    void update_shouldRedirectToUpdatePage_whenEditDtoInvalid() throws Exception {
+        when(roomService.update(EXISTENT_ROOM_ID, getRoomEditDto())).thenReturn(Optional.empty());
+
+        mockMvc.perform(post("/my-booking/rooms/" + EXISTENT_ROOM_ID + "/edit")
+                .param(hotelId, String.valueOf(EXISTENT_HOTEL_ID))
+                .param(cost, "6000")
+                .param(floor, "6")
+                .param(available, "true")
+        ).andExpectAll(
+                status().is3xxRedirection(),
+                redirectedUrlPattern("/my-booking/rooms/{d\\+}/update"),
+                flash().attributeCount(2),
+                flash().attributeExists("roomEditDto", "errors"),
+                flash().attribute("errors", hasSize(4)));
+    }
+
     private RoomReadDto getRoomReadDto() {
         return new RoomReadDto(
                 EXISTENT_ROOM_ID,
@@ -245,13 +297,13 @@ public class RoomControllerTest extends UnitTestBase {
                 EXISTENT_HOTEL_ID,
                 1,
                 RoomType.TRPL,
-                50.5,
-                2,
-                1,
-                BigDecimal.valueOf(2500),
+                25.3,
+                3,
+                0,
+                BigDecimal.valueOf(1500.99),
                 1,
                 true,
-                "Просторная комната",
+                "Nice room in moscowPlaza",
                 null
         );
     }
