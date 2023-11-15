@@ -297,13 +297,13 @@ public class RoomControllerTest extends UnitTestBase {
                 EXISTENT_HOTEL_ID,
                 1,
                 RoomType.TRPL,
-                25.3,
-                3,
-                0,
-                BigDecimal.valueOf(1500.99),
+                50.5,
+                2,
+                1,
+                BigDecimal.valueOf(2500),
                 1,
                 true,
-                "Nice room in moscowPlaza",
+                "Просторная комната",
                 null
         );
     }
