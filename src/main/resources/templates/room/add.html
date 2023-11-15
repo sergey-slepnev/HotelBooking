@@ -42,11 +42,6 @@
     <label for="content"><span th:text="#{room.content}">Room content:</span>
         <input type="file" name="content" id="content">
     </label><br>
-    <label for="contentType"><span th:text="#{content.type}">Content type</span>
-        <select name="contentType" id="contentType">
-            <option th:each="type : ${contentTypes}" th:value="${type}" th:text="${type}"></option>
-        </select>
-    </label><br>
     <button type="submit" th:text="#{button.add}">Add room</button>
 </form>
 <div th:if="${errors}">
