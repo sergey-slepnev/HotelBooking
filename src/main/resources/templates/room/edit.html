@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add room</title>
+</head>
+<body>
+<div th:insert="~{fragment/header}"></div>
+<form th:action="@{/my-booking/rooms/{roomId}/edit(roomId=${room.id})}"
+      enctype="multipart/form-data" method="post" th:object="${roomEditDto}">
+
+    <input type="hidden" name="hotelId" th:value="${hotel.id}">
+    <label for="roomNo"><span th:text="#{room.number}">Room no:</span>
+        <input type="number" name="roomNo" id="roomNo" th:value="${roomEditDto.roomNo()}"
+               th:text="|#{text.current_value} - ${room.roomNo}|">
+    </label><br>
+    <label for="type"><span th:text="#{room.type}">Room type:</span>
+        <select name="type" id="type">
+            <option th:each="type : ${types}" th:value="${type}" th:text="${type}"></option>
+        </select>
+    </label><br>
+    <label for="square"><span th:text="#{room.square}">Room square:</span>
+        <input type="number" name="square" id="square" th:value="${roomEditDto.square}"
+               th:text="|#{text.current_value} - ${room.square}|">
+    </label><br>
+    <label for="adultBedCount"><span th:text="#{room.adult_beds}">Adult beds in room:</span>
+        <input type="number" name="adultBedCount" id="adultBedCount" th:value="${roomEditDto.adultBedCount}"
+               th:text="|#{text.current_value} - ${room.adultBedCount}|">
+    </label><br>
+    <label for="childrenBedCount"><span th:text="#{room.children_beds}">Children beds in room:</span>
+        <input type="number" name="childrenBedCount" id="childrenBedCount" th:value="${roomEditDto.childrenBedCount}"
+               th:text="|#{text.current_value} - ${room.childrenBedCount}|">
+    </label><br>
+    <label for="cost"><span th:text="#{room.cost}">Room cost:</span>
+        <input type="number" name="cost" id="cost" th:value="${roomEditDto.cost}"
+               th:text="|#{text.current_value} - ${room.cost}|">
+    </label><br>
+    <label for="floor"><span th:text="#{room.floor}">Floor number:</span>
+        <input type="number" name="floor" id="floor" th:value="${roomEditDto.floor}"
+               th:text="|#{text.current_value} - ${room.floor}|">
+    </label><br>
+    <input type="hidden" name="available">
+    <label for="description"><span th:text="#{room.description}">Description:</span>
+        <input type="text" name="description" id="description" th:value="${roomEditDto.description}"
+               th:text="|#{text.current_value} - ${room.description}|">
+    </label><br>
+    <button type="submit" th:text="#{button.update_room}">Update room</button>
+</form>
+<div th:if="${errors}">
+    <p style="color: red" th:each="error : ${errors}" th:text="${error.defaultMessage}">Error message</p>
+</div>
+</body>
+</html>
