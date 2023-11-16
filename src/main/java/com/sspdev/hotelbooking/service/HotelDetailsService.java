@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -40,5 +41,9 @@ public class HotelDetailsService {
                 .map(entity -> hotelDetailsCreateEditMapper.map(hotelDetails, entity))
                 .map(hotelDetailsRepository::saveAndFlush)
                 .map(hotelDetailsReadMapper::map);
+    }
+
+    public List<String> findCountries() {
+        return hotelDetailsRepository.findCountries();
     }
 }
