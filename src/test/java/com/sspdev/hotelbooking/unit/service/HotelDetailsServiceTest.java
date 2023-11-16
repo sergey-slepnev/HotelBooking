@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -81,6 +82,16 @@ public class HotelDetailsServiceTest extends UnitTestBase {
         var actualHotelDetails = hotelDetailsService.update(hotelDetails.getId(), hotelDetailsCreatedEditDto);
 
         assertThat(actualHotelDetails).isPresent();
+    }
+
+    @Test
+    void findCountries_shouldFindThreeCounties() {
+        when(hotelDetailsRepository.findCountries()).thenReturn(List.of("Russia", "Ukraine", "Belarus"));
+
+        var countries = hotelDetailsService.findCountries();
+
+        assertThat(countries).hasSize(3);
+        assertThat(countries).contains("Russia", "Ukraine", "Belarus");
     }
 
     private HotelDetailsReadDto getHotelDetailsReadDto() {

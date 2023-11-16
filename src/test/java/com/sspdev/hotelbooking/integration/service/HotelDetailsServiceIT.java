@@ -74,6 +74,14 @@ public class HotelDetailsServiceIT extends IntegrationTestBase {
                 }));
     }
 
+    @Test
+    void findCountries_shouldFindThreeCounties() {
+        var countries = hotelDetailsService.findCountries();
+
+        assertThat(countries).hasSize(3);
+        assertThat(countries).contains("Russia", "Ukraine", "Belarus");
+    }
+
     private HotelDetailsCreateEditDto getHotelDetailsCreatedEditDto() {
         return new HotelDetailsCreateEditDto(
                 EXISTENT_HOTEL_ID,
