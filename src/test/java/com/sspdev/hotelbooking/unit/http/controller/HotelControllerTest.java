@@ -7,21 +7,29 @@ import com.sspdev.hotelbooking.database.entity.enums.Status;
 import com.sspdev.hotelbooking.dto.HotelContentReadDto;
 import com.sspdev.hotelbooking.dto.HotelDetailsReadDto;
 import com.sspdev.hotelbooking.dto.HotelReadDto;
+import com.sspdev.hotelbooking.dto.PageResponse;
+import com.sspdev.hotelbooking.dto.filter.HotelFilter;
 import com.sspdev.hotelbooking.service.HotelContentService;
 import com.sspdev.hotelbooking.service.HotelDetailsService;
 import com.sspdev.hotelbooking.service.HotelService;
 import com.sspdev.hotelbooking.unit.UnitTestBase;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -44,12 +52,12 @@ public class HotelControllerTest extends UnitTestBase {
 
     @MockBean
     private final HotelService hotelService;
-
     @MockBean
     private final HotelDetailsService hotelDetailsService;
-
     @MockBean
     private final HotelContentService hotelContentService;
+    @MockBean
+    private final Page<HotelReadDto> hotelReadDtoPage;
 
     @Test
     void findById_shouldReturnPageWithHotelAndHotelDetailsAndContent_whenExist() throws Exception {
@@ -77,6 +85,30 @@ public class HotelControllerTest extends UnitTestBase {
 
         mockMvc.perform(get("/my-booking/hotels/" + NON_EXISTENT_HOTEL_ID))
                 .andExpect(status().isNotFound());
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {1L, 5L, 20L, 100L})
+    void findAll_shouldFindAllRooms_whenNoPredicatesFilter(long expectedTotalElements) throws Exception {
+        var pageMetadata = new PageResponse.Metadata(0, 20, expectedTotalElements);
+        var expectedResponseContent = List.of(getHotelReadDto());
+        var pageResponse = new PageResponse<>(expectedResponseContent, pageMetadata);
+
+        when(hotelReadDtoPage.getContent()).thenReturn(expectedResponseContent);
+        when(hotelReadDtoPage.getSize()).thenReturn(20);
+        when(hotelReadDtoPage.getTotalElements()).thenReturn(expectedTotalElements);
+        when(hotelService.findAllByFilter(any(HotelFilter.class), any(Pageable.class))).thenReturn(hotelReadDtoPage);
+
+        var mvcResult = mockMvc.perform(get("/my-booking/hotels"))
+                .andExpectAll(
+                        status().isOk(),
+                        model().attributeExists("hotels", "filter"),
+                        model().attribute("hotels", pageResponse)
+                ).andReturn();
+
+        var hotelsToString = mvcResult.getModelAndView().getModel().get("hotels").toString();
+
+        assertThat(hotelsToString).contains("totalElements=" + expectedTotalElements);
     }
 
     private HotelReadDto getHotelReadDto() {

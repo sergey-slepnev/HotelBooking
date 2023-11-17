@@ -1,11 +1,21 @@
 package com.sspdev.hotelbooking.integration.http.controller;
 
+import com.sspdev.hotelbooking.database.entity.enums.Star;
 import com.sspdev.hotelbooking.integration.IntegrationTestBase;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.stream.Stream;
+
+import static com.sspdev.hotelbooking.dto.filter.HotelFilter.Fields.country;
+import static com.sspdev.hotelbooking.dto.filter.HotelFilter.Fields.star;
+import static java.util.Objects.requireNonNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -37,5 +47,27 @@ class HotelControllerIT extends IntegrationTestBase {
     void findById_shouldReturnNotFound_whenHotelNotExist() throws Exception {
         mockMvc.perform(get("/my-booking/hotels/" + NON_EXISTENT_HOTEL_ID))
                 .andExpect(status().isNotFound());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getArgumentsForFindAll")
+    void findAll_shouldFindHotelsByFilter(String paramName, String paramValue, Integer expectedNumbersOfHotels) throws Exception {
+        var mvcResult = mockMvc.perform(get("/my-booking/hotels")
+                        .queryParam(paramName, paramValue))
+                .andExpectAll(
+                        status().isOk(),
+                        model().attributeExists("hotels", "stars", "filter", "countries"))
+                .andReturn();
+        var hotelsToString = requireNonNull(mvcResult.getModelAndView()).getModel().get("hotels").toString();
+
+        assertThat(hotelsToString).contains("totalElements=" + expectedNumbersOfHotels);
+    }
+
+    static Stream<Arguments> getArgumentsForFindAll() {
+        return Stream.of(
+                Arguments.of(star, "", 5),
+                Arguments.of(star, Star.TWO.name(), 2),
+                Arguments.of(country, "Russia", 3)
+        );
     }
 }
