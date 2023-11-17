@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+        <title>Adding hotel</title>
+</head>
+<body>
+<div th:insert="~{fragment/header}"></div>
+<form th:action="@{/my-booking/hotels/{userId}/create(userId=${user.id})}" enctype="multipart/form-data" method="post"
+      th:object="${hotelCreateDto}">
+
+    <!--    For HotelCreateEditDTO-->
+    <input id="ownerId" type="hidden" name="ownerId" th:value="${user.id}">
+    <label for="name"><span th:text="#{hotel.name}">Name:</span>
+        <input id="name" type="text" name="name" th:value="${hotelCreateDto.name}">
+    </label><br>
+
+    <div th:if="${hotelErrors}">
+        <p style="color: red" th:each="error : ${hotelErrors}" th:text="${error.defaultMessage}">Error message</p>
+    </div>
+
+    <!--For HotelDetailsCreateEditDTO-->
+    <label for="phoneNumber"><span th:text="#{hotel.phone}">Phone:</span>
+        <input id="phoneNumber" type="text" name="phoneNumber" th:value="${hotelDetails.phoneNumber}">
+    </label><br>
+    <label for="country"><span th:text="#{hotel.country}">Country:</span>
+        <input id="country" type="text" name="country" th:value="${hotelDetails.country}">
+    </label><br>
+    <label for="locality"><span th:text="#{hotel.city}">Locality:</span>
+        <input id="locality" type="text" name="locality" th:value="${hotelDetails.locality}">
+    </label><br>
+
+    <label for="area"><span th:text="#{hotel.area}">Area:</span>
+        <input id="area" type="text" name="area" th:value="${hotelDetails.area}">
+    </label><br>
+    <label for="street"><span th:text="#{hotel.street}">Street:</span>
+        <input id="street" type="text" name="street" th:value="${hotelDetails.street}">
+    </label><br>
+    <label for="floorCount"><span th:text="#{hotel.floors}">Floors</span>
+        <input id="floorCount" type="number" name="floorCount" th:value="${hotelDetails.floorCount}">
+    </label><br>
+    <label for="star"><span th:text="#{hotel.star}">Stars:</span>
+        <select name="star" id="star">
+            <option th:each="star : ${stars}" th:value="${star}" th:text="${star}"
+                    th:checked="${star == hotelDetails.star}"></option>
+        </select>
+    </label><br>
+    <label for="description"><span th:text="#{hotel.description}">Description:</span>
+        <input id="description" type="text" name="description" th:value="${hotelDetails.description}">
+    </label><br>
+
+    <div th:if="${hotelDetailsErrors}">
+        <p style="color: red" th:each="error : ${hotelDetailsErrors}" th:text="${error.defaultMessage}">Error
+            message</p>
+    </div>
+
+    <div th:if="${hotelContentErrors}">
+        <p style="color: red" th:each="error : ${hotelContentErrors}" th:text="${error.defaultMessage}">Error
+            message</p>
+    </div>
+
+    <!--    For HotelContentCreateDTO-->
+    <label for="content"><span th:text="#{hotel.content}">Content</span>
+        <input type="file" id="content" name="content">
+    </label><br>
+
+    <button type="submit" th:text="#{button.add}">Add hotel</button>
+</form>
+</body>
+</html>
