@@ -15,13 +15,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/my-booking/hotels")
@@ -72,5 +76,44 @@ public class HotelController {
         model.addAttribute("stars", Star.values());
 
         return "hotel/add";
+    }
+
+    @PostMapping("/{userId}/create")
+    public String create(@PathVariable("userId") Integer userId,
+                         @ModelAttribute("hotelCreateDto") @Validated HotelCreateEditDto hotelCreateDto,
+                         BindingResult hotelBindingResult,
+                         @ModelAttribute("hotelDetails") @Validated HotelDetailsCreateEditDto hotelDetailsCreateDto,
+                         BindingResult hotelDetailsBindingResult,
+                         @ModelAttribute("hotelContent") @Validated HotelContentCreateDto hotelContentCreateDto,
+                         BindingResult hotelContentBindingResult,
+                         RedirectAttributes redirectAttributes) {
+        if (hotelBindingResult.hasErrors() || hotelDetailsBindingResult.hasErrors() || hotelContentBindingResult.hasErrors()) {
+            flashAttributes(hotelCreateDto,
+                    hotelBindingResult,
+                    hotelDetailsCreateDto,
+                    hotelDetailsBindingResult,
+                    hotelContentCreateDto,
+                    hotelContentBindingResult,
+                    redirectAttributes);
+            return "redirect:/my-booking/hotels/" + userId + "/add-hotel";
+        }
+
+        var hotelReadDto = hotelService.create(hotelCreateDto, hotelDetailsCreateDto, hotelContentCreateDto);
+        return "redirect:/my-booking/hotels/" + hotelReadDto.getId();
+    }
+
+    private static void flashAttributes(HotelCreateEditDto hotelDto,
+                                        BindingResult hotelBindingResult,
+                                        HotelDetailsCreateEditDto hotelDetailsCreateDTO,
+                                        BindingResult hotelDetailsBindingResult,
+                                        HotelContentCreateDto hotelContentCreateDTO,
+                                        BindingResult hotelContentBindingResult,
+                                        RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("hotel", hotelDto);
+        redirectAttributes.addFlashAttribute("hotelDetails", hotelDetailsCreateDTO);
+        redirectAttributes.addFlashAttribute("hotelContent", hotelContentCreateDTO);
+        redirectAttributes.addFlashAttribute("hotelErrors", hotelBindingResult.getAllErrors());
+        redirectAttributes.addFlashAttribute("hotelDetailsErrors", hotelDetailsBindingResult.getAllErrors());
+        redirectAttributes.addFlashAttribute("hotelContentErrors", hotelContentBindingResult.getAllErrors());
     }
 }
