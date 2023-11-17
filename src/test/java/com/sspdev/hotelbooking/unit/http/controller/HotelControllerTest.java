@@ -5,7 +5,10 @@ import com.sspdev.hotelbooking.database.entity.enums.ContentType;
 import com.sspdev.hotelbooking.database.entity.enums.Role;
 import com.sspdev.hotelbooking.database.entity.enums.Star;
 import com.sspdev.hotelbooking.database.entity.enums.Status;
+import com.sspdev.hotelbooking.dto.HotelContentCreateDto;
 import com.sspdev.hotelbooking.dto.HotelContentReadDto;
+import com.sspdev.hotelbooking.dto.HotelCreateEditDto;
+import com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto;
 import com.sspdev.hotelbooking.dto.HotelDetailsReadDto;
 import com.sspdev.hotelbooking.dto.HotelReadDto;
 import com.sspdev.hotelbooking.dto.PageResponse;
@@ -23,6 +26,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -31,13 +35,27 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static com.sspdev.hotelbooking.dto.HotelCreateEditDto.Fields.name;
+import static com.sspdev.hotelbooking.dto.HotelCreateEditDto.Fields.ownerId;
+import static com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto.Fields.area;
+import static com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto.Fields.description;
+import static com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto.Fields.floorCount;
+import static com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto.Fields.hotelId;
+import static com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto.Fields.locality;
+import static com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto.Fields.phoneNumber;
+import static com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto.Fields.street;
+import static com.sspdev.hotelbooking.dto.filter.HotelFilter.Fields.country;
+import static com.sspdev.hotelbooking.dto.filter.HotelFilter.Fields.star;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -125,6 +143,33 @@ public class HotelControllerTest extends UnitTestBase {
                 .andExpect(view().name("hotel/add"));
     }
 
+    @Test
+    void create_shouldRedirectToAddHotelPage_whenDtoInvalid() throws Exception {
+        var userInSession = getHotelReadDto();
+        var createHotelDto = getHotelCreateEditDto();
+        var hotelDetailsCreatedDto = getHotelDetailsCreatedEditDto();
+        var hotelContentCreateDto = getHotelContentCreateDto();
+
+        when(hotelService.create(createHotelDto, hotelDetailsCreatedDto, hotelContentCreateDto)).thenReturn(getHotelReadDto());
+
+        mockMvc.perform(post("/my-booking/hotels/" + EXISTENT_OWNER_ID + "/create")
+                        .sessionAttr("user", userInSession)
+                        .param(ownerId, String.valueOf(EXISTENT_OWNER_ID))
+                        .param(name, "T")
+                        .param(hotelId, String.valueOf(EXISTENT_HOTEL_ID))
+                        .param(phoneNumber, "0")
+                        .param(country, "")
+                        .param(locality, "")
+                        .param(area, "0")
+                        .param(street, "")
+                        .param(floorCount, "five")
+                        .param(star, Star.FIVE.name())
+                        .param(description, "Замечательный отель"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attributeCount(6))
+                .andExpect(redirectedUrlPattern("/my-booking/hotels/{d\\+}/add-hotel"));
+    }
+
     private HotelReadDto getHotelReadDto() {
         return new HotelReadDto(
                 EXISTENT_HOTEL_ID,
@@ -178,5 +223,36 @@ public class HotelControllerTest extends UnitTestBase {
                 "user_avatar",
                 Status.NEW,
                 LocalDateTime.of(2023, 5, 5, 10, 10));
+    }
+
+    private HotelCreateEditDto getHotelCreateEditDto() {
+        return new HotelCreateEditDto(
+                EXISTENT_OWNER_ID,
+                "TestHotel",
+                true,
+                Status.APPROVED
+        );
+    }
+
+    private HotelDetailsCreateEditDto getHotelDetailsCreatedEditDto() {
+        return new HotelDetailsCreateEditDto(
+                EXISTENT_HOTEL_ID,
+                "+7-965-78-78-888",
+                "Россия",
+                "Москва",
+                "Центральный",
+                "Новокузнецкая",
+                3,
+                Star.FIVE,
+                "Очень хороший отель"
+        );
+    }
+
+    private HotelContentCreateDto getHotelContentCreateDto() {
+        return new HotelContentCreateDto(
+                new MockMultipartFile("test.jpg", "test.jpg".getBytes()),
+                ContentType.PHOTO,
+                EXISTENT_HOTEL_ID
+        );
     }
 }

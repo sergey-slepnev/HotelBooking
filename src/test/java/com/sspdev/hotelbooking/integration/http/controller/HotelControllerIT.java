@@ -13,6 +13,15 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.stream.Stream;
 
+import static com.sspdev.hotelbooking.dto.HotelCreateEditDto.Fields.name;
+import static com.sspdev.hotelbooking.dto.HotelCreateEditDto.Fields.ownerId;
+import static com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto.Fields.area;
+import static com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto.Fields.description;
+import static com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto.Fields.floorCount;
+import static com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto.Fields.hotelId;
+import static com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto.Fields.locality;
+import static com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto.Fields.phoneNumber;
+import static com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto.Fields.street;
 import static com.sspdev.hotelbooking.dto.filter.HotelFilter.Fields.country;
 import static com.sspdev.hotelbooking.dto.filter.HotelFilter.Fields.star;
 import static java.util.Objects.requireNonNull;
@@ -20,7 +29,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -75,6 +87,48 @@ class HotelControllerIT extends IntegrationTestBase {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("hotelCreateDto", "hotelDetails", "hotelContent", "stars"))
                 .andExpect(view().name("hotel/add"));
+    }
+
+    @Test
+    void create_shouldCreateNewHotel_whenHotelDtoAndHotelDetailsDtoValid() throws Exception {
+        var userInSession = userService.findById(EXISTENT_OWNER_ID);
+        mockMvc.perform(post("/my-booking/hotels/" + EXISTENT_OWNER_ID + "/create")
+                        .sessionAttr("user", userInSession.get())
+                        .param(ownerId, String.valueOf(EXISTENT_OWNER_ID))
+                        .param(name, "TestHotel")
+                        .param(hotelId, String.valueOf(EXISTENT_HOTEL_ID))
+                        .param(phoneNumber, "8-934-776-59-06")
+                        .param(country, "Россия")
+                        .param(locality, "Москва")
+                        .param(area, "60")
+                        .param(street, "Новая")
+                        .param(floorCount, "4")
+                        .param(star, Star.FIVE.name())
+                        .param(description, "Замечательный отель"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attributeCount(0))
+                .andExpect(redirectedUrlPattern("/my-booking/hotels/{d\\+}"));
+    }
+
+    @Test
+    void create_shouldRedirectToAddHotelPage_whenDtoInvalid() throws Exception {
+        var userInSession = userService.findById(EXISTENT_OWNER_ID);
+        mockMvc.perform(post("/my-booking/hotels/" + EXISTENT_OWNER_ID + "/create")
+                        .sessionAttr("user", userInSession.get())
+                        .param(ownerId, String.valueOf(EXISTENT_OWNER_ID))
+                        .param(name, "T")
+                        .param(hotelId, String.valueOf(EXISTENT_HOTEL_ID))
+                        .param(phoneNumber, "0")
+                        .param(country, "")
+                        .param(locality, "")
+                        .param(area, "0")
+                        .param(street, "")
+                        .param(floorCount, "five")
+                        .param(star, Star.FIVE.name())
+                        .param(description, "Замечательный отель"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attributeCount(6))
+                .andExpect(redirectedUrlPattern("/my-booking/hotels/{d\\+}/add-hotel"));
     }
 
     static Stream<Arguments> getArgumentsForFindAll() {
