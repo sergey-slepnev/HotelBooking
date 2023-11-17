@@ -1,7 +1,11 @@
 package com.sspdev.hotelbooking.http.controller;
 
 import com.sspdev.hotelbooking.database.entity.enums.Star;
+import com.sspdev.hotelbooking.dto.HotelContentCreateDto;
+import com.sspdev.hotelbooking.dto.HotelCreateEditDto;
+import com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto;
 import com.sspdev.hotelbooking.dto.PageResponse;
+import com.sspdev.hotelbooking.dto.UserReadDto;
 import com.sspdev.hotelbooking.dto.filter.HotelFilter;
 import com.sspdev.hotelbooking.service.HotelContentService;
 import com.sspdev.hotelbooking.service.HotelDetailsService;
@@ -12,8 +16,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -50,5 +56,21 @@ public class HotelController {
         model.addAttribute("filter", filter);
         model.addAttribute("countries", hotelDetailsService.findCountries());
         return "hotel/hotels";
+    }
+
+    @GetMapping("/{userId}/add-hotel")
+    public String add(@PathVariable("userId") Integer userId,
+                      @SessionAttribute("user") UserReadDto user,
+                      Model model,
+                      @ModelAttribute("hotelCreateDto") HotelCreateEditDto hotelCreateDto,
+                      @ModelAttribute("hotelDetails") HotelDetailsCreateEditDto hotelDetailsCreateDto,
+                      @ModelAttribute("hotelContent") HotelContentCreateDto hotelContentCreateDto) {
+        model.addAttribute("user", user);
+        model.addAttribute("hotelCreateDto", hotelCreateDto);
+        model.addAttribute("hotelDetails", hotelDetailsCreateDto);
+        model.addAttribute("hotelContent", hotelContentCreateDto);
+        model.addAttribute("stars", Star.values());
+
+        return "hotel/add";
     }
 }
