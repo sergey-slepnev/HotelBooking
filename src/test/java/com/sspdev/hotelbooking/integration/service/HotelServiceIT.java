@@ -143,7 +143,7 @@ public class HotelServiceIT extends IntegrationTestBase {
     void create_shouldCreateNewHotel_whenCreateDtoValid() {
         var hotelCreateEditDto = getHotelCreateEditDto();
         var hotelDetailsCreatedEditDto = getHotelDetailsCreatedEditDto();
-        var actualResult = hotelService.create(hotelCreateEditDto, hotelDetailsCreatedEditDto);
+        var actualResult = hotelService.create(hotelCreateEditDto, hotelDetailsCreatedEditDto, null);
 
         assertThat(actualResult).isNotNull();
         assertThat(actualResult.getId()).isPositive();

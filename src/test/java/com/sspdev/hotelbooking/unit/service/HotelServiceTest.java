@@ -170,7 +170,7 @@ public class HotelServiceTest extends UnitTestBase {
         when(hotelRepository.save(hotel)).thenReturn(hotel);
         when(hotelReadMapper.map(hotel)).thenReturn(hotelReadDto);
 
-        var actualResult = hotelService.create(hotelCreateEditDto, hotelDetailsCreatedEditDto);
+        var actualResult = hotelService.create(hotelCreateEditDto, hotelDetailsCreatedEditDto, null);
 
         assertThat(actualResult.getId()).isPositive();
         verify(hotelDetailsService).create(hotelDetailsCreatedEditDto);

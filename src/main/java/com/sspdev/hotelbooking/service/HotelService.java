@@ -2,6 +2,7 @@ package com.sspdev.hotelbooking.service;
 
 import com.sspdev.hotelbooking.database.querydsl.QPredicates;
 import com.sspdev.hotelbooking.database.repository.HotelRepository;
+import com.sspdev.hotelbooking.dto.HotelContentCreateDto;
 import com.sspdev.hotelbooking.dto.HotelCreateEditDto;
 import com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto;
 import com.sspdev.hotelbooking.dto.HotelReadDto;
@@ -28,6 +29,8 @@ public class HotelService {
     private final HotelReadMapper hotelReadMapper;
     private final HotelCreateEditMapper hotelCreateEditMapper;
     private final HotelDetailsService hotelDetailsService;
+    private final ApplicationContentService applicationContentService;
+    private final HotelContentService hotelContentService;
 
     public List<HotelReadDto> findAll(HotelFilter filter) {
         return hotelRepository.findAllByFilter(filter).stream()
@@ -61,15 +64,20 @@ public class HotelService {
     }
 
     @Transactional
-    public HotelReadDto create(HotelCreateEditDto hotelDto,
-                               HotelDetailsCreateEditDto hotelDetailsDto) {
-        return Optional.of(hotelDto)
+    public HotelReadDto create(HotelCreateEditDto hotelDTO,
+                               HotelDetailsCreateEditDto hotelDetailsDto,
+                               HotelContentCreateDto hotelContentDto) {
+        return Optional.of(hotelDTO)
                 .map(hotelCreateEditMapper::map)
                 .map(hotelRepository::save)
                 .map(hotelReadMapper::map)
                 .map(hotel -> {
                     hotelDetailsDto.setHotelId(hotel.getId());
                     hotelDetailsService.create(hotelDetailsDto);
+                    if (hotelContentDto.getContent() != null && !hotelContentDto.getContent().isEmpty()) {
+                        hotelContentDto.setHotelId(hotel.getId());
+                        hotelContentService.save(hotelContentDto);
+                    }
                     return hotel;
                 }).orElseThrow();
     }
