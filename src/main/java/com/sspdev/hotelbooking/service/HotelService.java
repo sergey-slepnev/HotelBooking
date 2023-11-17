@@ -1,5 +1,6 @@
 package com.sspdev.hotelbooking.service;
 
+import com.sspdev.hotelbooking.database.querydsl.QPredicates;
 import com.sspdev.hotelbooking.database.repository.HotelRepository;
 import com.sspdev.hotelbooking.dto.HotelCreateEditDto;
 import com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto;
@@ -8,11 +9,15 @@ import com.sspdev.hotelbooking.dto.filter.HotelFilter;
 import com.sspdev.hotelbooking.mapper.HotelCreateEditMapper;
 import com.sspdev.hotelbooking.mapper.HotelReadMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+
+import static com.sspdev.hotelbooking.database.entity.QHotel.hotel;
 
 @RequiredArgsConstructor
 @Service
@@ -24,7 +29,7 @@ public class HotelService {
     private final HotelCreateEditMapper hotelCreateEditMapper;
     private final HotelDetailsService hotelDetailsService;
 
-    public List<HotelReadDto> findAllByFilter(HotelFilter filter) {
+    public List<HotelReadDto> findAll(HotelFilter filter) {
         return hotelRepository.findAllByFilter(filter).stream()
                 .map(hotelReadMapper::map)
                 .toList();
@@ -36,10 +41,18 @@ public class HotelService {
                 .toList();
     }
 
-    public List<HotelReadDto> findAll() {
-        return hotelRepository.findAll().stream()
-                .map(hotelReadMapper::map)
-                .toList();
+    public Page<HotelReadDto> findAllByFilter(HotelFilter filter, Pageable pageable) {
+        var predicate = QPredicates.builder()
+                .add(filter.name(), hotel.name::eq)
+                .add(filter.status(), hotel.status::eq)
+                .add(filter.available(), hotel.available::eq)
+                .add(filter.country(), hotel.hotelDetails.country::containsIgnoreCase)
+                .add(filter.locality(), hotel.hotelDetails.locality::containsIgnoreCase)
+                .add(filter.star(), hotel.hotelDetails.star::eq)
+                .build();
+
+        return hotelRepository.findAll(predicate, pageable)
+                .map(hotelReadMapper::map);
     }
 
     public Optional<HotelReadDto> findById(Integer id) {
