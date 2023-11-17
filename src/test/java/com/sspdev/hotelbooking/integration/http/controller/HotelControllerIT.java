@@ -2,6 +2,7 @@ package com.sspdev.hotelbooking.integration.http.controller;
 
 import com.sspdev.hotelbooking.database.entity.enums.Star;
 import com.sspdev.hotelbooking.integration.IntegrationTestBase;
+import com.sspdev.hotelbooking.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -29,8 +30,10 @@ class HotelControllerIT extends IntegrationTestBase {
 
     private static final Integer EXISTENT_HOTEL_ID = 1;
     private static final Integer NON_EXISTENT_HOTEL_ID = 999;
+    private static final Integer EXISTENT_OWNER_ID = 4;
 
     private final MockMvc mockMvc;
+    private final UserService userService;
 
     @Test
     void findById_shouldReturnPageWithHotelAndHotelDetailsAndContent_whenExist() throws Exception {
@@ -61,6 +64,17 @@ class HotelControllerIT extends IntegrationTestBase {
         var hotelsToString = requireNonNull(mvcResult.getModelAndView()).getModel().get("hotels").toString();
 
         assertThat(hotelsToString).contains("totalElements=" + expectedNumbersOfHotels);
+    }
+
+    @Test
+    void add_shouldReturnAddHotelPage() throws Exception {
+        var existentOwner = userService.findById(EXISTENT_OWNER_ID);
+        mockMvc.perform(get("/my-booking/hotels/" + EXISTENT_OWNER_ID + "/add-hotel")
+                        .sessionAttr("user", existentOwner.get())
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("hotelCreateDto", "hotelDetails", "hotelContent", "stars"))
+                .andExpect(view().name("hotel/add"));
     }
 
     static Stream<Arguments> getArgumentsForFindAll() {

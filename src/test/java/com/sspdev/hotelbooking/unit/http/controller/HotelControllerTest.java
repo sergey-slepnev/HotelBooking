@@ -2,12 +2,14 @@ package com.sspdev.hotelbooking.unit.http.controller;
 
 import com.sspdev.hotelbooking.database.entity.Hotel;
 import com.sspdev.hotelbooking.database.entity.enums.ContentType;
+import com.sspdev.hotelbooking.database.entity.enums.Role;
 import com.sspdev.hotelbooking.database.entity.enums.Star;
 import com.sspdev.hotelbooking.database.entity.enums.Status;
 import com.sspdev.hotelbooking.dto.HotelContentReadDto;
 import com.sspdev.hotelbooking.dto.HotelDetailsReadDto;
 import com.sspdev.hotelbooking.dto.HotelReadDto;
 import com.sspdev.hotelbooking.dto.PageResponse;
+import com.sspdev.hotelbooking.dto.UserReadDto;
 import com.sspdev.hotelbooking.dto.filter.HotelFilter;
 import com.sspdev.hotelbooking.service.HotelContentService;
 import com.sspdev.hotelbooking.service.HotelDetailsService;
@@ -24,6 +26,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -111,6 +115,16 @@ public class HotelControllerTest extends UnitTestBase {
         assertThat(hotelsToString).contains("totalElements=" + expectedTotalElements);
     }
 
+    @Test
+    void add_shouldReturnAddHotelPage() throws Exception {
+        var userInSession = getUserReadDto();
+        mockMvc.perform(get("/my-booking/hotels/" + EXISTENT_OWNER_ID + "/add-hotel")
+                        .sessionAttr("user", userInSession))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("hotelCreateDto", "hotelDetails", "hotelContent", "stars"))
+                .andExpect(view().name("hotel/add"));
+    }
+
     private HotelReadDto getHotelReadDto() {
         return new HotelReadDto(
                 EXISTENT_HOTEL_ID,
@@ -149,5 +163,20 @@ public class HotelControllerTest extends UnitTestBase {
                 ContentType.PHOTO.name(),
                 EXISTENT_HOTEL_ID
         );
+    }
+
+    private UserReadDto getUserReadDto() {
+        return new UserReadDto(
+                EXISTENT_OWNER_ID,
+                Role.USER,
+                "user",
+                "123",
+                "Petr",
+                "Petrov",
+                LocalDate.of(2000, 10, 10),
+                "+7-954-984-98-98",
+                "user_avatar",
+                Status.NEW,
+                LocalDateTime.of(2023, 5, 5, 10, 10));
     }
 }
