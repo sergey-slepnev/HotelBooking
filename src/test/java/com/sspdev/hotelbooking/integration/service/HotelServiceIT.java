@@ -1,5 +1,6 @@
 package com.sspdev.hotelbooking.integration.service;
 
+import com.sspdev.hotelbooking.database.entity.Hotel;
 import com.sspdev.hotelbooking.database.entity.enums.Star;
 import com.sspdev.hotelbooking.database.entity.enums.Status;
 import com.sspdev.hotelbooking.dto.HotelCreateEditDto;
@@ -13,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -40,8 +43,8 @@ public class HotelServiceIT extends IntegrationTestBase {
 
     @ParameterizedTest
     @MethodSource("getArgumentsForFindAllByFilter")
-    void checkFindByFilter(HotelFilter filter, Integer expectedNumberOfHotels) {
-        var actualHotels = hotelService.findAllByFilter(filter);
+    void findAll_shouldReturnHotelsByFilter(HotelFilter filter, Integer expectedNumberOfHotels) {
+        var actualHotels = hotelService.findAll(filter);
 
         assertEquals(actualHotels.size(), expectedNumberOfHotels);
     }
@@ -66,8 +69,37 @@ public class HotelServiceIT extends IntegrationTestBase {
     }
 
     @ParameterizedTest
+    @MethodSource("getArgumentsForFindAllByFilterAndPageable")
+    void findAllByFilter_shouldFindAllHotelsByFilterAndPageable_sortedByName(HotelFilter filter,
+                                                                Integer expectedNumberOfHotels,
+                                                                String... expectedHotelNames) {
+        var sort = Sort.sort(Hotel.class).by(Hotel::getName);
+        var pageable = PageRequest.of(0, 20, sort);
+
+        var actualHotels = hotelService.findAllByFilter(filter, pageable);
+        var actualHotelNames = actualHotels.stream().map(HotelReadDto::getName).toList();
+
+        assertThat(actualHotels).hasSize(expectedNumberOfHotels);
+        assertThat(actualHotelNames).containsExactly(expectedHotelNames);
+    }
+
+    static Stream<Arguments> getArgumentsForFindAllByFilterAndPageable() {
+        return Stream.of(
+//                empty filter -> find all hotels (5)
+                Arguments.of(HotelFilter.builder().build(), 5,
+                        new String[]{"KievPlaza", "MinskPlaza", "MoscowHotel", "MoscowPlaza", "PiterPlaza"}),
+//                country = "Russia" -> find 3 hotels
+                Arguments.of(HotelFilter.builder().country("Russia").build(), 3,
+                        new String[]{"MoscowHotel", "MoscowPlaza", "PiterPlaza"}),
+//                 star = TWO -> find two 2 hotels
+                Arguments.of(HotelFilter.builder().star(Star.TWO).build(), 2,
+                        new String[]{"MinskPlaza", "MoscowHotel"})
+        );
+    }
+
+    @ParameterizedTest
     @MethodSource("getArgumentsForFindAllByOwnerId")
-    void checkFindAllByOwnerId(Integer ownerId, Integer expectedNumberOfHotelsByUser, String... expectedHotelNames) {
+    void findAllByOwnerId_shouldFindHotelsByOwner_whenHotelsExixt(Integer ownerId, Integer expectedNumberOfHotelsByUser, String... expectedHotelNames) {
         var actualHotels = hotelService.findAllByOwnerId(ownerId);
         var actualHotelNames = actualHotels.stream().map(HotelReadDto::getName).toList();
 
@@ -86,16 +118,9 @@ public class HotelServiceIT extends IntegrationTestBase {
         );
     }
 
-    @Test
-    void shouldReturnAllHotels() {
-        var allHotels = hotelService.findAll();
-
-        assertThat(allHotels).hasSize(5);
-    }
-
     @ParameterizedTest
     @MethodSource("getArgumentsForFindById")
-    void checkFindById(Integer hotelId, Object expectedResult) {
+    void findById_shouldFindHotelById_whenHotelExists(Integer hotelId, Object expectedResult) {
         var actualResult = hotelService.findById(hotelId);
 
         assertThat(actualResult).isEqualTo(expectedResult);
@@ -115,7 +140,7 @@ public class HotelServiceIT extends IntegrationTestBase {
     }
 
     @Test
-    void shouldCreateNewHotel() {
+    void create_shouldCreateNewHotel_whenCreateDtoValid() {
         var hotelCreateEditDto = getHotelCreateEditDto();
         var hotelDetailsCreatedEditDto = getHotelDetailsCreatedEditDto();
         var actualResult = hotelService.create(hotelCreateEditDto, hotelDetailsCreatedEditDto);
@@ -125,7 +150,7 @@ public class HotelServiceIT extends IntegrationTestBase {
     }
 
     @Test
-    void shouldUpdateExistentHotel() {
+    void update_shouldUpdateExistentHotel_whenUpdateDtoValid() {
         var nonUpdatedHotel = hotelService.findById(EXISTENT_HOTEL_ID);
         nonUpdatedHotel.ifPresent(hotel -> {
             assertAll(() -> {

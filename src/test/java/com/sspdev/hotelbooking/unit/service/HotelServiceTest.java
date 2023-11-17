@@ -1,14 +1,15 @@
 package com.sspdev.hotelbooking.unit.service;
 
 import com.sspdev.hotelbooking.database.entity.Hotel;
+import com.sspdev.hotelbooking.database.entity.QHotel;
 import com.sspdev.hotelbooking.database.entity.User;
 import com.sspdev.hotelbooking.database.entity.enums.Role;
 import com.sspdev.hotelbooking.database.entity.enums.Star;
 import com.sspdev.hotelbooking.database.entity.enums.Status;
+import com.sspdev.hotelbooking.database.querydsl.QPredicates;
 import com.sspdev.hotelbooking.database.repository.HotelRepository;
 import com.sspdev.hotelbooking.dto.HotelCreateEditDto;
 import com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto;
-import com.sspdev.hotelbooking.dto.HotelDetailsReadDto;
 import com.sspdev.hotelbooking.dto.HotelReadDto;
 import com.sspdev.hotelbooking.dto.filter.HotelFilter;
 import com.sspdev.hotelbooking.mapper.HotelCreateEditMapper;
@@ -23,6 +24,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -64,17 +68,17 @@ public class HotelServiceTest extends UnitTestBase {
     private final HotelService hotelService;
 
     @ParameterizedTest
-    @MethodSource("getArgumentsForFindAllByFilter")
-    void checkFindAllByFilter(HotelFilter filter, List<Hotel> expectedHotels) {
+    @MethodSource("getArgumentsForFindAll")
+    void findAll_shouldFindAll(HotelFilter filter, List<Hotel> expectedHotels) {
         when(hotelRepository.findAllByFilter(filter)).thenReturn(expectedHotels);
 
-        var actualHotels = hotelService.findAllByFilter(filter);
+        var actualHotels = hotelService.findAll(filter);
 
         assertEquals(expectedHotels.size(), actualHotels.size());
         verify(hotelReadMapper, times(expectedHotels.size())).map(any(Hotel.class));
     }
 
-    static Stream<Arguments> getArgumentsForFindAllByFilter() {
+    static Stream<Arguments> getArgumentsForFindAll() {
         return Stream.of(
 //                country = Russia filter -> 3 hotels
                 Arguments.of(HotelFilter.builder()
@@ -90,7 +94,7 @@ public class HotelServiceTest extends UnitTestBase {
 
     @ParameterizedTest
     @MethodSource("getArgumentsForFindAllByOwnerId")
-    void checkFindAllByOwnerId(Integer ownerId, List<Hotel> expectedHotels) {
+    void findAllByOwnerId_whenHotelsExist(Integer ownerId, List<Hotel> expectedHotels) {
         doReturn(expectedHotels).when(hotelRepository).findAllByOwnerId(ownerId);
 
         var actualHotels = hotelService.findAllByOwnerId(ownerId);
@@ -109,14 +113,32 @@ public class HotelServiceTest extends UnitTestBase {
     }
 
     @Test
-    void shouldFindAllHotels() {
-        var allHotels = List.of(new Hotel(), new Hotel(), new Hotel(), new Hotel(), new Hotel());
-        doReturn(allHotels).when(hotelRepository).findAll();
+    void findAll_shouldFindAllHotels_whenHotelsExist() {
+        var hotels = List.of(getHotel(), getHotel());
+        var predicate = QPredicates.builder().build();
+        var pageable = PageRequest.of(0, 20);
+        var filter = HotelFilter.builder().build();
+        Page<Hotel> hotelPage = new PageImpl<>(hotels);
 
-        var actualHotels = hotelService.findAll();
+        when(hotelRepository.findAll(predicate, pageable)).thenReturn(hotelPage);
+        var actualHotels = hotelService.findAllByFilter(filter, pageable);
 
-        assertThat(actualHotels).hasSize(5);
-        verify(hotelReadMapper, times(actualHotels.size())).map(any(Hotel.class));
+        assertEquals(actualHotels.getTotalElements(), 2L);
+        verify(hotelReadMapper, times(2)).map(any(Hotel.class));
+    }
+
+    @Test
+    void findAllByFilter_shouldReturnAllHotels() {
+        HotelFilter filter = HotelFilter.builder().build();
+        var predicate = QPredicates.builder().add(filter.name(), QHotel.hotel.name::eq).build();
+        var pageable = PageRequest.of(0, 20);
+        Page<Hotel> hotelPage = new PageImpl<>(List.of(getHotel(), getHotel()));
+        when(hotelRepository.findAll(predicate, pageable)).thenReturn(hotelPage);
+
+        var actualHotels = hotelService.findAllByFilter(filter, pageable);
+
+        assertEquals(actualHotels.getTotalElements(), 2L);
+        verify(hotelReadMapper, times(2)).map(any(Hotel.class));
     }
 
     @Test
@@ -219,21 +241,6 @@ public class HotelServiceTest extends UnitTestBase {
 
     private HotelDetailsCreateEditDto getHotelDetailsCreatedEditDto() {
         return new HotelDetailsCreateEditDto(
-                EXISTENT_HOTEL_ID,
-                "+7-965-78-78-999",
-                "Russia",
-                "Moscow",
-                "West",
-                "First",
-                3,
-                Star.FIVE,
-                "good hotel"
-        );
-    }
-
-    private HotelDetailsReadDto getHotelDetailsReadDto() {
-        return new HotelDetailsReadDto(
-                EXISTENT_HOTEL_DETAILS_ID,
                 EXISTENT_HOTEL_ID,
                 "+7-965-78-78-999",
                 "Russia",
