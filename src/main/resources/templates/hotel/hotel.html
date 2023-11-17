@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <meta charset="UTF-8">
+    <title>Hotel</title>
+</head>
+<body>
+<div th:insert="~{fragment/header}"></div>
+<form th:action="@{/my-booking/hotels/{id}(id=${hotel.id})}" enctype="multipart/form-data"
+      th:object="${hotel}">
+
+    <h4 th:text="|#{hotel.name}: ${hotel.name}|">Hotel name</h4>
+    <h4 th:text="|#{hotel.phone}: ${hotelDetails.phoneNumber}|">Phone</h4>
+    <h4 th:text="|#{hotel.country}: ${hotelDetails.country}|">Country</h4>
+    <h4 th:text="|#{hotel.city}: ${hotelDetails.locality}|">Phone</h4>
+    <h4 th:text="|#{hotel.area}: ${hotelDetails.area}|">Area</h4>
+    <h4 th:text="|#{hotel.street}: ${hotelDetails.street}|">Street</h4>
+    <h4 th:text="|#{hotel.star}: ${hotelDetails.star}|">Star</h4>
+    <h4 th:text="|#{hotel.floors}: ${hotelDetails.floorCount}|">Floors</h4>
+
+    <div th:if="${contents}">
+        <h4 th:text="#{hotel.content}">Hotel content:</h4>
+        <div th:each="content : ${contents}">
+            <img th:src="@{/api/v1/hotels/{hotelId}/content/{contentId}(hotelId=${hotel.id}, contentId=${content.id})}"
+                 alt="Hotel content">
+        </div>
+    </div>
+
+    <div sec:authorize="hasAuthority('OWNER')">
+        <a th:href="@{/hotels/{hotelId}/update(hotelId=${hotel.id})}">
+            <button type="button" th:text="#{button.update}">Update hotel</button>
+        </a>
+    </div>
+
+    <div>
+        <a th:href="@{/my-booking/rooms/{hotelId}/rooms-by-hotel(hotelId=${hotel.id})}">
+            <button type="button" th:text="|#{button.show_room_by_hotel} ${hotel.name}|">Show rooms by hotel</button>
+        </a>
+    </div>
+
+    <div sec:authorize="hasAuthority('OWNER')">
+        <a th:href="@{/my-booking/rooms/{userId}/{hotelId}/add(userId=${session.get('authUser').id}, hotelId=${hotel.id})}">
+            <button type="button" th:text="#{button.add_new_room}">Add new room</button>
+        </a>
+    </div>
+</form>
+<form th:action="@{/hotels/{hotelId}/delete(hotelId=${hotel.id})}" method="post">
+    <button type="submit" th:text="#{button.delete}">Remove</button>
+</form>
+</body>
+</html>
