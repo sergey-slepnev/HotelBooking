@@ -40,4 +40,10 @@ public class HotelContentService {
                 .map(hotelContentReadMapper::map)
                 .orElseThrow();
     }
+
+    public void deleteAllByHotel(Integer hotelId) {
+        var content = hotelContentRepository.findByHotelId(hotelId);
+        hotelContentRepository.deleteAll(content);
+        hotelContentRepository.flush();
+    }
 }
