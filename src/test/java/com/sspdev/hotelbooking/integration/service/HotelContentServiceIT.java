@@ -32,4 +32,14 @@ class HotelContentServiceIT extends IntegrationTestBase {
 
         assertThat(links).isEmpty();
     }
+
+    @Test
+    void deleteAllByHotel_shouldDeleteAllContentsForHotel() {
+        var existentContent = hotelContentService.findContent(EXISTENT_HOTEL_ID);
+        assertThat(existentContent).hasSize(2);
+
+        hotelContentService.deleteAllByHotel(EXISTENT_HOTEL_ID);
+        var contentAfterDeleting = hotelContentService.findContent(EXISTENT_HOTEL_ID);
+        assertThat(contentAfterDeleting).hasSize(0);
+    }
 }

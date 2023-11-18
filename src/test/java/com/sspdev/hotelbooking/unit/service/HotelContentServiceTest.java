@@ -17,6 +17,7 @@ import java.util.List;
 
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -59,6 +60,24 @@ public class HotelContentServiceTest extends UnitTestBase {
 
         assertThat(links).isEmpty();
         verifyNoInteractions(hotelContentReadMapper);
+    }
+
+    @Test
+    void deleteAllByHotel_shouldDeleteAllContentsForHotel() {
+        var existentContents = List.of(getHotelContent(), getHotelContent());
+        when(hotelContentRepository.findByHotelId(EXISTENT_HOTEL_ID)).thenReturn(existentContents).thenReturn(emptyList());
+        when(hotelContentReadMapper.map(existentContents.get(0))).thenReturn(getHotelContentReadDto());
+        when(hotelContentReadMapper.map(existentContents.get(1))).thenReturn(getHotelContentReadDto());
+        var existentContent = hotelContentService.findContent(EXISTENT_HOTEL_ID);
+        assertThat(existentContent).hasSize(2);
+
+        doNothing().when(hotelContentRepository).deleteAll(existentContents);
+        doNothing().when(hotelContentRepository).flush();
+        hotelContentService.deleteAllByHotel(EXISTENT_HOTEL_ID);
+
+        var actualContent = hotelContentService.findContent(EXISTENT_HOTEL_ID);
+        actualContent.forEach(System.out::println);
+        assertThat(actualContent).hasSize(0);
     }
 
     private HotelContent getHotelContent() {
