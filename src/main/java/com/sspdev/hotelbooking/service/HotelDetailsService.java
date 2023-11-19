@@ -46,4 +46,16 @@ public class HotelDetailsService {
     public List<String> findCountries() {
         return hotelDetailsRepository.findCountries();
     }
+
+    @Transactional
+    public boolean delete(Integer hotelId) {
+        return Optional.ofNullable(hotelId)
+                .flatMap(hotelDetailsRepository::findByHotelId)
+                .map(hotelDetails -> {
+                    hotelDetailsRepository.delete(hotelDetails);
+                    hotelDetailsRepository.flush();
+                    return true;
+                })
+                .orElse(false);
+    }
 }
