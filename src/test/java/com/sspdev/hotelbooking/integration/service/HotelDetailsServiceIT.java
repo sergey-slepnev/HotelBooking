@@ -16,6 +16,7 @@ public class HotelDetailsServiceIT extends IntegrationTestBase {
 
     private static final Integer EXISTENT_HOTEL_ID = 1;
     private static final Integer EXISTENT_HOTEL_DETAILS_ID = 1;
+    private static final Integer NOT_EXISTENT_HOTEL_DETAILS_ID = 999;
 
     private final HotelDetailsService hotelDetailsService;
 
@@ -80,6 +81,25 @@ public class HotelDetailsServiceIT extends IntegrationTestBase {
 
         assertThat(countries).hasSize(3);
         assertThat(countries).contains("Russia", "Ukraine", "Belarus");
+    }
+
+    @Test
+    void delete_shouldDeleteHotelDetailsByHotel_whenExists() {
+        var existentHotelDetails = hotelDetailsService.findByHotelId(EXISTENT_HOTEL_ID);
+        assertThat(existentHotelDetails).isPresent();
+
+        var isDeleted = hotelDetailsService.delete(EXISTENT_HOTEL_ID);
+        var hotelDetailsAfterDeleting = hotelDetailsService.findByHotelId(EXISTENT_HOTEL_ID);
+
+        assertThat(isDeleted).isTrue();
+        assertThat(hotelDetailsAfterDeleting).isEmpty();
+    }
+
+    @Test
+    void delete_shouldReturnFalse_whenHotelDetailsNotExist() {
+        var isDeleted = hotelDetailsService.delete(NOT_EXISTENT_HOTEL_DETAILS_ID);
+
+        assertThat(isDeleted).isFalse();
     }
 
     private HotelDetailsCreateEditDto getHotelDetailsCreatedEditDto() {

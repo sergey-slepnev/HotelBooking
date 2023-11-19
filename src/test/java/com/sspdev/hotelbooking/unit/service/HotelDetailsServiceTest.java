@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @RequiredArgsConstructor
@@ -30,6 +31,7 @@ public class HotelDetailsServiceTest extends UnitTestBase {
     private static final Integer EXISTENT_HOTEL_ID = 1;
     private static final Integer EXISTENT_HOTEL_DETAILS_ID = 1;
     private static final Integer FIRST_OWNER_ID = 1;
+    private static final Integer NOT_EXISTENT_HOTEL_DETAILS_ID = 999;
 
     @MockBean
     private final HotelDetailsReadMapper hotelDetailsReadMapper;
@@ -92,6 +94,29 @@ public class HotelDetailsServiceTest extends UnitTestBase {
 
         assertThat(countries).hasSize(3);
         assertThat(countries).contains("Russia", "Ukraine", "Belarus");
+    }
+
+    @Test
+    void delete_shouldDeleteHotelDetailsByHotel_whenExists() {
+        var existentHotelDetails = getHotelDetails();
+        when(hotelDetailsRepository.findByHotelId(EXISTENT_HOTEL_ID)).thenReturn(Optional.of(existentHotelDetails));
+        doNothing().when(hotelDetailsRepository).delete(existentHotelDetails);
+        doNothing().when(hotelDetailsRepository).flush();
+
+        var isDeleted = hotelDetailsService.delete(EXISTENT_HOTEL_ID);
+        var hotelDetailsAfterDeleting = hotelDetailsService.findByHotelId(EXISTENT_HOTEL_ID);
+
+        assertThat(isDeleted).isTrue();
+        assertThat(hotelDetailsAfterDeleting).isEmpty();
+    }
+
+    @Test
+    void delete_shouldReturnFalse_whenHotelDetailsNotExist() {
+        when(hotelDetailsRepository.findByHotelId(NOT_EXISTENT_HOTEL_DETAILS_ID)).thenReturn(Optional.empty());
+
+        var isDeleted = hotelDetailsService.delete(NOT_EXISTENT_HOTEL_DETAILS_ID);
+
+        assertThat(isDeleted).isFalse();
     }
 
     private HotelDetailsReadDto getHotelDetailsReadDto() {
