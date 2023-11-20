@@ -1,19 +1,26 @@
 package com.sspdev.hotelbooking.unit.service;
 
 import com.sspdev.hotelbooking.database.entity.Hotel;
+import com.sspdev.hotelbooking.database.entity.HotelContent;
+import com.sspdev.hotelbooking.database.entity.HotelDetails;
 import com.sspdev.hotelbooking.database.entity.QHotel;
 import com.sspdev.hotelbooking.database.entity.User;
+import com.sspdev.hotelbooking.database.entity.enums.ContentType;
 import com.sspdev.hotelbooking.database.entity.enums.Role;
 import com.sspdev.hotelbooking.database.entity.enums.Star;
 import com.sspdev.hotelbooking.database.entity.enums.Status;
 import com.sspdev.hotelbooking.database.querydsl.QPredicates;
+import com.sspdev.hotelbooking.database.repository.HotelDetailsRepository;
 import com.sspdev.hotelbooking.database.repository.HotelRepository;
+import com.sspdev.hotelbooking.dto.HotelContentReadDto;
 import com.sspdev.hotelbooking.dto.HotelCreateEditDto;
 import com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto;
+import com.sspdev.hotelbooking.dto.HotelDetailsReadDto;
 import com.sspdev.hotelbooking.dto.HotelReadDto;
 import com.sspdev.hotelbooking.dto.filter.HotelFilter;
 import com.sspdev.hotelbooking.mapper.HotelCreateEditMapper;
 import com.sspdev.hotelbooking.mapper.HotelReadMapper;
+import com.sspdev.hotelbooking.service.HotelContentService;
 import com.sspdev.hotelbooking.service.HotelDetailsService;
 import com.sspdev.hotelbooking.service.HotelService;
 import com.sspdev.hotelbooking.unit.UnitTestBase;
@@ -22,8 +29,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -51,19 +62,20 @@ public class HotelServiceTest extends UnitTestBase {
     private static final Integer EXISTENT_HOTEL_ID = 1;
     private static final Integer NON_EXISTENT_HOTEL_ID = 99;
     private static final Integer EXISTENT_HOTEL_DETAILS_ID = 1;
+    private static final Integer EXISTENT_HOTEL_CONTENT_ID = 1;
 
     @MockBean
     private final HotelRepository hotelRepository;
-
     @MockBean
     private final HotelReadMapper hotelReadMapper;
-
     @MockBean
     private final HotelCreateEditMapper hotelCreateEditMapper;
-
     @MockBean
     private final HotelDetailsService hotelDetailsService;
-
+    @MockBean
+    private HotelContentService hotelContentService;
+    @MockBean
+    private HotelDetailsRepository hotelDetailsRepository;
     @InjectMocks
     private final HotelService hotelService;
 
@@ -194,11 +206,16 @@ public class HotelServiceTest extends UnitTestBase {
     }
 
     @Test
-    void delete_shouldDeleteHotel_whenHotelExists() {
+    void delete_shouldDeleteHotelWithHotelDetailsAndContent_whenEverythingExist() {
         var hotel = getHotel();
+        var hotelDetails = getHotelDetailsReadDto();
+        var hotelContent = getHotelContentReadDto();
         when(hotelRepository.findById(EXISTENT_HOTEL_ID)).thenReturn(Optional.of(hotel));
-        doNothing().when(hotelRepository).delete(hotel);
+        when(hotelDetailsService.findByHotelId(EXISTENT_HOTEL_ID)).thenReturn(Optional.of(hotelDetails));
+        when(hotelContentService.findContent(EXISTENT_HOTEL_ID)).thenReturn(List.of(hotelContent));
 
+        doNothing().when(hotelRepository).delete(hotel);
+        doNothing().when(hotelDetailsRepository).delete(getHotelDetails());
         var actualResult = hotelService.delete(EXISTENT_HOTEL_ID);
 
         assertTrue(actualResult);
@@ -242,6 +259,54 @@ public class HotelServiceTest extends UnitTestBase {
     private HotelDetailsCreateEditDto getHotelDetailsCreatedEditDto() {
         return new HotelDetailsCreateEditDto(
                 EXISTENT_HOTEL_ID,
+                "+7-965-78-78-999",
+                "Russia",
+                "Moscow",
+                "West",
+                "First",
+                3,
+                Star.FIVE,
+                "good hotel"
+        );
+    }
+
+    private HotelDetailsReadDto getHotelDetailsReadDto() {
+        return new HotelDetailsReadDto(
+                EXISTENT_HOTEL_DETAILS_ID,
+                EXISTENT_HOTEL_ID,
+                "+7-965-78-78-888",
+                "Россия",
+                "Москва",
+                "Центральный",
+                "Новокузнецкая",
+                3,
+                Star.FIVE,
+                "Очень хороший отель"
+        );
+    }
+
+    private HotelContentReadDto getHotelContentReadDto() {
+        return new HotelContentReadDto(
+                EXISTENT_HOTEL_CONTENT_ID,
+                "test.jpg",
+                ContentType.PHOTO.name(),
+                EXISTENT_HOTEL_ID
+        );
+    }
+
+    private HotelContent getHotelContent() {
+        return new HotelContent(
+                EXISTENT_HOTEL_CONTENT_ID,
+                getHotel(),
+                "test.jpg",
+                ContentType.PHOTO
+        );
+    }
+
+    private HotelDetails getHotelDetails() {
+        return new HotelDetails(
+                EXISTENT_HOTEL_DETAILS_ID,
+                getHotel(),
                 "+7-965-78-78-999",
                 "Russia",
                 "Moscow",

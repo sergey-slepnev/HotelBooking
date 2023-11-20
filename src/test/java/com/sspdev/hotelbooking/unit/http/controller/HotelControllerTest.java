@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
@@ -49,10 +50,12 @@ import static com.sspdev.hotelbooking.dto.filter.HotelFilter.Fields.star;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
@@ -168,6 +171,34 @@ public class HotelControllerTest extends UnitTestBase {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attributeCount(6))
                 .andExpect(redirectedUrlPattern("/my-booking/hotels/{d\\+}/add-hotel"));
+    }
+
+    @Test
+    void delete_shouldDeleteHotelAndRedirectToOwnerPage_ifHotelExists() throws Exception {
+        var ownerInSession = getUserReadDto();
+
+        when(hotelService.delete(EXISTENT_HOTEL_ID)).thenReturn(true);
+
+        mockMvc.perform(post("/my-booking/hotels/" + EXISTENT_HOTEL_ID + "/delete")
+                        .sessionAttr("user", ownerInSession))
+                .andDo(print())
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/my-booking/users/{d\\+}"));
+        var captor = ArgumentCaptor.forClass(Integer.class);
+        verify(hotelService).delete(captor.capture());
+    }
+
+    @Test
+    void delete_shouldReturnNotFound_ifHotelNotExist() throws Exception {
+        var ownerInSession = getUserReadDto();
+
+        when(hotelService.delete(NON_EXISTENT_HOTEL_ID)).thenReturn(false);
+
+        mockMvc.perform(post("/my-booking/hotels/" + NON_EXISTENT_HOTEL_ID + "/delete")
+                        .sessionAttr("user", ownerInSession))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+        verify(hotelService).delete(NON_EXISTENT_HOTEL_ID);
     }
 
     private HotelReadDto getHotelReadDto() {

@@ -8,6 +8,8 @@ import com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto;
 import com.sspdev.hotelbooking.dto.HotelReadDto;
 import com.sspdev.hotelbooking.dto.filter.HotelFilter;
 import com.sspdev.hotelbooking.integration.IntegrationTestBase;
+import com.sspdev.hotelbooking.service.HotelContentService;
+import com.sspdev.hotelbooking.service.HotelDetailsService;
 import com.sspdev.hotelbooking.service.HotelService;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
@@ -40,6 +42,8 @@ public class HotelServiceIT extends IntegrationTestBase {
     private static final Integer NON_EXISTENT_HOTEL_ID = 99;
 
     private final HotelService hotelService;
+    private final HotelDetailsService hotelDetailsService;
+    private final HotelContentService hotelContentService;
 
     @ParameterizedTest
     @MethodSource("getArgumentsForFindAllByFilter")
@@ -71,8 +75,8 @@ public class HotelServiceIT extends IntegrationTestBase {
     @ParameterizedTest
     @MethodSource("getArgumentsForFindAllByFilterAndPageable")
     void findAllByFilter_shouldFindAllHotelsByFilterAndPageable_sortedByName(HotelFilter filter,
-                                                                Integer expectedNumberOfHotels,
-                                                                String... expectedHotelNames) {
+                                                                             Integer expectedNumberOfHotels,
+                                                                             String... expectedHotelNames) {
         var sort = Sort.sort(Hotel.class).by(Hotel::getName);
         var pageable = PageRequest.of(0, 20, sort);
 
@@ -173,10 +177,23 @@ public class HotelServiceIT extends IntegrationTestBase {
     }
 
     @Test
-    void delete_shouldDeleteHotel_whenHotelExists() {
+    void delete_shouldDeleteHotelWithHotelDetailsAndContent_whenEverythingExist() {
+        var existentHotel = hotelService.findById(EXISTENT_HOTEL_ID);
+        var existentHotelDetails = hotelDetailsService.findByHotelId(EXISTENT_HOTEL_ID);
+        var existentContent = hotelContentService.findContent(EXISTENT_HOTEL_ID);
+        assertThat(existentHotel).isPresent();
+        assertThat(existentHotelDetails).isPresent();
+        assertThat(existentContent).hasSize(2);
+
         var actualResult = hotelService.delete(EXISTENT_HOTEL_ID);
+        var hotelAfterDeleting = hotelService.findById(EXISTENT_HOTEL_ID);
+        var hotelDetailsAfterDeleting = hotelDetailsService.findByHotelId(EXISTENT_HOTEL_ID);
+        var contentAfterDeleting = hotelContentService.findContent(EXISTENT_HOTEL_ID);
 
         assertTrue(actualResult);
+        assertThat(hotelAfterDeleting).isEmpty();
+        assertThat(hotelDetailsAfterDeleting).isEmpty();
+        assertThat(contentAfterDeleting).hasSize(0);
     }
 
     @Test

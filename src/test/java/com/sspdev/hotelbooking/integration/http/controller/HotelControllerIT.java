@@ -30,6 +30,7 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
@@ -129,6 +130,25 @@ class HotelControllerIT extends IntegrationTestBase {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attributeCount(6))
                 .andExpect(redirectedUrlPattern("/my-booking/hotels/{d\\+}/add-hotel"));
+    }
+
+    @Test
+    void delete_shouldDeleteHotelAndRedirectToOwnerPage_ifHotelExists() throws Exception {
+        var ownerInSession = userService.findById(EXISTENT_OWNER_ID);
+        mockMvc.perform(post("/my-booking/hotels/" + EXISTENT_HOTEL_ID + "/delete")
+                        .sessionAttr("user", ownerInSession.get()))
+                .andDo(print())
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/my-booking/users/{d\\+}"));
+    }
+
+    @Test
+    void delete_shouldReturnNotFound_ifHotelNotExist() throws Exception {
+        var ownerInSession = userService.findById(EXISTENT_OWNER_ID);
+        mockMvc.perform(post("/my-booking/hotels/" + NON_EXISTENT_HOTEL_ID + "/delete")
+                        .sessionAttr("user", ownerInSession.get()))
+                .andDo(print())
+                .andExpect(status().isNotFound());
     }
 
     static Stream<Arguments> getArgumentsForFindAll() {
