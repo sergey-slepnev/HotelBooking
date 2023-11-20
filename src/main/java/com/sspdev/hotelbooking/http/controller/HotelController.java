@@ -30,7 +30,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/my-booking/hotels")
 @RequiredArgsConstructor
-@SessionAttributes("hotel")
+@SessionAttributes({"hotel", "hotelDetails"})
 public class HotelController {
 
     private final HotelService hotelService;
@@ -115,5 +115,15 @@ public class HotelController {
         redirectAttributes.addFlashAttribute("hotelErrors", hotelBindingResult.getAllErrors());
         redirectAttributes.addFlashAttribute("hotelDetailsErrors", hotelDetailsBindingResult.getAllErrors());
         redirectAttributes.addFlashAttribute("hotelContentErrors", hotelContentBindingResult.getAllErrors());
+    }
+
+    @PostMapping("/{id}/delete")
+    public String delete(@PathVariable("id") Integer id,
+                         @SessionAttribute("user") UserReadDto user) {
+        if (hotelService.delete(id)) {
+            return "redirect:/my-booking/users/" + user.getId();
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
     }
 }

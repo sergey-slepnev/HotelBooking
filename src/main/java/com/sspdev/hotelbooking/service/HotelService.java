@@ -99,10 +99,12 @@ public class HotelService {
     @Transactional
     public boolean delete(Integer id) {
         return hotelRepository.findById(id)
-                .map(entity -> {
-                    hotelRepository.delete(entity);
+                .map(hotel -> {
+                    hotelContentService.deleteAllByHotel(hotel.getId());
+                    hotelDetailsService.delete(hotel.getId());
+                    hotelRepository.delete(hotel);
                     hotelRepository.flush();
-                    return true;
+                        return true;
                 })
                 .orElse(false);
     }
