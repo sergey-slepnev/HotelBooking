@@ -1,5 +1,6 @@
 package com.sspdev.hotelbooking.service;
 
+import com.sspdev.hotelbooking.database.entity.HotelContent;
 import com.sspdev.hotelbooking.database.repository.HotelContentRepository;
 import com.sspdev.hotelbooking.dto.HotelContentCreateDto;
 import com.sspdev.hotelbooking.dto.HotelContentReadDto;
@@ -43,6 +44,9 @@ public class HotelContentService {
 
     public void deleteAllByHotel(Integer hotelId) {
         var content = hotelContentRepository.findByHotelId(hotelId);
+        content.stream()
+                .map(HotelContent::getLink)
+                .forEach(applicationContentService::deleteContentFromStore);
         hotelContentRepository.deleteAll(content);
         hotelContentRepository.flush();
     }

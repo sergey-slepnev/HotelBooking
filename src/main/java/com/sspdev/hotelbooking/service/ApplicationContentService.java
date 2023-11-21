@@ -63,4 +63,12 @@ public class ApplicationContentService {
         }
         return true;
     }
+
+    @SneakyThrows
+    public void deleteContentFromStore(String contentName) {
+        if (!Objects.equals(contentName, "NoImageAvailable.jpg")) {
+            var fullContentPath = Path.of(bucket, contentName);
+            Files.deleteIfExists(fullContentPath);
+        }
+    }
 }
