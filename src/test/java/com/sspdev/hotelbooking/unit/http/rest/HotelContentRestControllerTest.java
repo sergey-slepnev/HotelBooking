@@ -2,16 +2,19 @@ package com.sspdev.hotelbooking.unit.http.rest;
 
 import com.sspdev.hotelbooking.database.entity.enums.ContentType;
 import com.sspdev.hotelbooking.dto.HotelContentReadDto;
+import com.sspdev.hotelbooking.http.rest.HotelContentRestController;
 import com.sspdev.hotelbooking.service.ApplicationContentService;
 import com.sspdev.hotelbooking.service.HotelContentService;
-import com.sspdev.hotelbooking.unit.UnitTestBase;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,26 +22,31 @@ import java.util.Optional;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RequiredArgsConstructor
-@AutoConfigureMockMvc
-@WithMockUser(username = "test@gmail.com", password = "test", authorities = {"ADMIN", "USER", "OWNER"})
-class HotelContentRestControllerTest extends UnitTestBase {
+@ExtendWith(MockitoExtension.class)
+class HotelContentRestControllerTest {
 
     private static final Integer EXISTENT_HOTEL_ID = 1;
     private static final Integer EXISTENT_CONTENT_ID = 1;
     private static final Integer NON_EXISTENT_CONTENT_ID = 999;
     private static final Integer EXISTENT_HOTEL_CONTENT_ID = 1;
 
-    private final MockMvc mockMvc;
+    private MockMvc mockMvc;
+    @Mock
+    private HotelContentService hotelContentService;
+    @Mock
+    private ApplicationContentService applicationContentService;
+    @InjectMocks
+    private HotelContentRestController hotelContentRestController;
 
-    @MockBean
-    private final HotelContentService hotelContentService;
-
-    @MockBean
-    private final ApplicationContentService applicationContentService;
+    @BeforeEach
+    public void initMockMvc() {
+        mockMvc = MockMvcBuilders.standaloneSetup(hotelContentRestController).build();
+    }
 
     @Test
     void findContent_shouldFindHotelContent_whenContentExists() throws Exception {
@@ -47,15 +55,17 @@ class HotelContentRestControllerTest extends UnitTestBase {
         when(applicationContentService.getImage(hotelContent.getLink())).thenReturn(Optional.of("test.jpg".getBytes()));
 
         mockMvc.perform(get("/api/v1/hotels/" + EXISTENT_HOTEL_ID + "/content/" + EXISTENT_CONTENT_ID))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM_VALUE));
     }
 
     @Test
     void findContent_shouldReturnNotFound_whenContentNotExists() throws Exception {
-        when(hotelContentService.findContent(NON_EXISTENT_CONTENT_ID)).thenReturn(Collections.emptyList());
+        when(hotelContentService.findContent(EXISTENT_HOTEL_ID)).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/v1/hotels/" + EXISTENT_HOTEL_ID + "/content/" + NON_EXISTENT_CONTENT_ID))
+                .andDo(print())
                 .andExpect(status().isNotFound());
     }
 
