@@ -10,8 +10,8 @@ import com.sspdev.hotelbooking.database.entity.enums.Role;
 import com.sspdev.hotelbooking.database.entity.enums.Star;
 import com.sspdev.hotelbooking.database.entity.enums.Status;
 import com.sspdev.hotelbooking.database.querydsl.QPredicates;
-import com.sspdev.hotelbooking.database.repository.HotelDetailsRepository;
 import com.sspdev.hotelbooking.database.repository.HotelRepository;
+import com.sspdev.hotelbooking.dto.HotelContentCreateDto;
 import com.sspdev.hotelbooking.dto.HotelContentReadDto;
 import com.sspdev.hotelbooking.dto.HotelCreateEditDto;
 import com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto;
@@ -23,21 +23,19 @@ import com.sspdev.hotelbooking.mapper.HotelReadMapper;
 import com.sspdev.hotelbooking.service.HotelContentService;
 import com.sspdev.hotelbooking.service.HotelDetailsService;
 import com.sspdev.hotelbooking.service.HotelService;
-import com.sspdev.hotelbooking.unit.UnitTestBase;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,7 +45,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -55,7 +52,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @RequiredArgsConstructor
-public class HotelServiceTest extends UnitTestBase {
+@ExtendWith(MockitoExtension.class)
+public class HotelServiceTest {
 
     private static final Integer FIRST_OWNER_ID = 4;
     private static final Integer SECOND_OWNER_ID = 5;
@@ -64,20 +62,18 @@ public class HotelServiceTest extends UnitTestBase {
     private static final Integer EXISTENT_HOTEL_DETAILS_ID = 1;
     private static final Integer EXISTENT_HOTEL_CONTENT_ID = 1;
 
-    @MockBean
-    private final HotelRepository hotelRepository;
-    @MockBean
-    private final HotelReadMapper hotelReadMapper;
-    @MockBean
-    private final HotelCreateEditMapper hotelCreateEditMapper;
-    @MockBean
-    private final HotelDetailsService hotelDetailsService;
-    @MockBean
+    @Mock
+    private HotelRepository hotelRepository;
+    @Mock
+    private HotelReadMapper hotelReadMapper;
+    @Mock
+    private HotelCreateEditMapper hotelCreateEditMapper;
+    @Mock
+    private HotelDetailsService hotelDetailsService;
+    @Mock
     private HotelContentService hotelContentService;
-    @MockBean
-    private HotelDetailsRepository hotelDetailsRepository;
     @InjectMocks
-    private final HotelService hotelService;
+    private HotelService hotelService;
 
     @ParameterizedTest
     @MethodSource("getArgumentsForFindAll")
@@ -176,13 +172,14 @@ public class HotelServiceTest extends UnitTestBase {
     void shouldCreateNewHotel() {
         var hotel = getHotel();
         var hotelCreateEditDto = getHotelCreateEditDto();
+        var hotelContentCreateDto = getHotelContentCreateDto();
         var hotelDetailsCreatedEditDto = getHotelDetailsCreatedEditDto();
         var hotelReadDto = getHotelReadDto();
         when(hotelCreateEditMapper.map(hotelCreateEditDto)).thenReturn(hotel);
         when(hotelRepository.save(hotel)).thenReturn(hotel);
         when(hotelReadMapper.map(hotel)).thenReturn(hotelReadDto);
 
-        var actualResult = hotelService.create(hotelCreateEditDto, hotelDetailsCreatedEditDto, null);
+        var actualResult = hotelService.create(hotelCreateEditDto, hotelDetailsCreatedEditDto, hotelContentCreateDto);
 
         assertThat(actualResult.getId()).isPositive();
         verify(hotelDetailsService).create(hotelDetailsCreatedEditDto);
@@ -208,16 +205,14 @@ public class HotelServiceTest extends UnitTestBase {
     @Test
     void delete_shouldDeleteHotelWithHotelDetailsAndContent_whenEverythingExist() {
         var hotel = getHotel();
-        var hotelDetails = getHotelDetailsReadDto();
-        var hotelContent = getHotelContentReadDto();
         when(hotelRepository.findById(EXISTENT_HOTEL_ID)).thenReturn(Optional.of(hotel));
-        when(hotelDetailsService.findByHotelId(EXISTENT_HOTEL_ID)).thenReturn(Optional.of(hotelDetails));
-        when(hotelContentService.findContent(EXISTENT_HOTEL_ID)).thenReturn(List.of(hotelContent));
 
-        doNothing().when(hotelRepository).delete(hotel);
-        doNothing().when(hotelDetailsRepository).delete(getHotelDetails());
         var actualResult = hotelService.delete(EXISTENT_HOTEL_ID);
 
+        verify(hotelContentService).deleteAllByHotel(hotel.getId());
+        verify(hotelDetailsService).delete(hotel.getId());
+        verify(hotelRepository).delete(hotel);
+        verify(hotelRepository).flush();
         assertTrue(actualResult);
     }
 
@@ -315,6 +310,15 @@ public class HotelServiceTest extends UnitTestBase {
                 3,
                 Star.FIVE,
                 "good hotel"
+        );
+    }
+
+    private HotelContentCreateDto getHotelContentCreateDto() {
+        var content = new MockMultipartFile("test.jgp", "test.jpg".getBytes());
+        return new HotelContentCreateDto(
+                content,
+                ContentType.PHOTO,
+                EXISTENT_HOTEL_ID
         );
     }
 }
