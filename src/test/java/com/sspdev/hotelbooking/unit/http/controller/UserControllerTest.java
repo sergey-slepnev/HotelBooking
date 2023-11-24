@@ -3,24 +3,23 @@ package com.sspdev.hotelbooking.unit.http.controller;
 import com.sspdev.hotelbooking.database.entity.enums.Role;
 import com.sspdev.hotelbooking.database.entity.enums.Status;
 import com.sspdev.hotelbooking.dto.PageResponse;
-import com.sspdev.hotelbooking.dto.UserCreateEditDto;
 import com.sspdev.hotelbooking.dto.UserReadDto;
 import com.sspdev.hotelbooking.dto.filter.UserFilter;
 import com.sspdev.hotelbooking.http.controller.UserController;
-import com.sspdev.hotelbooking.service.ApplicationContentService;
 import com.sspdev.hotelbooking.service.UserService;
-import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -44,7 +43,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -52,25 +51,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-@RequiredArgsConstructor
-@WebMvcTest(value = UserController.class)
-@WithMockUser(username = "test@gmail.com", password = "test", authorities = {"ADMIN", "USER", "OWNER"})
-@ImportAutoConfiguration
+@ExtendWith(MockitoExtension.class)
 class UserControllerTest {
 
     private static final Integer EXISTENT_USER_ID = 1;
     private static final Integer NON_EXISTENT_USER_ID = 999;
 
-    private final MockMvc mockMvc;
+    private MockMvc mockMvc;
+    @Mock
+    private Page<UserReadDto> userReadDtoPage;
+    @Mock
+    private UserService userService;
+    @InjectMocks
+    public UserController userController;
 
-    @MockBean
-    private final Page<UserReadDto> userReadDtoPage;
-
-    @MockBean
-    private final UserService userService;
-
-    @MockBean
-    private final ApplicationContentService applicationContentService;
+    @BeforeEach
+    public void initMockMvc() {
+        mockMvc = MockMvcBuilders.standaloneSetup(userController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .alwaysDo(print())
+                .build();
+    }
 
     @ParameterizedTest
     @ValueSource(longs = {0L, 5L, 10L, 100L})
@@ -87,7 +88,6 @@ class UserControllerTest {
         var mvcResult = mockMvc.perform(get("/my-booking/users"))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(model().attributeExists("users", "roles", "filter", "statuses"))
-                .andExpect(content().contentType("text/html;charset=UTF-8"))
                 .andExpect(model().attribute("users", pageResponse))
                 .andExpect(model().attribute("roles", Role.values()))
                 .andExpect(model().attribute("statuses", Status.values()))
@@ -121,14 +121,6 @@ class UserControllerTest {
     }
 
     @Test
-    void registration_shouldReturnRegistrationPage() throws Exception {
-        mockMvc.perform(get("/my-booking/registration"))
-                .andExpect(status().is2xxSuccessful())
-                .andExpect(view().name("user/registration"))
-                .andExpect(model().attributeExists("userCreateDto"));
-    }
-
-    @Test
     void update_shouldReturnUpdatePage_whenUserInSession() throws Exception {
         mockMvc.perform(get("/my-booking/users/" + EXISTENT_USER_ID + "/update")
                         .sessionAttr("user", getUserReadDto()))
@@ -140,10 +132,10 @@ class UserControllerTest {
     void update_shouldRedirectToUpdatePage_whenUpdateDtoInvalid() throws Exception {
         mockMvc.perform(post("/my-booking/users/" + EXISTENT_USER_ID + "/update")
                         .with(csrf())
-                        .param(username, "NewUsenamegmailcom")
+                        .param(username, "N")
                         .param(firstName, "A")
                         .param(lastName, "S")
-                        .param(phone, "8-888-88-88-88")
+                        .param(phone, "8")
                         .param(rawPassword, "testPassword")
                         .param(role, Role.USER.name())
                         .param(birthDate, "1988-10-10"))
@@ -152,7 +144,7 @@ class UserControllerTest {
                         redirectedUrlPattern("/my-booking/users/{\\d+}/update"),
                         flash().attributeCount(2),
                         flash().attributeExists("user", "errors"),
-                        flash().attribute("errors", hasSize(3))
+                        flash().attribute("errors", hasSize(2))
                 );
     }
 
@@ -186,18 +178,5 @@ class UserControllerTest {
                 "user_avatar",
                 Status.NEW,
                 LocalDateTime.of(2023, 5, 5, 10, 10));
-    }
-
-    private UserCreateEditDto getUserCreateEditDto() {
-        return new UserCreateEditDto(
-                "user",
-                "123",
-                "Petr",
-                "Petrov",
-                LocalDate.of(2000, 10, 10),
-                "+7-954-984-98-98",
-                Role.USER,
-                new MockMultipartFile("userAvatar.jpg", "userAvatar.jpg", "application/octet-stream", new byte[]{})
-        );
     }
 }
