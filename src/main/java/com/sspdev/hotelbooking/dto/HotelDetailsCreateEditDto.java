@@ -6,12 +6,14 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
 @Data
 @AllArgsConstructor
 @FieldNameConstants
+@Builder
 public class HotelDetailsCreateEditDto {
 
     Integer hotelId;
