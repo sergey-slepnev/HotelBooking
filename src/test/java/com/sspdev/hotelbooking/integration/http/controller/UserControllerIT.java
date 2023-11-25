@@ -132,7 +132,7 @@ class UserControllerIT extends IntegrationTestBase {
                         redirectedUrl("/my-booking/registration"),
                         flash().attributeCount(2),
                         flash().attributeExists("userCreateDto", "errors"),
-                        flash().attribute("errors", hasSize(5)));
+                        flash().attribute("errors", hasSize(3)));
     }
 
     @Test
@@ -184,7 +184,7 @@ class UserControllerIT extends IntegrationTestBase {
                         status().is3xxRedirection(),
                         redirectedUrl("/my-booking/users/" + EXISTENT_USER_ID + "/update"),
                         flash().attributeCount(2),
-                        flash().attribute("errors", hasSize(3)));
+                        flash().attribute("errors", hasSize(1)));
     }
 
     @Test

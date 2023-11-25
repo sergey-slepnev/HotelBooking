@@ -28,12 +28,14 @@ public class ApplicationContentService {
 
     @SneakyThrows
     public void uploadImage(MultipartFile content) {
-        var inputStream = content.getInputStream();
-        var fullImagePath = Path.of(bucket, content.getOriginalFilename());
-        if (!Objects.equals(content.getOriginalFilename(), "")) {
-            try (inputStream) {
-                Files.createDirectories(fullImagePath.getParent());
-                Files.write(fullImagePath, inputStream.readAllBytes(), CREATE, TRUNCATE_EXISTING);
+        if (content != null) {
+            var inputStream = content.getInputStream();
+            var fullImagePath = Path.of(bucket, content.getOriginalFilename());
+            if (!Objects.equals(content.getOriginalFilename(), "")) {
+                try (inputStream) {
+                    Files.createDirectories(fullImagePath.getParent());
+                    Files.write(fullImagePath, inputStream.readAllBytes(), CREATE, TRUNCATE_EXISTING);
+                }
             }
         }
     }

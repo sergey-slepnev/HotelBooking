@@ -1,8 +1,10 @@
 package com.sspdev.hotelbooking.integration.service;
 
 import com.sspdev.hotelbooking.database.entity.Hotel;
+import com.sspdev.hotelbooking.database.entity.enums.ContentType;
 import com.sspdev.hotelbooking.database.entity.enums.Star;
 import com.sspdev.hotelbooking.database.entity.enums.Status;
+import com.sspdev.hotelbooking.dto.HotelContentCreateDto;
 import com.sspdev.hotelbooking.dto.HotelCreateEditDto;
 import com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto;
 import com.sspdev.hotelbooking.dto.HotelReadDto;
@@ -18,6 +20,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -147,7 +151,8 @@ public class HotelServiceIT extends IntegrationTestBase {
     void create_shouldCreateNewHotel_whenCreateDtoValid() {
         var hotelCreateEditDto = getHotelCreateEditDto();
         var hotelDetailsCreatedEditDto = getHotelDetailsCreatedEditDto();
-        var actualResult = hotelService.create(hotelCreateEditDto, hotelDetailsCreatedEditDto, null);
+        var hotelContentDto = getHotelContentCreateDto();
+        var actualResult = hotelService.create(hotelCreateEditDto, hotelDetailsCreatedEditDto, hotelContentDto);
 
         assertThat(actualResult).isNotNull();
         assertThat(actualResult.getId()).isPositive();
@@ -223,6 +228,14 @@ public class HotelServiceIT extends IntegrationTestBase {
                 3,
                 Star.FIVE,
                 "good hotel"
+        );
+    }
+
+    private HotelContentCreateDto getHotelContentCreateDto() {
+        return new HotelContentCreateDto(
+                new MockMultipartFile("test.jpg", "test.jpg", MediaType.IMAGE_JPEG_VALUE, "test.jpg".getBytes()),
+                ContentType.PHOTO,
+                EXISTENT_HOTEL_ID
         );
     }
 }

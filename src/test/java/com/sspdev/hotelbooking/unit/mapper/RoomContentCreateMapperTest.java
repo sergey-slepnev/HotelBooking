@@ -31,7 +31,7 @@ class RoomContentCreateMapperTest extends UnitTestBase {
 
     private RoomContentCreateDto getRoomContentCreateDto() {
         return new RoomContentCreateDto(
-                new MockMultipartFile("RoomPhoto.jpg", "RoomPhoto.jpg", "application/octet-stream", new byte[]{}),
+                new MockMultipartFile("RoomPhoto.jpg", "RoomPhoto.jpg", "application/octet-stream", "RoomPhoto.jpg".getBytes()),
                 ContentType.PHOTO,
                 EXISTENT_ROOM_ID
         );

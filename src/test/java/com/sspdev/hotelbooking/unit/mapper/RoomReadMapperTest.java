@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -45,7 +46,7 @@ public class RoomReadMapperTest extends UnitTestBase {
                 .floor(1)
                 .available(true)
                 .description("Отличный отель")
-                .roomContents(null)
+                .roomContents(Collections.emptyList())
                 .build();
     }
 
@@ -72,7 +73,7 @@ public class RoomReadMapperTest extends UnitTestBase {
                 1,
                 true,
                 "Отличный отель",
-                null
+                Collections.emptyList()
         );
     }
 }

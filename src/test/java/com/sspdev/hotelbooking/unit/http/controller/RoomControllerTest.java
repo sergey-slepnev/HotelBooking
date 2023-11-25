@@ -201,10 +201,12 @@ public class RoomControllerTest extends UnitTestBase {
     @Test
     void update_shouldReturnEditRoomPage_whenRoomExist() throws Exception {
         var room = getRoomReadDto();
+        var hotel = getHotelReadDto();
         when(roomService.findById(EXISTENT_ROOM_ID)).thenReturn(Optional.of(room));
 
         mockMvc.perform(get("/my-booking/rooms/" + EXISTENT_ROOM_ID + "/update")
-                        .sessionAttr("room", room))
+                        .sessionAttr("room", room)
+                        .flashAttr("hotel", hotel))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("types", RoomType.values()))
                 .andExpect(view().name("room/edit"));
