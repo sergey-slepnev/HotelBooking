@@ -1,6 +1,8 @@
 package com.sspdev.hotelbooking.http.controller;
 
+import com.sspdev.hotelbooking.database.entity.enums.ContentType;
 import com.sspdev.hotelbooking.database.entity.enums.Star;
+import com.sspdev.hotelbooking.database.entity.enums.Status;
 import com.sspdev.hotelbooking.dto.HotelContentCreateDto;
 import com.sspdev.hotelbooking.dto.HotelCreateEditDto;
 import com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto;
@@ -23,14 +25,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttribute;
-import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/my-booking/hotels")
 @RequiredArgsConstructor
-@SessionAttributes({"hotel", "hotelDetails"})
+//@SessionAttributes({"hotel", "hotelDetails"})
 public class HotelController {
 
     private final HotelService hotelService;
@@ -39,6 +40,7 @@ public class HotelController {
 
     @GetMapping("/{id}")
     public String findById(@PathVariable("id") Integer id,
+                           @SessionAttribute("user") UserReadDto user,
                            Model model) {
         var maybeHotel = hotelService.findById(id);
         var maybeHotelDetails = hotelDetailsService.findByHotelId(id);
@@ -102,6 +104,35 @@ public class HotelController {
         return "redirect:/my-booking/hotels/" + hotelReadDto.getId();
     }
 
+    @GetMapping("{userId}/user-hotels/{hotelId}/edit")
+    public String update(@PathVariable("hotelId") Integer hotelId,
+                         @PathVariable("userId") Integer userId,
+                         @SessionAttribute("user") UserReadDto user,
+                         Model model) {
+        hotelService.findById(hotelId).map(hotel -> model.addAttribute("hotel", hotel))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        hotelDetailsService.findByHotelId(hotelId).map(details -> model.addAttribute("hotelDetails", details))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        model.addAttribute("hotelContent", hotelContentService.findContent(hotelId));
+
+        model.addAttribute("stars", Star.values());
+        model.addAttribute("statuses", Status.values());
+        model.addAttribute("contentTypes", ContentType.values());
+
+        return "hotel/edit";
+    }
+
+    @PostMapping("/{id}/delete")
+    public String delete(@PathVariable("id") Integer id,
+                         @SessionAttribute("user") UserReadDto user) {
+        if (hotelService.delete(id)) {
+            return "redirect:/my-booking/users/" + user.getId();
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+    }
+
+
     private static void flashAttributes(HotelCreateEditDto hotelDto,
                                         BindingResult hotelBindingResult,
                                         HotelDetailsCreateEditDto hotelDetailsCreateDTO,
@@ -115,15 +146,5 @@ public class HotelController {
         redirectAttributes.addFlashAttribute("hotelErrors", hotelBindingResult.getAllErrors());
         redirectAttributes.addFlashAttribute("hotelDetailsErrors", hotelDetailsBindingResult.getAllErrors());
         redirectAttributes.addFlashAttribute("hotelContentErrors", hotelContentBindingResult.getAllErrors());
-    }
-
-    @PostMapping("/{id}/delete")
-    public String delete(@PathVariable("id") Integer id,
-                         @SessionAttribute("user") UserReadDto user) {
-        if (hotelService.delete(id)) {
-            return "redirect:/my-booking/users/" + user.getId();
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
     }
 }
