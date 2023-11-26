@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit hotel</title>
+</head>
+<body>
+<div th:include="~{fragment/header}"></div>
+<form th:action="@{/hotels/{userId}/user-hotels/{hotelId}/update(userId=${user.id}, hotelId=${hotel.id})}" method="post"
+      enctype="multipart/form-data"
+      th:object="${hotelDetails}">
+
+    <!--    For HotelCreateEditDTO-->
+    <input id="ownerId" type="hidden" name="ownerId" th:value="${user.id}">
+    <label for="name"><span th:text="#{hotel.name}">Hotel name:</span>
+        <input id="name" type="text" name="name" th:value="${hotel.name}">
+    </label><br>
+    <input id="available" type="hidden" name="available" th:value="${hotel.available}">
+    <input id="status" type="hidden" name="status" th:value="${hotel.status}">
+
+    <div th:if="${hotelErrors}">
+        <p style="color: red" th:each="error : ${hotelErrors}" th:text="${error.defaultMessage}">Error message</p>
+    </div>
+
+    <!--For HotelDetailsCreateEditDTO-->
+    <label for="phoneNumber"><span th:text="#{hotel.phone}">Hotel phone:</span>
+        <input id="phoneNumber" type="text" name="phoneNumber" th:value="*{phoneNumber}">
+    </label><br>
+    <label for="country"><span th:text="#{hotel.country}">Hotel country:</span>
+        <input id="country" type="text" name="country" th:value="*{country}">
+    </label><br>
+    <label for="locality"><span th:text="#{hotel.city}">Hotel city:</span>
+        <input id="locality" type="text" name="locality" th:value="*{locality}">
+    </label><br>
+    <label for="area"><span th:text="#{hotel.area}">Hotel area:</span>
+        <input id="area" type="text" name="area" th:value="*{area}">
+    </label><br>
+    <label for="street"><span th:text="#{hotel.street}">Hotel street:</span>
+        <input id="street" type="text" name="street" th:value="*{street}">
+    </label><br>
+    <label for="star"><span th:text="#{hotel.star}">Stars:</span>
+        <select name="star" id="star">
+            <option th:text="${hotelDetails.star}"></option>
+            <option th:each="star : ${stars}" th:value="${star}" th:text="${star}"
+                    th:checked="${star == hotelDetails.star}"></option>
+        </select>
+    </label><br>
+    <label for="floorCount"><span th:text="#{hotel.floors}">Hotel floors:</span>
+        <input id="floorCount" type="number" name="floorCount" th:value="*{floorCount}">
+    </label><br>
+    <label for="description"><span th:text="#{hotel.description}">Description:</span>
+        <input id="description" type="text" name="description" th:value="*{description}">
+    </label><br>
+
+    <div th:if="${hotelDetailsErrors}">
+        <p style="color: red" th:each="error : ${hotelDetailsErrors}" th:text="${error.defaultMessage}">Error
+            message</p>
+    </div>
+
+    <div th:if="${hotelContent}">
+        <h4 th:text="#{hotel.content}">Hotel content:</h4>
+        <div th:each="content : ${hotelContent}">
+            <img th:src="@{/hotels/{hotelId}/content/{contentId}(hotelId=${hotel.id}, contentId=${content.id})}"
+                 alt="Hotel content">
+        </div>
+    </div>
+
+    <!--    For HotelContentCreateDTO-->
+    <label for="content"><span th:text="#{hotel.content}">Content</span>
+        <input id="content" type="file" name="link">
+    </label><br>
+    <span th:text="#{content.type}">Content type:</span>
+    <br>
+    <div th:each="contentType : ${contentTypes}">
+        <input th:id="${contentType}" type="radio" name="contentType" th:value="${contentType}"
+               th:checked="${contentType == hotelContent}">
+        <label th:for="${contentType}" th:text="${contentType}">Content type</label>
+    </div>
+
+    <button type="submit" th:text="#{button.update}">Update hotel</button>
+</form>
+</body>
+</html>
