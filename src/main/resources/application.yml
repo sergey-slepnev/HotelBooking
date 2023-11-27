@@ -1,4 +1,3 @@
-
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5433/hotel_repository
@@ -26,6 +25,14 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 1084978167683-4j6uftqv8lhdhmdcnf8ina0dgeruj13j.apps.googleusercontent.com
+            client-secret: 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
+            redirect-uri: https://localhost:8080/login/oauth2/code/google
 server:
   tomcat:
     max-swallow-size: -1

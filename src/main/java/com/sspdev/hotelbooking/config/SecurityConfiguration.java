@@ -2,6 +2,7 @@ package com.sspdev.hotelbooking.config;
 
 import com.sspdev.hotelbooking.database.entity.User;
 import com.sspdev.hotelbooking.database.repository.UserRepository;
+import com.sspdev.hotelbooking.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -10,10 +11,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.savedrequest.NullRequestCache;
 
 import java.io.IOException;
+import java.lang.reflect.Proxy;
+import java.util.Set;
 
 import static com.sspdev.hotelbooking.database.entity.enums.Role.ADMIN;
 import static com.sspdev.hotelbooking.database.entity.enums.Role.OWNER;
@@ -25,6 +33,7 @@ import static com.sspdev.hotelbooking.database.entity.enums.Role.USER;
 public class SecurityConfiguration {
 
     private final UserRepository userRepository;
+    private final UserService userService;
 
     @Bean
     public DefaultSecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -57,13 +66,15 @@ public class SecurityConfiguration {
                                 "/my-booking/users/{\\d+}/delete"
                         ).hasAnyAuthority(USER.getAuthority(), OWNER.getAuthority(), ADMIN.getAuthority())
                         .requestMatchers(
+                                "/my-booking/hotels/{d\\+}/add-hotel",
+                                "/my-booking/hotels/{d\\+}/create",
+                                "/my-booking/hotels/{d\\+}/delete",
+                                "/my-booking/hotels/{d\\+}/user-hotels/{\\d+}/edit",
                                 "/my-booking/rooms/{\\d+}/{\\d+}/add",
                                 "/my-booking/rooms/{\\d+}/{\\d+}/create",
                                 "/api/v1/rooms/content/{d\\+}/delete",
                                 "/my-booking/rooms/{d\\+}/delete",
                                 "/my-booking/rooms/{d\\+}/update",
-                                "/my-booking/rooms/{d\\+}/edit",
-                                "/my-booking/rooms/{d\\+}/delete",
                                 "/my-booking/rooms/{d\\+}/edit"
                         ).hasAuthority(OWNER.getAuthority())
                         .requestMatchers(
@@ -81,6 +92,10 @@ public class SecurityConfiguration {
                                     request.getSession().getAttributeNames();
                                     redirectToUserPage(response, user);
                                 })))
+                .oauth2Login(provider -> provider
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/my-booking/users")
+                        .userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUserService())))
 
                 .logout(logout -> logout
                         .logoutUrl("/logout").permitAll()
@@ -90,6 +105,20 @@ public class SecurityConfiguration {
                         .deleteCookies("JSESSIONID"));
 
         return httpSecurity.build();
+    }
+
+    private OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService() {
+        return userRequest -> {
+            String email = userRequest.getIdToken().getClaim("email");
+            var userDetails = userService.loadUserByUsername(email);
+            var methods = Set.of(userDetails.getClass().getMethods());
+            var oidcUser = new DefaultOidcUser(userDetails.getAuthorities(), userRequest.getIdToken());
+            return (OidcUser) Proxy.newProxyInstance(SecurityConfiguration.class.getClassLoader(),
+                    new Class[]{UserDetails.class, OidcUser.class},
+                    (proxy, method, args) -> methods.contains(method)
+                            ? method.invoke(userDetails, args)
+                            : method.invoke(oidcUser, args));
+        };
     }
 
     @SneakyThrows
