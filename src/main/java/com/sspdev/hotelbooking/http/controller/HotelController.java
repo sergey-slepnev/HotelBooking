@@ -25,13 +25,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/my-booking/hotels")
 @RequiredArgsConstructor
-//@SessionAttributes({"hotel", "hotelDetails"})
+@SessionAttributes(value = {"hotel", "hotelDetails"})
 public class HotelController {
 
     private final HotelService hotelService;
@@ -45,6 +46,7 @@ public class HotelController {
         var maybeHotel = hotelService.findById(id);
         var maybeHotelDetails = hotelDetailsService.findByHotelId(id);
         if (maybeHotel.isPresent() && maybeHotelDetails.isPresent()) {
+            model.addAttribute("user", user);
             maybeHotel.map(hotel -> model.addAttribute("hotel", hotel));
             maybeHotelDetails.map(hotelDetails -> model.addAttribute("hotelDetails", hotelDetails));
             model.addAttribute("contents", hotelContentService.findContent(id));
@@ -62,6 +64,14 @@ public class HotelController {
         model.addAttribute("filter", filter);
         model.addAttribute("countries", hotelDetailsService.findCountries());
         return "hotel/hotels";
+    }
+
+    @GetMapping("/{userId}/hotels-by-user")
+    public String findAllByOwner(@PathVariable("userId") Integer userId,
+                                 Model model) {
+        var hotelsByUser = hotelService.findAllByOwnerId(userId);
+        model.addAttribute("hotels", hotelsByUser);
+        return "hotel/hotels_by_owner";
     }
 
     @GetMapping("/{userId}/add-hotel")
