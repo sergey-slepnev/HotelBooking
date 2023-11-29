@@ -39,3 +39,7 @@ server:
 my-app:
   content:
     no-image-available: NoImageAvailable.jpg
+logging:
+  file:
+    name: hotelBooking.log
+    path: /
