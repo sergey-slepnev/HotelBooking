@@ -26,12 +26,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -57,6 +57,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.ModelAndViewAssert.assertAndReturnModelAttributeOfType;
+import static org.springframework.test.web.ModelAndViewAssert.assertCompareListModelAttribute;
+import static org.springframework.test.web.ModelAndViewAssert.assertModelAttributeAvailable;
+import static org.springframework.test.web.ModelAndViewAssert.assertViewName;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -67,7 +71,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @RequiredArgsConstructor
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
 public class HotelControllerTest {
 
     private static final Integer EXISTENT_HOTEL_ID = 1;
@@ -77,14 +81,14 @@ public class HotelControllerTest {
     private static final Integer EXISTENT_HOTEL_DETAILS_ID = 1;
 
     private MockMvc mockMvc;
-    @Mock
-    private HotelService hotelService;
-    @Mock
-    private HotelDetailsService hotelDetailsService;
-    @Mock
-    private HotelContentService hotelContentService;
-    @Mock
-    private Page<HotelReadDto> hotelReadDtoPage;
+    @MockBean
+    private final HotelService hotelService;
+    @MockBean
+    private final HotelDetailsService hotelDetailsService;
+    @MockBean
+    private final HotelContentService hotelContentService;
+    @MockBean
+    private final Page<HotelReadDto> hotelReadDtoPage;
     @InjectMocks
     private HotelController hotelController;
 
@@ -110,8 +114,8 @@ public class HotelControllerTest {
         mockMvc.perform(get("/my-booking/hotels/" + EXISTENT_HOTEL_ID)
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("hotel", "hotelDetails", "contents"))
-                .andExpect(model().size(3))
+                .andExpect(model().attributeExists("user", "hotel", "hotelDetails", "contents"))
+                .andExpect(model().size(4))
                 .andExpect(model().attribute("contents", hasSize(1)))
                 .andExpect(view().name("hotel/hotel"));
     }
@@ -215,6 +219,28 @@ public class HotelControllerTest {
                         .sessionAttr("user", ownerInSession))
                 .andExpect(status().isNotFound());
         verify(hotelService).delete(NON_EXISTENT_HOTEL_ID);
+    }
+
+    @Test
+    void findAllByOwner_shouldFindAllHotelsByOwner_whenHotelsExist() throws Exception {
+        var expectedHotels = List.of(getHotelReadDto(), getHotelReadDto());
+        when(hotelService.findAllByOwnerId(EXISTENT_OWNER_ID)).thenReturn(expectedHotels);
+        var modelAndView = mockMvc.perform(get("/my-booking/hotels/" + EXISTENT_OWNER_ID + "/hotels-by-user"))
+                .andDo(print())
+                .andExpectAll(
+                        status().isOk(),
+                        model().attributeExists("hotels"),
+                        model().attribute("hotels", hasSize(2)),
+                        view().name("hotel/hotels_by_owner")
+                ).andReturn().getModelAndView();
+
+        if (modelAndView != null) {
+            assertViewName(modelAndView, "hotel/hotels_by_owner");
+            assertModelAttributeAvailable(modelAndView, "hotels");
+            assertCompareListModelAttribute(modelAndView, "hotels", expectedHotels);
+            var hotels = assertAndReturnModelAttributeOfType(modelAndView, "hotels", List.class);
+            assertThat(hotels).hasSize(2);
+        }
     }
 
     private HotelReadDto getHotelReadDto() {

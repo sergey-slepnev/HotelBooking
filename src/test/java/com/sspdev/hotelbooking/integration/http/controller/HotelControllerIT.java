@@ -167,4 +167,16 @@ class HotelControllerIT extends IntegrationTestBase {
                 Arguments.of(country, "Russia", 3)
         );
     }
+
+    @Test
+    void findAllByOwner_shouldFindAllHotelsByOwner_whenHotelsExist() throws Exception {
+        mockMvc.perform(get("/my-booking/hotels/" + EXISTENT_OWNER_ID + "/hotels-by-user"))
+                .andDo(print())
+                .andExpectAll(
+                        status().isOk(),
+                        model().attributeExists("hotels"),
+                        model().attribute("hotels", hasSize(3)),
+                        view().name("hotel/hotels_by_owner")
+                );
+    }
 }
