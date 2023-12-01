@@ -24,7 +24,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/my-booking/users")
-@SessionAttributes({"user", "statuses"})
+@SessionAttributes(value = "user", types = UserReadDto.class)
 @RequiredArgsConstructor
 public class UserController {
 
@@ -39,6 +39,11 @@ public class UserController {
         model.addAttribute("statuses", Status.values());
 
         return "user/users";
+    }
+
+    @ModelAttribute("user")
+    public UserReadDto getUser() {
+        return new UserReadDto();
     }
 
     @GetMapping("/{id}")

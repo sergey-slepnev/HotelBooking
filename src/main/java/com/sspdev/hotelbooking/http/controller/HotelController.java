@@ -6,6 +6,8 @@ import com.sspdev.hotelbooking.database.entity.enums.Status;
 import com.sspdev.hotelbooking.dto.HotelContentCreateDto;
 import com.sspdev.hotelbooking.dto.HotelCreateEditDto;
 import com.sspdev.hotelbooking.dto.HotelDetailsCreateEditDto;
+import com.sspdev.hotelbooking.dto.HotelDetailsReadDto;
+import com.sspdev.hotelbooking.dto.HotelReadDto;
 import com.sspdev.hotelbooking.dto.PageResponse;
 import com.sspdev.hotelbooking.dto.UserReadDto;
 import com.sspdev.hotelbooking.dto.filter.HotelFilter;
@@ -32,16 +34,26 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/my-booking/hotels")
 @RequiredArgsConstructor
-@SessionAttributes(value = {"hotel", "hotelDetails"})
+@SessionAttributes({"hotel", "hotelDetails"})
 public class HotelController {
 
     private final HotelService hotelService;
     private final HotelDetailsService hotelDetailsService;
     private final HotelContentService hotelContentService;
 
+    @ModelAttribute("hotel")
+    public HotelReadDto getHotel() {
+        return new HotelReadDto();
+    }
+
+    @ModelAttribute("hotelDetails")
+    public HotelDetailsReadDto getHotelDetails() {
+        return new HotelDetailsReadDto();
+    }
+
     @GetMapping("/{id}")
     public String findById(@PathVariable("id") Integer id,
-                           @SessionAttribute("user") UserReadDto user,
+                           @ModelAttribute("user") UserReadDto user,
                            Model model) {
         var maybeHotel = hotelService.findById(id);
         var maybeHotelDetails = hotelDetailsService.findByHotelId(id);
@@ -141,7 +153,6 @@ public class HotelController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
     }
-
 
     private static void flashAttributes(HotelCreateEditDto hotelDto,
                                         BindingResult hotelBindingResult,
