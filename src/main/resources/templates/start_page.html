@@ -8,13 +8,13 @@
 <body>
 <div th:insert="~{fragment/header}"></div>
 <form action="/my-booking">
-    <a href="/hotels">
+    <a href="/my-booking/hotels">
         <button type="button" th:text="#{welcome.all_hotels}"></button>
     </a><br>
     <h1 th:text="#{welcome.top_five}">Top five hotels on MyBooking</h1>
     <div th:each="hotel : ${topFiveHotels}">
         <h3>
-            <a th:href="@{/hotels/{hotelId}(hotelId=${hotel.id})}"
+            <a th:href="@{/my-booking/hotels/{id}(id=${hotel.id})}"
                th:text="|${hotel.name} - ${hotel.star()} -  ${hotel.avgRating()}|">Hotel info</a>
         </h3>
     </div>

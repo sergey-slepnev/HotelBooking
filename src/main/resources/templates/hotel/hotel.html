@@ -19,7 +19,7 @@
     <h4 th:text="|#{hotel.star}: ${hotelDetails.star}|">Star</h4>
     <h4 th:text="|#{hotel.floors}: ${hotelDetails.floorCount}|">Floors</h4>
 
-    <div th:if="${contents}">
+    <div th:if="${contents.size() != 0}">
         <h4 th:text="#{hotel.content}">Hotel content:</h4>
         <div th:each="content : ${contents}">
             <img th:src="@{/api/v1/hotels/{hotelId}/content/{contentId}(hotelId=${hotel.id}, contentId=${content.id})}"
@@ -39,14 +39,18 @@
         </a>
     </div>
 
-    <div sec:authorize="hasAuthority('OWNER')">
-        <a th:href="@{/my-booking/rooms/{userId}/{hotelId}/add(userId=${session.get('authUser').id}, hotelId=${hotel.id})}">
-            <button type="button" th:text="#{button.add_new_room}">Add new room</button>
-        </a>
+    <div th:if="${session.user != null}">
+        <div sec:authorize="hasAuthority('OWNER')">
+            <a th:href="@{/my-booking/rooms/{userId}/{hotelId}/add(userId=${user.id}, hotelId=${hotel.id})}">
+                <button type="button" th:text="#{button.add_new_room}">Add new room</button>
+            </a>
+        </div>
     </div>
 </form>
-<form th:action="@{/hotels/{hotelId}/delete(hotelId=${hotel.id})}" method="post">
-    <button type="submit" th:text="#{button.delete}">Remove</button>
-</form>
+<div sec:authorize="hasAnyAuthority('OWNER', 'ADMIN')">
+    <form th:action="@{/my-booking/hotels/{id}/delete(id=${hotel.id})}" method="post">
+        <button type="submit" th:text="#{button.delete_hotel}">Remove</button>
+    </form>
+</div>
 </body>
 </html>

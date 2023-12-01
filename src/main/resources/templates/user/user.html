@@ -31,6 +31,16 @@
         <button type="submit" th:text="#{button.delete_user}">Delete user</button>
     </form>
 </div>
+<div sec:authorize="hasAuthority('OWNER')">
+    <a th:href="@{/my-booking/hotels/{userId}/hotels-by-user(userId=${user.id})}">
+        <button type="button" th:text="#{hotel.show_hotels_by_user}">User's hotels</button>
+    </a>
+</div>
+<div sec:authorize="hasAuthority('OWNER')">
+    <a th:href="@{/my-booking/hotels/{userId}/create(userId=${user.id})}">
+        <button type="button" th:text="#{button.register_new_hotel}">Register hotel</button>
+    </a>
+</div>
 <div sec:authorize="hasAuthority('ADMIN')">
     <span th:text="#{user.change_status}"></span>
     <form th:action="@{/my-booking/users/{id}/change-status(id=${user.id})}" method="post">
