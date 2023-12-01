@@ -3,7 +3,7 @@ Service for searching and booking rooms.
 
 <h1 align="center">
   <br>
-  <a href="http://www.amitmerchant.com/electron-markdownify"><img src="https://i.ibb.co/1mbffZS/HB.png" alt="HotelBooking" width="200"></a>
+  <img src="https://i.ibb.co/1mbffZS/HB.png" alt="HotelBooking" width="200"></a>
   <br>
 Hotel Booking
   <br>
@@ -22,6 +22,11 @@ Hotel Booking
 HotelBooking - the service for searching and booking rooms. The goal is to create a service with the ability to register, search and book places to stay. 
 The functionality assumes the presence of three roles: owner, user and administrator.The owner registers places of residence with the ability to edit and delete them.
 The user searches for and books rooms, the administrator verifies users, processes applications and receives general statistics on the operation of the service.
+
+## Database diagram
+<div alight="centre">
+ <img src="https://i.ibb.co/6Z8jsyH/db-scheme.png" width="450">
+</div>
 
 ## Developers
 - [sergey-slepnev](https://github.com/sergey-slepnev)
