@@ -2,6 +2,7 @@ package com.sspdev.hotelbooking.unit.mapper;
 
 import com.sspdev.hotelbooking.database.entity.BookingRequest;
 import com.sspdev.hotelbooking.database.entity.Hotel;
+import com.sspdev.hotelbooking.database.entity.PersonalInfo;
 import com.sspdev.hotelbooking.database.entity.Room;
 import com.sspdev.hotelbooking.database.entity.User;
 import com.sspdev.hotelbooking.database.entity.enums.Role;
@@ -69,6 +70,11 @@ class BookingRequestReadMapperTest {
         return User.builder()
                 .id(FIRST_OWNER_ID)
                 .role(Role.ADMIN)
+                .username("TestUser")
+                .personalInfo(new PersonalInfo(
+                        "TestFirstName",
+                        "TestLastName",
+                        LocalDate.of(2000, 10, 10)))
                 .build();
     }
 
@@ -93,11 +99,16 @@ class BookingRequestReadMapperTest {
         return BookingRequestReadDto.builder()
                 .id(EXISTENT_REQUEST_ID)
                 .createdAt(LocalDateTime.of(2023, 12, 1, 15, 15))
-                .hotelId(EXISTENT_HOTEL_ID)
-                .roomId(EXISTENT_ROOM_ID)
-                .userId(FIRST_OWNER_ID)
+                .hotelName("MoscowPlaza")
+                .roomNo(1)
+                .userName("TestUser")
+                .firstName("TestFirstName")
+                .lastName("TestLastName")
                 .checkIn(LocalDate.of(2023, 12, 1))
                 .checkOut(LocalDate.of(2023, 12, 10))
+                .daysToStay(9L)
+                .costPerDay(getRoom().getCost())
+                .totalCost(BigDecimal.valueOf(17100))
                 .status(Status.NEW)
                 .build();
     }
