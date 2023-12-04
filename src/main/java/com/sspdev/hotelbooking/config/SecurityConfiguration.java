@@ -63,12 +63,14 @@ public class SecurityConfiguration {
                                 "/api/v1/users/{\\d+}/avatar",
                                 "/my-booking/users",
                                 "/my-booking/users/{\\d+}/update",
-                                "/my-booking/users/{\\d+}/delete"
+                                "/my-booking/users/{\\d+}/delete",
+                                "/my-booking/booking-requests/{\\d+}"
                         ).hasAnyAuthority(USER.getAuthority(), OWNER.getAuthority(), ADMIN.getAuthority())
                         .requestMatchers(
                                 "/my-booking/hotels/{d\\+}/add-hotel",
                                 "/my-booking/hotels/{d\\+}/create",
                                 "/my-booking/hotels/{d\\+}/delete",
+                                "/my-booking/hotels/{\\d+}/hotels-by-user",
                                 "/my-booking/hotels/{d\\+}/user-hotels/{\\d+}/edit",
                                 "/my-booking/rooms/{\\d+}/{\\d+}/add",
                                 "/my-booking/rooms/{\\d+}/{\\d+}/create",

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking request</title>
+</head>
+<body>
+<div th:insert="~{fragment/header}"></div>
+
+<h4 th:text="|#{booking_request.status}: ${request.status()}|">Request status</h4>
+
+<div sec:authorize="hasAuthority('ADMIN')">
+    <form th:action="@{/my-booking/booking-request/{id}/change-status(id=${request.id()})}">
+        <label for="status"><span th:text="#{booking_request.status}">Status</span>
+            <select name="status" id="status">
+                <option th:each="status : ${statuses}" th:value="${request.status()}" th:text="status"></option>
+            </select>
+        </label>
+        <button type="submit" th:text="#{button.change_status}">Change request status</button>
+    </form>
+</div>
+
+<h4 th:text="|#{booking_request.created_at}: ${request.createdAt()}|">Created at</h4>
+<h4 th:text="|#{user.firstname} #{user.lastname}: ${request.firstName} ${request.lastName}|">User</h4>
+<h4 th:text="|#{hotel.name}: ${request.hotelName()}|">Hotel</h4>
+<h4 th:text="|#{room.number}: ${request.roomNo}|">Room</h4>
+<h4 th:text="|#{booking_request.check_in}: ${request.checkIn()}|">Check in date</h4>
+<h4 th:text="|#{booking_request.check_out}: ${request.checkOut()}|">Check out date</h4>
+<h4 th:text="|#{booking_request.days_to_stay}: ${request.daysToStay()}|">Days to stay</h4>
+<h4 th:text="|#{booking_request.cost_per_day}: ${request.costPerDay()}|">Cost per day</h4>
+<h4 th:text="|#{booking_request.total_cost}: ${request.totalCost()}|">Total cost</h4>
+
+</body>
+</html>

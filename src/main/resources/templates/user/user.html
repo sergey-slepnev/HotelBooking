@@ -53,5 +53,10 @@
         <button type="submit" th:text="#{button.change_status}"></button>
     </form>
 </div>
+<div sec:authorize="hasAuthority('OWNER')">
+    <a th:href="@{/my-booking/hotels/{userId}/add-hotel(userId=${user.id})}">
+        <button type="submit" th:text="#{button.add_hotel}">Add new hotel</button>
+    </a>
+</div>
 </body>
 </html>
