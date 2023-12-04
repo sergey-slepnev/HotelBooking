@@ -33,6 +33,10 @@ spring:
             client-id: 1084978167683-4j6uftqv8lhdhmdcnf8ina0dgeruj13j.apps.googleusercontent.com
             client-secret: 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
             redirect-uri: https://localhost:8080/login/oauth2/code/google
+  banner:
+    location: banner.txt
+  main:
+    banner-mode: console
 server:
   tomcat:
     max-swallow-size: -1
