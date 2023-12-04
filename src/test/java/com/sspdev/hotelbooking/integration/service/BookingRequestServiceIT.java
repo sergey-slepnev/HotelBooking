@@ -1,10 +1,14 @@
 package com.sspdev.hotelbooking.integration.service;
 
 import com.sspdev.hotelbooking.database.entity.enums.Status;
+import com.sspdev.hotelbooking.dto.BookingRequestCreateEditDto;
 import com.sspdev.hotelbooking.integration.IntegrationTestBase;
 import com.sspdev.hotelbooking.service.BookingRequestService;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -26,13 +30,40 @@ public class BookingRequestServiceIT extends IntegrationTestBase {
         expectedBookingRequest.ifPresent(request -> {
             assertAll(() -> {
                 assertThat(request.createdAt()).isEqualTo("2022-10-10T12:05");
-                assertThat(request.hotelId()).isEqualTo(EXISTENT_HOTEL_ID);
-                assertThat(request.roomId()).isEqualTo(EXISTENT_ROOM_ID);
-                assertThat(request.userId()).isEqualTo(EXISTENT_USER_ID);
+                assertThat(request.hotelName()).isEqualTo("MoscowPlaza");
+                assertThat(request.roomNo()).isEqualTo(1);
+                assertThat(request.userName()).isEqualTo("FirstUser@gmail.com");
                 assertThat(request.checkIn()).isEqualTo("2022-10-10");
                 assertThat(request.checkOut()).isEqualTo("2022-10-15");
                 assertThat(request.status()).isEqualTo(Status.NEW);
             });
         });
+    }
+
+    @Test
+    void create_shouldCreateNewBookingRequest() {
+        var createDto = getBookingRequestCreateDto();
+        var actualReadDto = bookingRequestService.create(createDto);
+
+        assertThat(actualReadDto.id()).isNotNull();
+        assertThat(actualReadDto.createdAt()).isEqualTo("2023-12-01T15:15");
+        assertThat(actualReadDto.hotelName()).isEqualTo("MoscowPlaza");
+        assertThat(actualReadDto.roomNo()).isEqualTo(1);
+        assertThat(actualReadDto.userName()).isEqualTo("FirstUser@gmail.com");
+        assertThat(actualReadDto.checkIn()).isEqualTo("2023-12-01");
+        assertThat(actualReadDto.checkOut()).isEqualTo("2023-12-10");
+        assertThat(actualReadDto.status()).isEqualTo(Status.NEW);
+    }
+
+    private BookingRequestCreateEditDto getBookingRequestCreateDto() {
+        return BookingRequestCreateEditDto.builder()
+                .createdAt(LocalDateTime.of(2023, 12, 1, 15, 15))
+                .hotelId(EXISTENT_HOTEL_ID)
+                .roomId(EXISTENT_ROOM_ID)
+                .userId(EXISTENT_USER_ID)
+                .checkIn(LocalDate.of(2023, 12, 1))
+                .checkOut(LocalDate.of(2023, 12, 10))
+                .status(Status.NEW)
+                .build();
     }
 }
