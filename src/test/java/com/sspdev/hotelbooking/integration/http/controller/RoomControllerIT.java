@@ -137,7 +137,7 @@ class RoomControllerIT extends IntegrationTestBase {
     void findByHotel_shouldFindRoomsByHotelPage_whenHotelAndRoomsExist() throws Exception {
         mockMvc.perform(get("/my-booking/rooms/" + EXISTENT_HOTEL_ID + "/rooms-by-hotel"))
                 .andExpect(status().isOk())
-                .andExpect(model().size(1))
+                .andExpect(model().size(2))
                 .andExpect(model().attributeExists("rooms"))
                 .andExpect(model().attribute("rooms", hasSize(4)))
                 .andExpect(view().name("room/rooms-by-hotel"));
@@ -147,7 +147,7 @@ class RoomControllerIT extends IntegrationTestBase {
     void findByHotel_shouldReturnRoomsByHotelPageWithNotRooms() throws Exception {
         mockMvc.perform(get("/my-booking/rooms/" + NOT_EXISTENT_HOTEL_ID + "/rooms-by-hotel"))
                 .andExpect(status().isOk())
-                .andExpect(model().size(1))
+                .andExpect(model().size(2))
                 .andExpect(model().attributeExists("rooms"))
                 .andExpect(model().attribute("rooms", hasSize(0)))
                 .andExpect(view().name("room/rooms-by-hotel"));

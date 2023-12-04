@@ -42,6 +42,11 @@ public class RoomController {
     private final RoomService roomService;
     private final HotelService hotelService;
 
+    @ModelAttribute
+    public RoomReadDto getRoom() {
+        return new RoomReadDto();
+    }
+
     @GetMapping("/{id}")
     public String findById(@PathVariable("id") Integer id,
                            Model model) {
