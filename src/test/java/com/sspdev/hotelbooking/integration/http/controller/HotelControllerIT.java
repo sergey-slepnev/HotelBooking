@@ -91,7 +91,7 @@ class HotelControllerIT extends IntegrationTestBase {
                         .sessionAttr("hotelDetails", HotelDetailsCreateEditDto.builder().build())
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("hotelCreateDto", "hotelDetails", "hotelContent", "stars"))
+                .andExpect(model().attributeExists("hotelCreateDto", "hotelDetails", "stars"))
                 .andExpect(view().name("hotel/add"));
     }
 

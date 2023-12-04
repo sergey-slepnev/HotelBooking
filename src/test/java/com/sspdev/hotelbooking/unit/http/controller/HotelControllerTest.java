@@ -161,7 +161,11 @@ public class HotelControllerTest {
                         .sessionAttr("user", userInSession)
                         .sessionAttr("hotelDetails", hotelDetails))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("hotelCreateDto", "hotelDetails", "hotelContent", "stars"))
+                .andExpect(model().attributeExists(
+                        "hotelCreateDto",
+                        "hotelDetailsCreateDto",
+                        "hotelContentCreateDto",
+                        "stars"))
                 .andExpect(view().name("hotel/add"));
     }
 

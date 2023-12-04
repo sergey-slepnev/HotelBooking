@@ -91,12 +91,12 @@ public class HotelController {
                       @SessionAttribute("user") UserReadDto user,
                       Model model,
                       @ModelAttribute("hotelCreateDto") HotelCreateEditDto hotelCreateDto,
-                      @ModelAttribute("hotelDetails") HotelDetailsCreateEditDto hotelDetailsCreateDto,
-                      @ModelAttribute("hotelContent") HotelContentCreateDto hotelContentCreateDto) {
+                      @ModelAttribute("hotelDetailsCreateDto") HotelDetailsCreateEditDto hotelDetailsCreateDto,
+                      @ModelAttribute("hotelContentCreateDto") HotelContentCreateDto hotelContentCreateDto) {
         model.addAttribute("user", user);
         model.addAttribute("hotelCreateDto", hotelCreateDto);
-        model.addAttribute("hotelDetails", hotelDetailsCreateDto);
-        model.addAttribute("hotelContent", hotelContentCreateDto);
+        model.addAttribute("hotelDetailsCreateDto", hotelDetailsCreateDto);
+        model.addAttribute("hotelContentCreateDto", hotelContentCreateDto);
         model.addAttribute("stars", Star.values());
 
         return "hotel/add";
