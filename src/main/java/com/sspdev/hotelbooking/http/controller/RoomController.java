@@ -58,13 +58,13 @@ public class RoomController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping("/search")
+    @GetMapping
     public String findAll(Model model, RoomFilter filter, Pageable pageable) {
         var roomPage = roomService.findAll(filter, pageable);
         model.addAttribute("rooms", PageResponse.of(roomPage));
         model.addAttribute("filter", filter);
         model.addAttribute("stars", Star.values());
-        return "room/search";
+        return "room/rooms";
     }
 
     @GetMapping("/{userId}/{hotelId}/add")

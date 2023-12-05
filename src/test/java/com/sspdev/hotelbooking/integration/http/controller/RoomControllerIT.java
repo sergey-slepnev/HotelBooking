@@ -1,7 +1,6 @@
 package com.sspdev.hotelbooking.integration.http.controller;
 
 import com.sspdev.hotelbooking.database.entity.enums.RoomType;
-import com.sspdev.hotelbooking.dto.RoomReadDto;
 import com.sspdev.hotelbooking.dto.filter.RoomFilter;
 import com.sspdev.hotelbooking.integration.IntegrationTestBase;
 import com.sspdev.hotelbooking.service.HotelService;
@@ -16,7 +15,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.math.BigDecimal;
 import java.util.stream.Stream;
 
 import static com.sspdev.hotelbooking.dto.RoomCreateEditDto.Fields.adultBedCount;
@@ -88,7 +86,7 @@ class RoomControllerIT extends IntegrationTestBase {
     @ParameterizedTest
     @MethodSource("getArgumentsForFindAllByFilter")
     void findAll_shouldFindRooms_withCostFromFilter(String paramName, String paramValue, Integer expectedNumbersOfRooms) throws Exception {
-        var mvcResult = mockMvc.perform(get("/my-booking/rooms/search").queryParam(paramName, paramValue))
+        var mvcResult = mockMvc.perform(get("/my-booking/rooms").queryParam(paramName, paramValue))
                 .andExpect(status().isOk())
                 .andExpect(view().name("room/search"))
                 .andExpect(model().attributeExists("rooms"))
@@ -214,22 +212,5 @@ class RoomControllerIT extends IntegrationTestBase {
                 flash().attributeCount(2),
                 flash().attributeExists("roomEditDto", "errors"),
                 flash().attribute("errors", hasSize(4)));
-    }
-
-    private RoomReadDto getRoomReadDto() {
-        return new RoomReadDto(
-                EXISTENT_ROOM_ID,
-                1,
-                1,
-                RoomType.TRPL,
-                25.3,
-                3,
-                0,
-                BigDecimal.valueOf(1500.99),
-                1,
-                true,
-                "Nice room in moscowPlaza",
-                null
-        );
     }
 }

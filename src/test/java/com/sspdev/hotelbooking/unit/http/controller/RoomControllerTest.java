@@ -132,7 +132,7 @@ public class RoomControllerTest extends UnitTestBase {
         when(roomReadDtoPage.getTotalElements()).thenReturn(expectedTotalElements);
         when(roomService.findAll(any(RoomFilter.class), any(Pageable.class))).thenReturn(roomReadDtoPage);
 
-        var mvcResult = mockMvc.perform(get("/my-booking/rooms/search"))
+        var mvcResult = mockMvc.perform(get("/my-booking/rooms/"))
                 .andExpectAll(
                         status().isOk(),
                         model().attributeExists("rooms", "filter"),

@@ -42,7 +42,7 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(urlConfig -> urlConfig
                         .requestMatchers(
-                                "/my-booking/rooms/search",
+                                "/my-booking/rooms",
                                 "/login",
                                 "/my-booking",
                                 "/my-booking/registration",

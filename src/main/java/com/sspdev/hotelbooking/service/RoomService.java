@@ -6,7 +6,6 @@ import com.sspdev.hotelbooking.dto.RoomContentCreateDto;
 import com.sspdev.hotelbooking.dto.RoomCreateEditDto;
 import com.sspdev.hotelbooking.dto.RoomReadDto;
 import com.sspdev.hotelbooking.dto.filter.RoomFilter;
-import com.sspdev.hotelbooking.mapper.RoomContentCreateMapper;
 import com.sspdev.hotelbooking.mapper.RoomCreateEditMapper;
 import com.sspdev.hotelbooking.mapper.RoomReadMapper;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,6 @@ public class RoomService {
     private final RoomReadMapper roomReadMapper;
     private final RoomCreateEditMapper roomCreateEditMapper;
     private final RoomContentService roomContentService;
-    private final RoomContentCreateMapper roomContentCreateMapper;
 
     public Optional<RoomReadDto> findById(Integer roomId) {
         return roomRepository.findById(roomId)
@@ -39,8 +37,8 @@ public class RoomService {
 
     public Page<RoomReadDto> findAll(RoomFilter filter, Pageable pageable) {
         var predicate = QPredicates.builder()
-                .add(filter.country(), hotel.hotelDetails.country::eq)
-                .add(filter.locality(), hotel.hotelDetails.locality::eq)
+                .add(filter.country(), hotel.hotelDetails.country::contains)
+                .add(filter.locality(), hotel.hotelDetails.locality::contains)
                 .add(filter.star(), hotel.hotelDetails.star::eq)
                 .add(filter.costFrom(), room.cost::goe)
                 .add(filter.costTo(), room.cost::loe)
