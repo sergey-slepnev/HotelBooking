@@ -6,6 +6,7 @@ import com.sspdev.hotelbooking.dto.PageResponse;
 import com.sspdev.hotelbooking.dto.UserReadDto;
 import com.sspdev.hotelbooking.dto.filter.UserFilter;
 import com.sspdev.hotelbooking.http.controller.UserController;
+import com.sspdev.hotelbooking.service.BookingRequestService;
 import com.sspdev.hotelbooking.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.sspdev.hotelbooking.dto.UserCreateEditDto.Fields.birthDate;
@@ -62,6 +64,8 @@ class UserControllerTest {
     private Page<UserReadDto> userReadDtoPage;
     @Mock
     private UserService userService;
+    @Mock
+    private BookingRequestService bookingRequestService;
     @InjectMocks
     public UserController userController;
 
@@ -102,6 +106,7 @@ class UserControllerTest {
     @Test
     void findById_shouldFindUserById_whenUserExists() throws Exception {
         var expectedUserReadDto = getUserReadDto();
+        when(bookingRequestService.countRequestsByUserAndStatus(EXISTENT_USER_ID)).thenReturn(Map.of());
         when(userService.findById(anyInt())).thenReturn(Optional.of(expectedUserReadDto));
 
         mockMvc.perform(get("/my-booking/users/" + EXISTENT_USER_ID))

@@ -6,6 +6,7 @@ import com.sspdev.hotelbooking.dto.PageResponse;
 import com.sspdev.hotelbooking.dto.UserCreateEditDto;
 import com.sspdev.hotelbooking.dto.UserReadDto;
 import com.sspdev.hotelbooking.dto.filter.UserFilter;
+import com.sspdev.hotelbooking.service.BookingRequestService;
 import com.sspdev.hotelbooking.service.UserService;
 import com.sspdev.hotelbooking.validation.group.CreateAction;
 import com.sspdev.hotelbooking.validation.group.UpdateAction;
@@ -18,7 +19,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -29,6 +36,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class UserController {
 
     private final UserService userService;
+    private final BookingRequestService bookingRequestService;
 
     @GetMapping
     public String findAll(Model model, UserFilter userFilter, Pageable pageable) {
@@ -53,6 +61,16 @@ public class UserController {
                 .map(user -> {
                     model.addAttribute("user", user);
                     model.addAttribute("statuses", Status.values());
+                    if (user.getRole().equals(Role.ADMIN)) {
+                        model.addAttribute("totalRequests", bookingRequestService.getTotalRequests());
+                        model.addAttribute("requests", bookingRequestService.countRequestsByStatus());
+                    }
+                    if (user.getRole().equals(Role.USER)) {
+                        model.addAttribute("userRequests", bookingRequestService.countRequestsByUserAndStatus(id));
+                    }
+                    if (user.getRole().equals(Role.OWNER)) {
+                        model.addAttribute("ownerRequests", bookingRequestService.countRequestsByOwnerAndStatus(id));
+                    }
                     return "user/user";
                 })
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
