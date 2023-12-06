@@ -9,7 +9,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
 import java.util.Optional;
+
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
 
 @Service
 @RequiredArgsConstructor
@@ -27,10 +31,29 @@ public class BookingRequestService {
 
     @Transactional
     public BookingRequestReadDto create(BookingRequestCreateEditDto createDto) {
-            return Optional.of(createDto)
-                    .map(bookingRequestCreteEditMapper::map)
-                    .map(bookingRequestRepository::save)
-                    .map(bookingRequestReadMapper::map)
-                    .orElseThrow();
+        return Optional.of(createDto)
+                .map(bookingRequestCreteEditMapper::map)
+                .map(bookingRequestRepository::save)
+                .map(bookingRequestReadMapper::map)
+                .orElseThrow();
+    }
+
+    public long getTotalRequests() {
+        return bookingRequestRepository.count();
+    }
+
+    public Map<String, Long> countRequestsByStatus() {
+        return bookingRequestRepository.findAll().stream()
+                .collect(groupingBy(request -> request.getStatus().name(), counting()));
+    }
+
+    public Map<String, Long> countRequestsByUserAndStatus(Integer id) {
+        return bookingRequestRepository.findByUser(id).stream()
+                .collect(groupingBy(request -> request.getStatus().name(), counting()));
+    }
+
+    public Map<String, Long> countRequestsByOwnerAndStatus(Integer id) {
+        return bookingRequestRepository.countRequestsByOwnerAndStatus(id).stream()
+                .collect(groupingBy(request -> request.getStatus().name(), counting()));
     }
 }
