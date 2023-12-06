@@ -22,6 +22,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +37,7 @@ class BookingRequestServiceTest {
     private static final Integer EXISTENT_HOTEL_ID = 1;
     private static final Integer FIRST_OWNER_ID = 4;
     private static final Integer EXISTENT_ROOM_ID = 1;
+    private static final Integer EXISTENT_USER_ID = 2;
 
     @Mock
     private BookingRequestRepository bookingRequestRepository;
@@ -81,6 +84,41 @@ class BookingRequestServiceTest {
         var actualReadDto = bookingRequestService.create(createDto);
 
         assertThat(actualReadDto).isEqualTo(requestReadDto);
+    }
+
+    @Test
+    void getTotalRequests_shouldReturnAllRequestsFromDb() {
+        when(bookingRequestRepository.count()).thenReturn(9L);
+        var actualResult = bookingRequestService.getTotalRequests();
+
+        assertThat(actualResult).isEqualTo(9);
+    }
+
+    @Test
+    void countRequestsByStatus_shouldReturnAllRequestsInMapWithStatusAndCount() {
+        var entity = getBookingRequestEntity();
+        when(bookingRequestRepository.findAll()).thenReturn(List.of(entity, entity));
+        var actualStatusesAndCount = bookingRequestService.countRequestsByStatus();
+
+        assertThat(actualStatusesAndCount).containsAllEntriesOf(Map.of("NEW", 2L));
+    }
+
+    @Test
+    void countRequestsByUserAndStatus_shouldReturnRequestByUserMapperStatusAndCount() {
+        var entity = getBookingRequestEntity();
+        when(bookingRequestRepository.findByUser(EXISTENT_USER_ID)).thenReturn(List.of(entity, entity));
+        var actualStatusesAndCount = bookingRequestService.countRequestsByUserAndStatus(EXISTENT_USER_ID);
+
+        assertThat(actualStatusesAndCount).containsAllEntriesOf(Map.of("NEW", 2L));
+    }
+
+    @Test
+    void countRequestsByOwnerAndStatus_shouldReturnRequestByOwnerMappedStatusesAndCount() {
+        var entity = getBookingRequestEntity();
+        when(bookingRequestRepository.countRequestsByOwnerAndStatus(FIRST_OWNER_ID)).thenReturn(List.of(entity, entity));
+        var requestForFirstOwner = bookingRequestService.countRequestsByOwnerAndStatus(FIRST_OWNER_ID);
+
+        assertThat(requestForFirstOwner).containsAllEntriesOf(Map.of("NEW", 2L));
     }
 
     private BookingRequest getBookingRequestEntity() {

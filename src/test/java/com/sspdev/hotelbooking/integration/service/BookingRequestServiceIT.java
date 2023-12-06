@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -20,6 +21,7 @@ public class BookingRequestServiceIT extends IntegrationTestBase {
     private static final Integer EXISTENT_HOTEL_ID = 1;
     private static final Integer EXISTENT_ROOM_ID = 1;
     private static final Integer EXISTENT_USER_ID = 2;
+    private static final Integer FIRST_OWNER_ID = 4;
 
     private final BookingRequestService bookingRequestService;
 
@@ -53,6 +55,45 @@ public class BookingRequestServiceIT extends IntegrationTestBase {
         assertThat(actualReadDto.checkIn()).isEqualTo("2023-12-01");
         assertThat(actualReadDto.checkOut()).isEqualTo("2023-12-10");
         assertThat(actualReadDto.status()).isEqualTo(Status.NEW);
+    }
+
+    @Test
+    void getTotalRequests_shouldReturnAllRequestsFromDb() {
+        var actualResult = bookingRequestService.getTotalRequests();
+
+        assertThat(actualResult).isEqualTo(9);
+    }
+
+    @Test
+    void countRequestsByStatus_shouldReturnAllRequestsInMapWithStatusAndCount() {
+        var actualStatusesAndCount = bookingRequestService.countRequestsByStatus();
+
+        assertThat(actualStatusesAndCount).containsAllEntriesOf(Map.of(
+                "NEW", 2L,
+                "APPROVED", 3L,
+                "PAID", 2L,
+                "CANCELED", 2L));
+    }
+
+    @Test
+    void countRequestsByUserAndStatus_shouldReturnRequestByUserMapperStatusAndCount() {
+        var actualStatusesAndCount = bookingRequestService.countRequestsByUserAndStatus(EXISTENT_USER_ID);
+
+        assertThat(actualStatusesAndCount).containsAllEntriesOf(Map.of(
+                "NEW", 2L,
+                "APPROVED", 2L,
+                "PAID", 1L
+        ));
+    }
+
+    @Test
+    void countRequestsByOwnerAndStatus_shouldReturnRequestByOwnerMappedStatusesAndCount() {
+        var requestForFirstOwner = bookingRequestService.countRequestsByOwnerAndStatus(FIRST_OWNER_ID);
+
+        assertThat(requestForFirstOwner).containsAllEntriesOf(Map.of(
+                "NEW", 2L,
+                "CANCELED", 2L
+        ));
     }
 
     private BookingRequestCreateEditDto getBookingRequestCreateDto() {
