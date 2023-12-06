@@ -88,7 +88,7 @@ class RoomControllerIT extends IntegrationTestBase {
     void findAll_shouldFindRooms_withCostFromFilter(String paramName, String paramValue, Integer expectedNumbersOfRooms) throws Exception {
         var mvcResult = mockMvc.perform(get("/my-booking/rooms").queryParam(paramName, paramValue))
                 .andExpect(status().isOk())
-                .andExpect(view().name("room/search"))
+                .andExpect(view().name("room/rooms"))
                 .andExpect(model().attributeExists("rooms"))
                 .andReturn();
 
