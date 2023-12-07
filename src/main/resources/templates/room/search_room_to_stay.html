@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Search room to stay</title>
+</head>
+<body>
+<div th:insert="~{fragment/header}"></div>
+<form action="/my-booking/rooms/search" >
+    <label for="country"><span th:text="#{hotel.country}">Country</span>
+        <select name="country" id="country">
+            <option th:if="${filter.country()}" th:value="${filter.country()}" th:text="${filter.country()}"></option>
+            <option th:each="country: ${countries.keySet()}" th:value="${country}" th:text="${country}"></option>
+        </select>
+    </label><br>
+    <label for="locality"><span th:text="#{hotel.city}">City</span>
+        <input type="text" name="locality" id="locality" th:value="${filter.locality()}">
+    </label><br>
+    <label for="star"><span th:text="#{hotel.star}">Stars:</span>
+        <select name="star" id="star">
+            <option th:if="${filter.star()}" th:value="${filter.star()}" th:text="${filter.star().name()}"></option>
+            <option th:each="star : ${stars}" th:value="${star}" th:text="${star}"></option>
+        </select>
+    </label><br>
+    <label for="costFrom"><span th:text="#{room.cost.min}">Cost from</span>
+        <input id="costFrom" type="number" name="costFrom" th:value="${filter.costFrom()}">
+    </label><br>
+    <label for="costTo"><span th:text="#{room.cost.max}">Cost to</span>
+        <input id="costTo" type="number" name="costTo" th:value="${filter.costTo()}">
+    </label><br>
+    <label for="adultBedCount"><span th:text="#{room.adult_beds}">Adult beds</span>
+        <input id="adultBedCount" type="number" name="adultBedCount" th:value="${filter.adultBedCount()}">
+    </label><br>
+    <label for="childrenBedCount"><span th:text="#{room.children_beds}">Children beds</span>
+        <input id="childrenBedCount" type="number" name="childrenBedCount" th:value="${filter.childrenBedCount()}">
+    </label><br>
+    <label for="checkIn"><span th:text="#{room.checkIn}">Check in date</span>
+        <input id="checkIn" type="date" name="checkIn" th:value="${filter.checkIn()}">
+    </label><br>
+    <label for="checkOut"><span th:text="#{room.checkOut}">Check out date</span>
+        <input id="checkOut" type="date" name="checkOut" th:value="${filter.checkOut()}">
+    </label><br>
+    <input type="hidden" name="available" th:value="true">
+    <!--    <div>-->
+    <!--        <label for="page"><span th:text="#{filter.page}">Page</span>-->
+    <!--            <input id="page" type="number" name="page" th:value="${rooms.metadata.page}">-->
+    <!--        </label>-->
+    <!--        <label for="size"><span th:text="#{filter.size}">Size</span>-->
+    <!--            <input id="size" type="number" name="size" th:value="${rooms.metadata.size}">-->
+    <!--        </label>-->
+    <!--    </div>-->
+    <div style="color: blue" sec:authorize="!isAuthenticated()">
+        <div th:text="#{room.register_to_book}"></div>
+    </div>
+    <div th:each="room : ${rooms}">
+        <span th:text="|${room.hotelName()} ${room.availableRooms()}|"></span>
+        <div sec:authorize="hasAuthority('USER')">
+            <a th:href="@{/my-booking/rooms/{id}(id=${room.id})}">
+                <button th:text="#{room.to_book}"></button>
+            </a>
+        </div>
+    </div>
+    <p>
+        <button type="submit" th:text="#{button.filter}">Filter</button>
+    </p>
+</form>
+<div th:if="${errors != null}">
+    <p style="color: red" th:each="error: ${errors}" th:text="${error.getDefaultMessage()}">Error message</p>
+</div>
+</body>
+</html>
