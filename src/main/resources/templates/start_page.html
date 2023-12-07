@@ -11,10 +11,10 @@
     <a href="/my-booking/hotels">
         <button type="button" th:text="#{welcome.all_hotels}"></button>
     </a><br>
-    <a href="/my-booking/rooms/find">
+    <a href="/my-booking/rooms/search">
         <button type="button" th:text="#{welcome.go_to_search}"></button>
     </a><br>
-    <h1 th:text="#{welcome.top_five}">Top five hotels on MyBooking</h1>
+    <h1 th:text="#{welcome.best_hotels}">Top five hotels on MyBooking</h1>
     <div th:each="hotel : ${topFiveHotels}">
         <h3>
             <a th:href="@{/my-booking/hotels/{id}(id=${hotel.id})}"

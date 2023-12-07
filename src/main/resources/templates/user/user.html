@@ -52,11 +52,28 @@
         </div>
         <button type="submit" th:text="#{button.change_status}"></button>
     </form>
+    <h4 th:text="|#{booking_request.count} ${totalRequests}|"></h4>
+    <h4 th:text="|#{booking_request.status_new}: ${requests.get('NEW')}|"></h4>
+    <h4 th:text="|#{booking_request.status_approved}: ${requests.get('APPROVED')}|"></h4>
+    <h4 th:text="|#{booking_request.status_paid}: ${requests.get('PAID')}|"></h4>
 </div>
 <div sec:authorize="hasAuthority('OWNER')">
     <a th:href="@{/my-booking/hotels/{userId}/add-hotel(userId=${user.id})}">
         <button type="submit" th:text="#{button.add_hotel}">Add new hotel</button>
     </a>
+</div>
+<div sec:authorize="hasAuthority('USER')" th:if="${userRequests}">
+    <h3 th:text="#{user.my_requests}"></h3>
+    <h3 th:text="|#{booking_request.status_new}: ${userRequests.get('NEW')}|"></h3>
+    <h3 th:text="|#{booking_request.status_approved}: ${userRequests.get('APPROVED')}|"></h3>
+    <h3 th:text="|#{booking_request.status_paid}: ${userRequests.get('PAID')}|"></h3>
+</div>
+<br>
+<div sec:authorize="hasAuthority('OWNER')" th:if="${ownerRequests}">
+    <h3 th:text="#{user.my_requests}"></h3>
+    <h3 th:text="|#{booking_request.status_new}: ${ownerRequests.get('NEW')}|"></h3>
+    <h3 th:text="|#{booking_request.status_approved}: ${ownerRequests.get('APPROVED')}|"></h3>
+    <h3 th:text="|#{booking_request.status_paid}: ${ownerRequests.get('PAID')}|"></h3>
 </div>
 </body>
 </html>
