@@ -23,9 +23,11 @@ bin/
 *.iml
 *.ipr
 *.log
+*.gz
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+images/
 
 ### NetBeans ###
 /nbproject/private/
