@@ -12,7 +12,7 @@ import java.util.Arrays;
 @Slf4j
 @Aspect
 @Component
-public class FirstAspect {
+public class ServiceAspect {
 
     @Pointcut("execution(public * com.sspdev.hotelbooking.service.*Service.*(..))")
     public void isAndyPublicServiceMethod() {
@@ -21,13 +21,13 @@ public class FirstAspect {
     @Around("isAndyPublicServiceMethod()")
     public Object logAroundServiceMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         var joinPoints = Arrays.toString(joinPoint.getArgs());
-        log.info("Enter: {}.{}() with argument[s] = {}", joinPoint.getSignature().getDeclaringTypeName(),
+        log.info("Enter: {}.{}() with argument[s]: {}.", joinPoint.getSignature().getDeclaringTypeName(),
                 joinPoint.getSignature().getName(), joinPoints);
         try {
             var startTime = System.currentTimeMillis();
             var result = joinPoint.proceed();
             var takenTimeInMilliseconds = System.currentTimeMillis() - startTime;
-            log.info("Exit: {}.{}() with result = {}. Execution time = {} ms", joinPoint.getSignature().getDeclaringTypeName(),
+            log.info("Exit: {}.{}() with result: {}. Execution time: {}ms.", joinPoint.getSignature().getDeclaringTypeName(),
                     joinPoint.getSignature().getName(), result.toString(), takenTimeInMilliseconds);
             return result;
         } catch (Throwable ex) {
