@@ -28,7 +28,7 @@ public class ServiceAspect {
             var result = joinPoint.proceed();
             var takenTimeInMilliseconds = System.currentTimeMillis() - startTime;
             log.info("Exit: {}.{}() with result: {}. Execution time: {}ms.", joinPoint.getSignature().getDeclaringTypeName(),
-                    joinPoint.getSignature().getName(), result.toString(), takenTimeInMilliseconds);
+                    joinPoint.getSignature().getName(), result, takenTimeInMilliseconds);
             return result;
         } catch (Throwable ex) {
             log.error("Exception in {}.{}() with cause: {}.", joinPoint.getSignature().getDeclaringTypeName(),
