@@ -14,6 +14,11 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        cache:
+          use_second_level_cache: true
+          provider_configuration_file_resource_path: src/main/resources/ehcache-config.xml
+          region:
+            factory_class: org.hibernate.cache.jcache.internal.JCacheRegionFactory
   messages:
     basename: messages
   servlet:

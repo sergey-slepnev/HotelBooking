@@ -16,6 +16,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,6 +28,7 @@ import java.time.LocalDateTime;
 @Builder
 @EqualsAndHashCode(of = {"createdAt", "hotel", "room", "user"})
 @ToString(exclude = {"id", "hotel", "room", "user"})
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "BookingRequest")
 @Entity
 public class BookingRequest implements BaseEntity<Long> {
 
