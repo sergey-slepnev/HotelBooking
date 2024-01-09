@@ -1,7 +1,9 @@
 //file (plugin) to store versions that are not in spring-dependency-plugin
 ext {
     versions = [
-            'querydsl': '5.0.0',
-            'testcontainers' : '1.19.0'
+            'querydsl'        : '5.0.0',
+            'testcontainers'  : '1.19.0',
+            'hibernate_jcache': '6.4.1.Final',
+            'ehcache'         : '3.10.8'
     ]
 }
